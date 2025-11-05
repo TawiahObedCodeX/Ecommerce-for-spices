@@ -405,11 +405,16 @@
 }
 
 @theme {
-  --primary: #8B4513;
-  --secondary: #C93F1D;
-  --accent: #F2A65A;
-  --background: #FFF7E9;
-  --text-dark: #1F1300;
-  --success: #4CAF50;
-  --border: #E0D5C3;
+  --color-primary-100: #1B5E20;        /* Dark green – strong, earthy brand color for organic depth */
+  --color-secondary: #4CAF50;      /* Medium green – warm highlights & buttons evoking freshness */
+  --color-accent: #81C784;         /* Light green – vibrant call-to-action pop for vitality */
+  --color-background: #F5F5F5;     /* Soft white background for a clean, inviting feel */
+  --color-background-dark: #2E7D32; /* Darker green for dark mode or headers */
+  --color-text-dark: #1B5E20;      /* Dark green – strong, readable text */
+  --color-text-light: #FFFFFF;     /* White text for dark sections */
+  --color-card: #E8F5E8;           /* Very light green for product cards, natural and fresh */
+  --color-border: #A5D6A7;         /* Soft green border for subtle separation */
+  --color-success: #4CAF50;        /* Green – order success, organic freshness */
+  --color-error: #D32F2F;          /* Deep red – alerts for errors */
+  --color-info: #1976D2;           /* Blue – notifications and shipping updates */
 }
