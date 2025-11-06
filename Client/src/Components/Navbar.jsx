@@ -171,7 +171,7 @@ export default function Navbar() {
               <Link
                 to={item.link}
                 onClick={() => setIsOpen(false)}
-                className="text-text-dark text-sm sm:text-base md:text-lg font-montserrat-semibold hover:text-secondary hover:scale-110 transition-all duration-300 px-3 py-2 sm:py-3 lg:py-4 rounded-full hover:bg-accent/20 w-full max-w-xs text-center block"
+                className="text-text-dark text-sm sm:text-base md:text-lg font-montserrat-semibold hover:text-secondary hover:scale-110 transition-all duration-300 px-4 py-3 sm:py-3 lg:py-5 rounded-full hover:bg-accent/20 w-full max-w-xs text-center block"
               >
                 {item.label}
               </Link>
