@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 export default function Navbar() {
@@ -198,7 +198,6 @@ export default function Navbar() {
           </motion.button>
         </motion.div>
       </motion.div>
-      <Outlet />
     </>
   );
 }
