@@ -405,16 +405,22 @@
 }
 
 @theme {
-  --color-primary-100: #1B5E20;        /* Dark green – strong, earthy brand color for organic depth */
-  --color-secondary: #4CAF50;      /* Medium green – warm highlights & buttons evoking freshness */
-  --color-accent: #81C784;         /* Light green – vibrant call-to-action pop for vitality */
-  --color-background: #F5F5F5;     /* Soft white background for a clean, inviting feel */
-  --color-background-dark: #2E7D32; /* Darker green for dark mode or headers */
-  --color-text-dark: #1B5E20;      /* Dark green – strong, readable text */
-  --color-text-light: #FFFFFF;     /* White text for dark sections */
-  --color-card: #E8F5E8;           /* Very light green for product cards, natural and fresh */
-  --color-border: #A5D6A7;         /* Soft green border for subtle separation */
-  --color-success: #4CAF50;        /* Green – order success, organic freshness */
-  --color-error: #D32F2F;          /* Deep red – alerts for errors */
-  --color-info: #1976D2;           /* Blue – notifications and shipping updates */
+  --color-primary-100: #000000;        /* Jet Black – primary text, authoritative luxury */
+  --color-secondary: #DC143C;          /* Crimson Red – buttons, vibrant accents for energy */
+  --color-accent: #228B22;             /* Forest Green – hovers, organic depth */
+  --color-background: #FFFFFF;         /* Pure White – main backgrounds, crisp professionalism */
+  --color-background-dark: #2C2C2C;    /* Charcoal Gray – dark sections, sophisticated drama */
+  --color-text-dark: #000000;          /* Jet Black – bold, readable text */
+  --color-text-light: #FFFFFF;         /* Pure White – light text, high contrast */
+  --color-card: #F5F5F5;               /* Light Gray – cards, subtle elegance */
+  --color-border: #708090;             /* Slate Gray – borders, refined neutrality */
+  --color-success: #50C878;            /* Emerald Green – success, fresh vitality */
+  --color-error: #FF2400;              /* Scarlet – alerts, intense focus */
+  --color-info: #4169E1;               /* Royal Blue – notifications, trustworthy depth */
+  --color-navy: #000080;               /* Navy Blue – gradients, nautical luxury */
+  --color-burgundy: #800020;           /* Burgundy – testimonials, rich heritage */
+  --color-teal: #008080;               /* Teal – links, modern edge */
+  --color-charcoal: #2C2C2C;           /* Charcoal Gray – secondary text, understated power */
+  --color-olive: #228B22;              /* Olive Green – secondary accents, earthy intrigue */
+  --color-steel: #4682B4;              /* Steel Blue – shadows, cool precision */
 }

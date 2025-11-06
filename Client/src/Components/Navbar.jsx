@@ -103,7 +103,7 @@ export default function Navbar() {
               <motion.div key={index} variants={linkVariants}>
                 <Link
                   to={item.link}
-                  className="px-1 py-0.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 2xl:px-6 rounded-lg hover:bg-accent/20 hover:text-secondary transition-all duration-300 group whitespace-nowrap text-center font-playfair-display-semi-bold"
+                  className="px-1 py-0.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 2xl:px-6 rounded-lg hover:text-accent underline-offset-8 decoration-2 hover:decoration-accent transition-all duration-300 group whitespace-nowrap text-center font-playfair-display-semi-bold"
                 >
                   {item.label}
                 </Link>
