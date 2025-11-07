@@ -70,7 +70,7 @@ const RoleSelector = () => {
             onHoverStart={() => setHovered('client')}
             onHoverEnd={() => setHovered(null)}
           >
-            <Link to="/client-auth">
+            <Link to="/clientform">
               <div className="bg-white rounded-3xl p-10 shadow-2xl border border-[var(--color-border)]/50 relative overflow-hidden cursor-pointer transition-all duration-500 hover:border-[var(--color-accent)]">
                 {/* Gradient overlay on hover */}
                 <motion.div 
@@ -111,7 +111,7 @@ const RoleSelector = () => {
             onHoverStart={() => setHovered('admin')}
             onHoverEnd={() => setHovered(null)}
           >
-            <Link to="/admin-auth">
+            <Link to="/adminform">
               <div className="bg-white rounded-3xl p-10 shadow-2xl border border-[var(--color-border)]/50 relative overflow-hidden cursor-pointer transition-all duration-500 hover:border-[var(--color-secondary)]">
                 {/* Gradient overlay on hover */}
                 <motion.div 

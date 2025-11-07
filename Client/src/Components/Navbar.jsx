@@ -117,21 +117,25 @@ export default function Navbar() {
           className="hidden md:flex flex-row items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 "
           variants={buttonVariants}
         >
-          <motion.button 
-            className="bg-secondary text-white rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:scale-105 transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Sign Up
-          </motion.button>
-          <motion.button 
-            className="border-2 border-accent text-accent rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:text-white transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Login
-          </motion.button>
-        </motion.div>
+         <Link  to='/roleselector'>
+             <motion.button
+           className="bg-secondary text-white rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:scale-105 transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
+           whileHover={{ scale: 1.05 }}
+           whileTap={{ scale: 0.95 }}
+         >
+           Sign Up
+         </motion.button>
+         </Link>
+          <Link  to='/roleselector'>
+          <motion.button
+           className="border-2 border-accent text-accent rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:text-white transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
+           whileHover={{ scale: 1.05 }}
+           whileTap={{ scale: 0.95 }}
+         >
+           Login
+         </motion.button>
+         </Link>
+       </motion.div>
 
         {/* Mobile Hamburger Menu - Enhanced sizing for all small screens */}
         <div className="md:hidden flex items-center relative">
@@ -178,24 +182,28 @@ export default function Navbar() {
             </motion.div>
           ))}
         </div>
-        <motion.div 
+        <motion.div
           className="flex flex-col items-center space-y-1 sm:space-y-2 w-full max-w-xs px-4 sm:px-6"
           variants={buttonVariants}
         >
-          <motion.button 
+           <Link  to='/roleselector'>
+           <motion.button
             className="w-full bg-secondary text-white rounded-lg py-2 sm:py-3 lg:py-4 hover:bg-accent hover:scale-105 transition-all duration-300 shadow-md btn-glow  text-sm sm:text-base md:text-lg font-playfair-display-bold-italic"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign Up
           </motion.button>
-          <motion.button 
+          </Link>
+            <Link  to='/roleselector'>
+           <motion.button
             className="w-full border-2 border-accent text-accent rounded-lg py-2 sm:py-3 lg:py-4 hover:bg-accent hover:text-white transition-all duration-300 shadow-md btn-glow font-montserrat-semibold text-sm sm:text-base md:text-lg"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Login
           </motion.button>
+          </Link>
         </motion.div>
       </motion.div>
     </>
