@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+ 
 import { motion } from 'framer-motion'; // Install framer-motion for smooth animations
 import spices from "../assets/spices1.png";
 

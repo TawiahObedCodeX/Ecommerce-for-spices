@@ -76,7 +76,7 @@ export default function Products() {
       
       {/* Hero Section */}
       <motion.section 
-        className="relative h-96 flex items-center justify-center bg-gradient-to-br from-secondary via-error to-burgundy"
+        className="relative h-96 flex items-center justify-center bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20"
         initial="hidden"
         animate="visible"
         variants={itemVariants}
@@ -88,10 +88,10 @@ export default function Products() {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="font-playfair-display-extra-bold text-4xl md:text-6xl text-text-light mb-4 drop-shadow-lg">
+          <h1 className="font-playfair-display-extra-bold text-4xl md:text-6xl  mb-4 drop-shadow-lg">
             Curated Spice Collection
           </h1>
-          <p className="font-montserrat-light text-xl text-text-light max-w-2xl mx-auto drop-shadow-md">
+          <p className="font-montserrat-light text-xl  max-w-2xl mx-auto drop-shadow-md">
             Ethically sourced, premium organic spices that transform ordinary moments into extraordinary experiences.
           </p>
         </motion.div>
@@ -116,8 +116,8 @@ export default function Products() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-6 py-3 rounded-full font-montserrat-semi-bold text-sm transition-all duration-300 whitespace-nowrap ${
                   selectedCategory === cat
-                    ? 'bg-secondary text-text-light shadow-lg hover:shadow-[0_0_10px_rgba(220,20,60,0.3)]'
-                    : 'bg-text-light/10 text-text-light hover:bg-info/20 hover:border-info/30 border border-text-light/30'
+                    ? 'bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light shadow-lg hover:shadow-[0_0_10px_rgba(220,20,60,0.3)]'
+                    : 'bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light hover:bg-info/20 hover:border-info/30 border border-text-light/30'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -183,7 +183,7 @@ export default function Products() {
                   )}
 
                   {/* Image with Gradient Overlay */}
-                  <div className="relative overflow-hidden bg-gradient-to-t from-secondary/20 to-transparent">
+                  <div className="relative overflow-hidden bg-gradient-to-t from-background-dark/50 to-transparent">
                     <img 
                       src={product.image} 
                       alt={product.name} 

@@ -1,7 +1,7 @@
 // Contact.jsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Phone, Mail, MapPin, Clock, Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Clock, Instagram, Facebook, Twitter, Youtube, } from 'lucide-react';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
 
@@ -47,7 +47,7 @@ export default function Contact() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background mt-20">
       <Navbar />
       
       {/* Hero Section */}
@@ -93,8 +93,8 @@ export default function Contact() {
             <div className="space-y-6">
               {[
                 { icon: Mail, label: "Email Us", value: "hello@meloorganic.com", desc: "For general questions and partnerships." },
-                { icon: Phone, label: "Call Us", value: "+1 (555) 123-4567", desc: "Mon-Fri 9AM-6PM EST for immediate assistance." },
-                { icon: MapPin, label: "Visit Us", value: "123 Spice Lane, Organic Valley, CA 90210, USA", desc: "Open for tours by appointment." },
+                { icon: Phone, label: "Call Us", value: "0244597912", desc: "Mon-Fri 9AM-6PM EST for immediate assistance." },
+                { icon: MapPin, label: "Visit Us", value: "123 Spice Lane, Organic Valley, CA 90210, Ghana", desc: "Open for tours by appointment." },
                 { icon: Clock, label: "Business Hours", value: "Mon-Fri: 9AM-6PM | Sat: 10AM-4PM | Sun: Closed", desc: "Global support available 24/7 via email." }
               ].map((contact, index) => {
                 const IconComponent = contact.icon;
