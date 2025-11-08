@@ -28,7 +28,7 @@ const ClientAuth = () => {
       setView('login');
     } else if (view === 'login') {
       alert('Logged in successfully!');
-      navigate('/dashboard');
+      navigate('/dashbord-client');
     } else if (view === 'forget') {
       alert('Reset link sent to your email!');
       setView('reset');
@@ -63,52 +63,52 @@ const ClientAuth = () => {
           exit="exit"
           transition={{ duration: 0.3 }}
           onSubmit={handleSubmit} 
-          className="space-y-3 max-w-md w-full"
+          className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Full Name</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Full Name</label>
             <motion.input 
               type="text" 
               name="fullName" 
               value={formData.fullName} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Age</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Age</label>
             <motion.input 
               type="number" 
               name="age" 
               value={formData.age} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
             <motion.input 
               type="email" 
               name="email" 
               value={formData.email} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Password</label>
             <motion.input 
               type="password" 
               name="password" 
               value={formData.password} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
@@ -122,26 +122,26 @@ const ClientAuth = () => {
           </div>
           <motion.button 
             type="submit"
-            className="w-full bg-[var(--color-text-dark)] text-[var(--color-text-light)] py-2.5 rounded-lg font-montserrat-semi-bold text-base hover:bg-gray-800 transition-all shadow-md"
+            className="w-full bg-[var(--color-text-dark)] text-[var(--color-text-light)] py-2 sm:py-2.5 rounded-lg font-montserrat-semi-bold text-sm sm:text-base hover:bg-gray-800 transition-all shadow-md"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             Create Account
           </motion.button>
           <div className="text-center">
-            <p className="text-sm text-[var(--color-charcoal)]">or</p>
-            <div className="flex justify-center space-x-2 mt-3">
-              <button className="px-3 py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-4 h-4" />
+            <p className="text-xs sm:text-sm text-[var(--color-charcoal)]">or</p>
+            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
+              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
                 <span className="font-montserrat-medium">Google</span>
               </button>
-              <button className="px-3 py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-4 h-4" />
+              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
                 <span className="font-montserrat-medium">LinkedIn</span>
               </button>
             </div>
           </div>
-          <p className="text-center text-xs sm:text-sm text-[var(--color-charcoal)] mt-3">
+          <p className="text-center text-xs sm:text-sm text-[var(--color-charcoal)] mt-2 sm:mt-3">
             Already have an account? <button onClick={() => setView('login')} className="text-[var(--color-accent)] hover:underline font-montserrat-medium">Sign in</button>
           </p>
           <p className="text-center text-xs sm:text-sm text-[var(--color-charcoal)]">
@@ -159,28 +159,28 @@ const ClientAuth = () => {
           exit="exit"
           transition={{ duration: 0.3 }}
           onSubmit={handleSubmit} 
-          className="space-y-3 max-w-md w-full"
+          className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
             <motion.input 
               type="email" 
               name="email" 
               value={formData.email} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Password</label>
             <motion.input 
               type="password" 
               name="password" 
               value={formData.password} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
@@ -190,26 +190,26 @@ const ClientAuth = () => {
           </p>
           <motion.button 
             type="submit"
-            className="w-full bg-[var(--color-text-dark)] text-[var(--color-text-light)] py-2.5 rounded-lg font-montserrat-semi-bold text-base hover:bg-gray-800 transition-all shadow-md"
+            className="w-full bg-[var(--color-text-dark)] text-[var(--color-text-light)] py-2 sm:py-2.5 rounded-lg font-montserrat-semi-bold text-sm sm:text-base hover:bg-gray-800 transition-all shadow-md"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             Sign In
           </motion.button>
           <div className="text-center">
-            <p className="text-sm text-[var(--color-charcoal)]">or</p>
-            <div className="flex justify-center space-x-2 mt-3">
-              <button className="px-3 py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-4 h-4" />
+            <p className="text-xs sm:text-sm text-[var(--color-charcoal)]">or</p>
+            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
+              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
                 <span className="font-montserrat-medium">Google</span>
               </button>
-              <button className="px-3 py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-4 h-4" />
+              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
                 <span className="font-montserrat-medium">LinkedIn</span>
               </button>
             </div>
           </div>
-          <p className="text-center text-xs sm:text-sm text-[var(--color-charcoal)] mt-3">
+          <p className="text-center text-xs sm:text-sm text-[var(--color-charcoal)] mt-2 sm:mt-3">
             Don't have an account? <button onClick={() => setView('signup')} className="text-[var(--color-accent)] hover:underline font-montserrat-medium">Create one</button>
           </p>
         </motion.form>
@@ -224,23 +224,23 @@ const ClientAuth = () => {
           exit="exit"
           transition={{ duration: 0.3 }}
           onSubmit={handleSubmit} 
-          className="space-y-3 max-w-md w-full"
+          className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Email Address</label>
             <motion.input 
               type="email" 
               name="email" 
               value={formData.email} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <motion.button 
             type="submit"
-            className="w-full bg-[var(--color-info)] text-[var(--color-text-light)] py-2.5 rounded-lg font-montserrat-semi-bold text-base hover:bg-[var(--color-navy)] transition-all shadow-md"
+            className="w-full bg-[var(--color-info)] text-[var(--color-text-light)] py-2 sm:py-2.5 rounded-lg font-montserrat-semi-bold text-sm sm:text-base hover:bg-[var(--color-navy)] transition-all shadow-md"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -261,36 +261,36 @@ const ClientAuth = () => {
           exit="exit"
           transition={{ duration: 0.3 }}
           onSubmit={handleSubmit} 
-          className="space-y-3 max-w-md w-full"
+          className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">New Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">New Password</label>
             <motion.input 
               type="password" 
               name="newPassword" 
               value={formData.newPassword} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
             <p className="text-xs text-gray-500">6+ characters</p>
           </div>
           <div className="space-y-1">
-            <label className="block text-sm font-montserrat-medium text-[var(--color-charcoal)]">Confirm New Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-[var(--color-charcoal)]">Confirm New Password</label>
             <motion.input 
               type="password" 
               name="confirmPassword" 
               value={formData.confirmPassword} 
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm text-sm"
               whileFocus={{ scale: 1.02 }}
               required 
             />
           </div>
           <motion.button 
             type="submit"
-            className="w-full bg-[var(--color-info)] text-[var(--color-text-light)] py-2.5 rounded-lg font-montserrat-semi-bold text-base hover:bg-[var(--color-navy)] transition-all shadow-md"
+            className="w-full bg-[var(--color-info)] text-[var(--color-text-light)] py-2 sm:py-2.5 rounded-lg font-montserrat-semi-bold text-sm sm:text-base hover:bg-[var(--color-navy)] transition-all shadow-md"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -317,7 +317,7 @@ const ClientAuth = () => {
           key="client-image"
           src="https://i.pinimg.com/1200x/1c/ed/74/1ced7439e0ca1fd2cfe309227520686a.jpg" 
           alt="Exquisite Spices" 
-          className="w-full h-32 sm:h-48 lg:h-64 object-cover"
+          className="w-full h-32 sm:h-48 lg:h-64 object-cover hidden sm:block"
           whileHover={{ scale: 1.05 }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -350,7 +350,7 @@ const ClientAuth = () => {
   };
 
   return (
-    <div className="h-screen bg-[var(--color-background)] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="h-screen bg-[var(--color-background)] flex items-center justify-center px-2 sm:px-4 relative overflow-hidden">
       {/* Subtle luxury background pattern on white */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(220,20,60,0.05),transparent_50%),radial-gradient(circle_at_80%_20%,rgba(34,139,34,0.05),transparent_50%),radial-gradient(circle_at_40%_40%,rgba(80,200,120,0.05),transparent_50%)]"></div>
@@ -364,7 +364,7 @@ const ClientAuth = () => {
       >
         {/* Right: Image + Text - Responsive and stacked on small screens (first on mobile) */}
         <motion.div 
-          className="w-full lg:w-1/2 order-1 lg:order-2 flex justify-center flex-1"
+          className="hidden lg:flex w-full lg:w-1/2 order-1 lg:order-2 flex justify-center flex-1"
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -374,14 +374,14 @@ const ClientAuth = () => {
 
         {/* Left: Form - Centered, no border, responsive height */}
         <motion.div 
-          className="w-full lg:w-1/2 order-2 lg:order-1 bg-[var(--color-background)] rounded-3xl p-2 sm:p-4 lg:p-6 lg:p-8 flex flex-col justify-center items-center flex-1"
+          className="w-full lg:w-1/2 order-2 lg:order-1 bg-[var(--color-background)] rounded-3xl p-1 sm:p-2 sm:p-4 lg:p-6 lg:p-8 flex flex-col justify-center items-center flex-1 min-h-0"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           <motion.h1 
             key={view}
-            className="font-playfair-display-bold text-base sm:text-lg lg:text-2xl text-[var(--color-text-dark)] mb-2 sm:mb-4 lg:mb-6 text-center"
+            className="font-playfair-display-bold text-sm sm:text-base sm:text-lg lg:text-2xl text-[var(--color-text-dark)] mb-1 sm:mb-2 sm:mb-4 lg:mb-6 text-center"
             variants={titleVariants}
             initial="hidden"
             animate="visible"
@@ -390,7 +390,7 @@ const ClientAuth = () => {
             {getTitleText()}
           </motion.h1>
 
-          <div className="w-full max-w-md mx-auto">
+          <div className="w-full max-w-md mx-auto flex-1 flex flex-col justify-center">
             <AnimatePresence mode="wait">
               {renderForm()}
             </AnimatePresence>

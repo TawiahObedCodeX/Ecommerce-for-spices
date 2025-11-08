@@ -6,6 +6,8 @@ import Contact from './Pages/Contact'
 import RoleSelector from './Components/RoleSelector'
 import AdminAuth from './Pages/AdminAuth'
 import ClientAuth from './Pages/ClientAuth'
+import DashboardAdmin from './Pages/DashboardForAdmin'
+import DashboardForClient from './Pages/DashboardForClient'
 
 
 export default function App() {
@@ -18,7 +20,8 @@ export default function App() {
       <Route path="/roleselector" element={<RoleSelector/>} />
       <Route path="/adminform" element={<AdminAuth/>} />
       <Route path="/clientform" element={<ClientAuth/>} />
-
+      <Route path='/dashboard-admin' element={<DashboardAdmin/>} />
+       <Route path='/dashbord-client' element={<DashboardForClient/>} />
     </Route>
   ))
   return (
