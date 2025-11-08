@@ -55,7 +55,7 @@ const RoleSelector = () => {
           variants={cardVariants}
         >
           <h1 className="font-playfair-display-bold text-6xl md:text-8xl text-[var(--color-text-dark)] mb-4 bg-gradient-to-r from-[var(--color-secondary)] via-[var(--color-accent)] to-[var(--color-success)] bg-clip-text text-transparent">
-            SpiceLux
+           Melo's Spice
           </h1>
           <p className="font-montserrat-medium text-xl text-[var(--color-charcoal)] max-w-lg mx-auto">
             Where premium flavors meet unparalleled sophistication. Choose your path to culinary excellence.
