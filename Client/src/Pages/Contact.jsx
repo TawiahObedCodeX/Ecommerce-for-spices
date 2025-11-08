@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Send, Phone, Mail, MapPin, Clock, Instagram, Facebook, Twitter, Youtube, } from 'lucide-react';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import { FaTiktok } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -52,7 +53,7 @@ export default function Contact() {
       
       {/* Hero Section */}
       <motion.section 
-        className="relative h-96 flex items-center justify-center bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20"
+        className="relative h-96 flex items-center justify-center bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20"
         initial="hidden"
         animate="visible"
         variants={itemVariants}
@@ -104,7 +105,7 @@ export default function Contact() {
                     className="flex items-start gap-4 p-6 rounded-xl bg-card hover:bg-accent/20 transition-all duration-300 border border-border/50 hover:border-gold/20"
                     whileHover={{ x: 10 }}
                   >
-                    <div className="text-2xl text-secondary mt-1 flex-shrink-0">
+                    <div className="text-2xl text-secondary mt-1 shrink-0">
                       <IconComponent size={24} />
                     </div>
                     <div className="flex-1">
@@ -128,7 +129,8 @@ export default function Contact() {
                   { icon: Instagram, href: "#", color: "text-rose-gold" },
                   { icon: Facebook, href: "#", color: "text-maroon" },
                   { icon: Twitter, href: "#", color: "text-charcoal" },
-                  { icon: Youtube, href: "#", color: "text-success" }
+                  { icon: Youtube, href: "#", color: "text-charcoal" },
+                  {icon: FaTiktok, href:"#", color:"text-charcoal"}
                 ].map((social, index) => {
                   const IconComponent = social.icon;
                   return (

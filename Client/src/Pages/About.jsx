@@ -132,7 +132,7 @@ export default function About() {
                 Our founder, Tawiah Melody, drew from generations of spice knowledge passed down through his family. Starting with just five acres of cardamom and turmeric, we now partner with over 200 artisan farmers across Asia and Africa, preserving heirloom varieties and cultural recipes.
               </p>
               <ul className="space-y-2 font-montserrat-medium text-charcoal">
-                <li className="flex items-center gap-2">• Founded in 1985</li>
+                <li className="flex items-center gap-2">• Founded in 2023</li>
                 <li className="flex items-center gap-2">• 200+ Global Partners</li>
                 <li className="flex items-center gap-2">• Heirloom Seed Preservation</li>
                 <li className="flex items-center gap-2">• Cultural Recipe Archives</li>
@@ -220,10 +220,10 @@ export default function About() {
             variants={containerVariants}
           >
             {[
-              { name: "USDA Organic", desc: "Certified organic farming practices.", image: "/api/placeholder/150/100?text=USDA" },
-              { name: "Fair Trade", desc: "Ethical sourcing and fair wages.", image: "/api/placeholder/150/100?text=Fair+Trade" },
-              { name: "Non-GMO Project", desc: "Verified non-genetically modified.", image: "/api/placeholder/150/100?text=Non-GMO" },
-              { name: "Kosher Certified", desc: "Meets strict kosher dietary laws.", image: "/api/placeholder/150/100?text=Kosher" }
+              { name: "Black seed", desc: "Certified organic farming practices.", image: "https://i.pinimg.com/1200x/58/40/37/584037110fde8a455fdd28f8c69417d2.jpg" },
+              { name: "Fair Trade", desc: "Ethical sourcing and fair wages.", image: "https://i.pinimg.com/1200x/d7/10/49/d71049642d25f75f842df8c35db82d7e.jpg" },
+              { name: "Non-GMO Project", desc: "Verified non-genetically modified.", image: "https://i.pinimg.com/1200x/d3/0d/34/d30d3481bf877249ab2c31b6bf23d1d9.jpg" },
+              { name: "Kosher Certified", desc: "Meets strict kosher dietary laws.", image: "https://i.pinimg.com/1200x/a2/b9/e4/a2b9e462057da4b0a4788bae38a71056.jpg" }
             ].map((cert, index) => (
               <motion.div 
                 key={index}
@@ -266,8 +266,8 @@ export default function About() {
             variants={containerVariants}
           >
             {[
-              { name: "Raj Melo", role: "Founder & Chief Spice Alchemist", image: "/api/placeholder/300/300?text=Raj", bio: "With 40 years in spice cultivation, Raj pioneered our regenerative farming techniques." },
-              { name: "Dr. Lena Voss", role: "Head of R&D", image: "/api/placeholder/300/300?text=Lena", bio: "PhD in Botany, Lena develops innovative blends for modern wellness needs." },
+              { name: "Melody Tawiah ", role: "Founder & Chief Spice Alchemist", image: "/api/placeholder/300/300?text=Raj", bio: "With 40 years in spice cultivation, melody pioneered our regenerative  food and medical" },
+              { name: "Tawiah Obed", role: "Full stack developer", image: "/api/placeholder/300/300?text=Lena", bio: "Developer who deliver impactful solution to end users with quality and  user friendly project " },
               { name: "Marcus Hale", role: "Sustainability Director", image: "/api/placeholder/300/300?text=Marcus", bio: "Former UN advisor, Marcus ensures our global supply chain remains eco-conscious." }
             ].map((member, index) => (
               <motion.div 
