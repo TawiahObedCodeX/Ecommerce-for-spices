@@ -129,7 +129,7 @@ export default function About() {
                 Roots in Tradition
               </h3>
               <p className="font-montserrat-light text-lg text-charcoal leading-relaxed">
-                Our founder, Raj Melo, drew from generations of spice knowledge passed down through his family. Starting with just five acres of cardamom and turmeric, we now partner with over 200 artisan farmers across Asia and Africa, preserving heirloom varieties and cultural recipes.
+                Our founder, Tawiah Melody, drew from generations of spice knowledge passed down through his family. Starting with just five acres of cardamom and turmeric, we now partner with over 200 artisan farmers across Asia and Africa, preserving heirloom varieties and cultural recipes.
               </p>
               <ul className="space-y-2 font-montserrat-medium text-charcoal">
                 <li className="flex items-center gap-2">• Founded in 1985</li>
