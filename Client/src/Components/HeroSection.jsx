@@ -97,7 +97,7 @@ export default function HeroSection() {
       {/* Subtle background animation elements for smooth, professional depth - Responsive positioning */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div 
-          className="absolute top-10 sm:top-16 left-4 sm:left-8 w-20 sm:w-24 md:w-28 lg:w-32 h-20 sm:h-24 md:h-28 lg:h-32 rounded-full mix-blend-multiply filter blur-xl opacity-40 sm:opacity-50 bg-linear-to-br from-amber-200 to-orange-300 hidden md:block"
+          className="absolute top-10 sm:top-16 left-4 sm:left-8 w-20 sm:w-24 md:w-28 lg:w-32 h-20 sm:h-24 md:h-28 lg:h-32 rounded-full mix-blend-multiply filter blur-xl opacity-40 sm:opacity-50 bg-gradient-to-br from-amber-200 to-orange-300 hidden md:block"
           animate={{ 
             y: [0, -20, 0],
             scale: [1, 1.1, 1],
@@ -130,7 +130,7 @@ export default function HeroSection() {
         />
         {/* Additional subtle floating element for more depth - Only on larger screens */}
         <motion.div 
-          className="absolute top-1/2 left-1/4 w-12 sm:w-16 h-12 sm:h-16 rounded-full mix-blend-multiply filter blur-xl opacity-20 sm:opacity-30 bg-linear-to-br from-green-200 to-emerald-300 hidden lg:block"
+          className="absolute top-1/2 left-1/4 w-12 sm:w-16 h-12 sm:h-16 rounded-full mix-blend-multiply filter blur-xl opacity-20 sm:opacity-30 bg-gradient-to-br from-green-200 to-emerald-300 hidden lg:block"
           animate={{ 
             y: [0, -15, 0],
             opacity: [0.3, 0.5, 0.3]
@@ -145,7 +145,7 @@ export default function HeroSection() {
         />
         {/* Simplified floating element for small screens */}
         <motion.div 
-          className="absolute top-1/4 left-1/2 w-16 h-16 rounded-full mix-blend-multiply filter blur-xl opacity-30 bg-linear-to-br from-amber-100 to-orange-200 md:hidden"
+          className="absolute top-1/4 left-1/2 w-16 h-16 rounded-full mix-blend-multiply filter blur-xl opacity-30 bg-gradient-to-br from-amber-100 to-orange-200 md:hidden"
           animate={{ 
             y: [0, -10, 0],
             scale: [1, 1.05, 1]

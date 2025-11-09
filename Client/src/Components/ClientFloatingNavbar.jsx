@@ -1,0 +1,88 @@
+// ClientFloatingNavbar.jsx
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  MdStorefront, 
+  MdShoppingCart, 
+  MdPayment, 
+  MdChatBubbleOutline, 
+  MdVisibility, 
+  MdTrackChanges,MdLogout 
+} from 'react-icons/md';
+
+const ClientFloatingNavbar = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const tabs = [
+    { icon: MdStorefront },
+    { icon: MdShoppingCart },
+    { icon: MdPayment },
+    { icon: MdChatBubbleOutline },
+    { icon: MdVisibility },
+    { icon: MdTrackChanges },
+     { icon: MdLogout }
+  ];
+
+  const handleTabClick = (index) => {
+    setActiveTab(index);
+    // Integrate with your navigation here, e.g., useNavigate from react-router-dom
+  };
+
+  return (
+    <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
+      transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.2 }}
+      className="fixed  bottom-40 left-0 right-0 md:left-4 md:right-4 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-purple-100/50 md:rounded-3xl md:border"
+    >
+      <nav className="flex justify-around items-center relative">
+        {tabs.map((tab, index) => {
+          const Icon = tab.icon;
+          const isActive = index === activeTab;
+          return (
+            <motion.button
+              key={index}
+              onClick={() => handleTabClick(index)}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+              className={`relative flex items-center justify-center p-2 md:p-3 rounded-2xl transition-all duration-300 ease-out group ${
+                isActive 
+                  ? 'bg-purple-500 text-white shadow-lg' 
+                  : 'text-gray-500 hover:text-purple-500 hover:bg-purple-50'
+              }`}
+              style={{ width: 'auto', height: 'auto' }}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Icon 
+                  size={isActive ? 24 : 20} 
+                  className={`transition-all duration-300 ${isActive ? 'fill-white' : ''}`} 
+                />
+              </motion.div>
+              {isActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute inset-0 bg-purple-500 rounded-2xl -z-10"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                />
+              )}
+            </motion.button>
+          );
+        })}
+      </nav>
+    </motion.div>
+  );
+};
+
+export default ClientFloatingNavbar;

@@ -128,9 +128,9 @@ const AddToCartButton = ({
         whileTap={isAuthenticated ? "tap" : {}}
         animate={isAnimating ? "animating" : "idle"}
         className={`
-          relative flex items-center justify-center font-bold rounded-xl
+          relative flex items-center justify-center space-x-3 px-6 py-4 font-bold rounded-xl
           shadow-xl focus:outline-none focus:ring-4 transition-all duration-300
-          overflow-hidden border-0 w-16 h-16
+          overflow-hidden border-0
           ${isAuthenticated
             ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl focus:ring-purple-500/50 disabled:opacity-60 disabled:cursor-not-allowed before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:to-white/20 before:animate-shimmer before:opacity-0 hover:before:opacity-100'
             : 'bg-gray-400 text-gray-200 cursor-not-allowed'
@@ -147,16 +147,16 @@ const AddToCartButton = ({
         />
 
         <motion.div
-          className="flex flex-col items-center space-y-1"
+          className="flex items-center space-x-2"
           animate={{ scale: isAnimating ? [1, 1.1, 1] : 1 }}
           transition={{ duration: 0.3 }}
         >
           {isAuthenticated ? (
-            <FaShoppingCart className="text-lg relative z-10" />
+            <FaShoppingCart className="text-xl relative z-10" />
           ) : (
-            <FaLock className="text-lg relative z-10" />
+            <FaLock className="text-xl relative z-10" />
           )}
-          <span className="relative z-10 text-xs text-center">
+          <span className="relative z-10 text-sm sm:text-base">
             {isAnimating ? (
               <>
                 <motion.span
