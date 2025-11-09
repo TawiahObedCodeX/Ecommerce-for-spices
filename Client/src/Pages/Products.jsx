@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import AddToCartButton from '../Components/AddToCartButton';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -64,6 +65,13 @@ const products = [
 export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAuthenticated] = useState(false); // Mock authentication state
+
+  // Mock login handler
+  const handleLoginRequired = () => {
+    // Redirect to client auth page for signup or login
+    window.location.href = '/clientauth';
+  };
 
   const filteredProducts = products.filter(product => 
     (selectedCategory === 'All' || product.category === selectedCategory) &&
@@ -225,14 +233,12 @@ export default function Products() {
                       <span className="font-playfair-display-bold text-2xl text-secondary tracking-tight">
                         ${product.price}
                       </span>
-                      <motion.button 
-                        className="bg-text-dark text-text-light px-6 py-3 rounded-xl font-montserrat-semi-bold flex items-center gap-2 hover:bg-charcoal transition-all duration-300 shadow-lg hover:shadow-xl"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Add to Cart
-                        <ShoppingCart className="w-4 h-4" />
-                      </motion.button>
+                    <AddToCartButton
+                      isAuthenticated={isAuthenticated}
+                      onLoginRequired={handleLoginRequired}
+                      productName={product.name}
+                      productImage={product.image}
+                    />
                     </div>
                   </div>
 

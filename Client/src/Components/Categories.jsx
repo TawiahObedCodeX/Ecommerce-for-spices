@@ -1,7 +1,8 @@
 import { GrStar } from "react-icons/gr";
-import { motion, useAnimation } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { FiTruck, FiShield, FiClock, FiArrowRight } from 'react-icons/fi'; // Added more icons
+import AddToCartButton from './AddToCartButton';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -52,16 +53,9 @@ const cardVariants = {
 
 // Modern Card Component with subtle lift on hover
 function ModernCard({ children, className, variants, style = {}, ...props }) {
-  const controls = useAnimation();
-
-  useEffect(() => {
-    controls.start(variants?.visible || { opacity: 1, y: 0 });
-  }, [controls, variants]);
-
   return (
     <motion.div
       className={`bg-white/80 backdrop-blur-sm border border-gray-100/50 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 ${className}`}
-      animate={controls}
       style={{ ...style }}
       variants={variants}
       initial="hidden"
@@ -108,16 +102,13 @@ function TrustIndicators() {
 }
 
 export default function Categories() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isAuthenticated] = useState(false); // Mock authentication state
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Mock login handler
+  const handleLoginRequired = () => {
+    // Redirect to client auth page for signup or login
+    window.location.href = '/clientauth';
+  };
 
   // Refined data with modern, concise details
   const categories = [
@@ -165,7 +156,6 @@ export default function Categories() {
       desc: 'Intense aroma for bold dishes',
       image: "https://i.pinimg.com/1200x/e7/18/5d/e7185d2fbdd5bdfbcd462eba190e1eaf.jpg",
       price: 'GH₵45',
-      price: 'GH₵45',
       rating: 4.9
     },
     {
@@ -190,10 +180,10 @@ export default function Categories() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50/50 to-white flex flex-col items-center py-20 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-white via-gray-50/50 to-white flex flex-col items-center py-20 px-4 relative overflow-hidden">
       {/* Subtle background pattern for modernity */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(220,20,60,0.02)_25%,rgba(220,20,60,0.02)_50%,transparent_50%,transparent_75%,rgba(220,20,60,0.02)_75%,rgba(220,20,60,0.02))] bg-[size:20px_20px] animate-pulse"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(220,20,60,0.02)_25%,rgba(220,20,60,0.02)_50%,transparent_50%,transparent_75%,rgba(220,20,60,0.02)_75%,rgba(220,20,60,0.02))] bg-size-[20px_20px] animate-pulse"></div>
       </div>
 
       {/* Hero Section with Modern Typography */}
@@ -205,7 +195,7 @@ export default function Categories() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.h1 
-          className="font-montserrat-black text-5xl md:text-7xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2 leading-tight"
+          className="font-montserrat-black text-5xl md:text-7xl bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2 leading-tight"
           variants={fadeInUpVariants}
         >
           Curated Categories
@@ -274,14 +264,13 @@ export default function Categories() {
                   <span className="font-montserrat-bold text-xl text-gray-900">{mix.price}</span>
                   {renderStars(mix.rating)}
                 </div>
-                <motion.button 
-                  className="flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-lg font-montserrat-medium hover:from-gray-800 hover:to-gray-700 transition-all"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Add to Cart
-                  <FiArrowRight className="text-sm" />
-                </motion.button>
+                <AddToCartButton
+                  isAuthenticated={isAuthenticated}
+                  onLoginRequired={handleLoginRequired}
+                  productName={mix.name}
+                  productImage={mix.image}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-montserrat-medium"
+                />
               </div>
             </ModernCard>
           ))}
@@ -319,13 +308,13 @@ export default function Categories() {
                     <span className="font-montserrat-bold text-xl text-gray-900">{pick.price}</span>
                     {renderStars(pick.rating)}
                   </div>
-                  <motion.button 
-                    className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg font-montserrat-medium hover:from-green-700 hover:to-green-800 transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Shop Now
-                  </motion.button>
+                  <AddToCartButton
+                    isAuthenticated={isAuthenticated}
+                    onLoginRequired={handleLoginRequired}
+                    productName={pick.name}
+                    productImage={pick.image}
+                    className="px-4 py-2 rounded-lg font-montserrat-medium"
+                  />
                 </div>
               </div>
             </ModernCard>
@@ -348,7 +337,7 @@ export default function Categories() {
           Fresh updates weekly. Join our community for exclusive drops and tips.
         </p>
         <motion.button 
-          className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-8 py-4 rounded-xl font-montserrat-semi-bold text-lg hover:from-gray-800 hover:to-gray-700 transition-all"
+          className="bg-linear-to-r from-gray-900 to-gray-800 text-white px-8 py-4 rounded-xl font-montserrat-semi-bold text-lg hover:from-gray-800 hover:to-gray-700 transition-all"
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
