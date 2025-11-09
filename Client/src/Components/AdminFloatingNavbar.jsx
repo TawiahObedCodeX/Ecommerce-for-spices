@@ -13,6 +13,7 @@ import {
 const AdminFloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -20,13 +21,13 @@ const AdminFloatingNavbar = () => {
   }, []);
 
   const tabs = [
-    { icon: MdAddCircleOutline },
-    { icon: MdViewList },
-    { icon: MdAnalytics },
-    { icon: MdMessage },
-    { icon: MdLocalShipping },
-    { icon: MdChatBubbleOutline },
-    { icon: MdLogout },
+    { icon: MdAddCircleOutline, name: 'Add' },
+    { icon: MdViewList, name: 'View' },
+    { icon: MdAnalytics, name: 'Analytics' },
+    { icon: MdMessage, name: 'Message' },
+    { icon: MdLocalShipping, name: 'Shipping' },
+    { icon: MdChatBubbleOutline, name: 'Chat' },
+    { icon: MdLogout, name: 'Logout' },
   ];
 
   const handleTabClick = (index) => {
@@ -49,11 +50,13 @@ const AdminFloatingNavbar = () => {
             <motion.button
               key={index}
               onClick={() => handleTabClick(index)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
               className={`relative flex items-center justify-center p-2 md:p-3 rounded-2xl transition-all duration-300 ease-out group ${
-                isActive 
-                  ? 'bg-purple-500 text-white shadow-lg' 
+                isActive
+                  ? 'bg-purple-500 text-white shadow-lg'
                   : 'text-gray-500 hover:text-purple-500 hover:bg-purple-50'
               }`}
               style={{ width: 'auto', height: 'auto' }}
@@ -63,9 +66,9 @@ const AdminFloatingNavbar = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <Icon 
-                  size={isActive ? 24 : 20} 
-                  className={`transition-all duration-300 ${isActive ? 'fill-white' : ''}`} 
+                <Icon
+                  size={isActive ? 24 : 20}
+                  className={`transition-all duration-300 ${isActive ? 'fill-white' : ''}`}
                 />
               </motion.div>
               {isActive && (
@@ -76,6 +79,17 @@ const AdminFloatingNavbar = () => {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 />
+              )}
+              {hoveredIndex === index && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap z-50"
+                >
+                  {tab.name}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </motion.div>
               )}
             </motion.button>
           );
