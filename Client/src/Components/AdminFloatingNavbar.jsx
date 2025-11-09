@@ -1,14 +1,15 @@
 // AdminFloatingNavbar.jsx
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
   MdAddCircleOutline,
   MdViewList,
   MdAnalytics,
   MdMessage,
   MdLocalShipping,
-  MdChatBubbleOutline,MdLogout
-} from 'react-icons/md';
+  MdLogout,
+  MdOutlineMeetingRoom
+} from "react-icons/md";
 
 const AdminFloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -21,13 +22,13 @@ const AdminFloatingNavbar = () => {
   }, []);
 
   const tabs = [
-    { icon: MdAddCircleOutline, name: 'Add' },
-    { icon: MdViewList, name: 'View' },
-    { icon: MdAnalytics, name: 'Analytics' },
-    { icon: MdMessage, name: 'Message' },
-    { icon: MdLocalShipping, name: 'Shipping' },
-    { icon: MdChatBubbleOutline, name: 'Chat' },
-    { icon: MdLogout, name: 'Logout' },
+    { icon: MdAddCircleOutline, name: "Add" },
+    { icon: MdViewList, name: "View" },
+    { icon: MdAnalytics, name: "Analytics" },
+    { icon: MdMessage, name: "Message" },
+    { icon: MdLocalShipping, name: "Shipping" },
+    { icon: MdOutlineMeetingRoom, name: "One on One Section with Client" },
+    { icon: MdLogout, name: "Logout" },
   ];
 
   const handleTabClick = (index) => {
@@ -39,7 +40,7 @@ const AdminFloatingNavbar = () => {
     <motion.div
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
-      transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.2 }}
+      transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.2 }}
       className="fixed  bottom-40 left-0 right-0 md:left-4 md:right-4 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-gray-200/50 md:rounded-3xl md:border"
     >
       <nav className="flex justify-around items-center relative">
@@ -56,10 +57,10 @@ const AdminFloatingNavbar = () => {
               whileHover={{ scale: 1.05 }}
               className={`relative flex items-center justify-center p-2 md:p-3 rounded-2xl transition-all duration-300 ease-out group ${
                 isActive
-                  ? 'bg-purple-500 text-white shadow-lg'
-                  : 'text-gray-500 hover:text-purple-500 hover:bg-purple-50'
+                  ? "bg-purple-500 text-white shadow-lg"
+                  : "text-gray-500 hover:text-purple-500 hover:bg-purple-50"
               }`}
-              style={{ width: 'auto', height: 'auto' }}
+              style={{ width: "auto", height: "auto" }}
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -68,7 +69,9 @@ const AdminFloatingNavbar = () => {
               >
                 <Icon
                   size={isActive ? 24 : 20}
-                  className={`transition-all duration-300 ${isActive ? 'fill-white' : ''}`}
+                  className={`transition-all duration-300 ${
+                    isActive ? "fill-white" : ""
+                  }`}
                 />
               </motion.div>
               {isActive && (
@@ -77,7 +80,7 @@ const AdminFloatingNavbar = () => {
                   className="absolute inset-0 bg-purple-500 rounded-2xl -z-10"
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
               )}
               {hoveredIndex === index && (

@@ -1,17 +1,18 @@
 // ClientAuth.jsx - Centered form, no scroll, view switching via text links, forget password link in signup/login
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import spices from "../assets/Spiceslogo.png";
 
 const ClientAuth = () => {
-  const [view, setView] = useState('signup'); // 'signup', 'login', 'forget', 'reset'
+  const [view, setView] = useState("signup"); // 'signup', 'login', 'forget', 'reset'
   const [formData, setFormData] = useState({
-    fullName: '',
-    age: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    newPassword: ''
+    fullName: "",
+    age: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    newPassword: "",
   });
   const navigate = useNavigate();
 
@@ -22,51 +23,59 @@ const ClientAuth = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Simulate API call
-    console.log('Form submitted:', { role: 'client', view, data: formData });
-    if (view === 'signup') {
-      alert('Client account created successfully!');
-       navigate('/dashbord-client');
-    } else if (view === 'login') {
-      alert('Logged in successfully!');
-      navigate('/dashbord-client');
-    } else if (view === 'forget') {
-      alert('Reset link sent to your email!');
-      setView('reset');
-    } else if (view === 'reset') {
-      alert('Password reset successfully!');
-      setView('login');
+    console.log("Form submitted:", { role: "client", view, data: formData });
+    if (view === "signup") {
+      alert("Client account created successfully!");
+      navigate("/dashbord-client");
+    } else if (view === "login") {
+      navigate("/dashbord-client");
+    } else if (view === "forget") {
+      alert("Reset link sent to your email!");
+      setView("reset");
+    } else if (view === "reset") {
+      alert("Password reset successfully!");
+      setView("login");
     }
-    setFormData({ fullName: '', age: '', email: '', password: '', confirmPassword: '', newPassword: '' });
+    setFormData({
+      fullName: "",
+      age: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      newPassword: "",
+    });
   };
 
   // Variants for form transitions
   const formVariants = {
     hidden: { x: 50, opacity: 0 },
     visible: { x: 0, opacity: 1 },
-    exit: { x: -50, opacity: 0 }
+    exit: { x: -50, opacity: 0 },
   };
 
   // Variants for title animation on view change
   const titleVariants = {
     hidden: { y: -20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
+    visible: { y: 0, opacity: 1 },
   };
 
   const renderForm = () => {
-    if (view === 'signup') {
+    if (view === "signup") {
       return (
-        <motion.form 
+        <motion.form
           key="signup"
           variants={formVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           transition={{ duration: 0.3 }}
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Full Name</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Full Name
+            </label>
             <motion.input
               type="text"
               name="fullName"
@@ -78,7 +87,9 @@ const ClientAuth = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Age</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Age
+            </label>
             <motion.input
               type="number"
               name="age"
@@ -90,7 +101,9 @@ const ClientAuth = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Email Address
+            </label>
             <motion.input
               type="email"
               name="email"
@@ -102,7 +115,9 @@ const ClientAuth = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Password
+            </label>
             <motion.input
               type="password"
               name="password"
@@ -115,9 +130,20 @@ const ClientAuth = () => {
             <p className="text-xs text-gray-500">6+ characters</p>
           </div>
           <div className="flex items-start">
-            <input type="checkbox" id="terms" className="mt-1 mr-2 rounded" required />
-            <label htmlFor="terms" className="text-xs font-montserrat-regular text-charcoal">
-              I agree to all statements included in the <a href="#" className="text-accent hover:underline">terms of service</a>
+            <input
+              type="checkbox"
+              id="terms"
+              className="mt-1 mr-2 rounded"
+              required
+            />
+            <label
+              htmlFor="terms"
+              className="text-xs font-montserrat-regular text-charcoal"
+            >
+              I agree to all statements included in the{" "}
+              <a href="#" className="text-accent hover:underline">
+                terms of service
+              </a>
             </label>
           </div>
           <motion.button
@@ -128,41 +154,41 @@ const ClientAuth = () => {
           >
             Create Account
           </motion.button>
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-charcoal">or</p>
-            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">Google</span>
-              </button>
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">LinkedIn</span>
-              </button>
-            </div>
-          </div>
           <p className="text-center text-xs sm:text-sm text-charcoal mt-2 sm:mt-3">
-            Already have an account? <button onClick={() => setView('login')} className="text-accent hover:underline font-montserrat-medium">Sign in</button>
+            Already have an account?{" "}
+            <button
+              onClick={() => setView("login")}
+              className="text-accent hover:underline font-montserrat-medium"
+            >
+              Sign in
+            </button>
           </p>
           <p className="text-center text-xs sm:text-sm text-charcoal">
-            <button onClick={() => setView('forget')} className="text-info hover:underline font-montserrat-medium">Forgot password?</button>
+            <button
+              onClick={() => setView("forget")}
+              className="text-info hover:underline font-montserrat-medium"
+            >
+              Forgot password?
+            </button>
           </p>
         </motion.form>
       );
-    } else if (view === 'login') {
+    } else if (view === "login") {
       return (
-        <motion.form 
+        <motion.form
           key="login"
           variants={formVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           transition={{ duration: 0.3 }}
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Email Address
+            </label>
             <motion.input
               type="email"
               name="email"
@@ -174,7 +200,9 @@ const ClientAuth = () => {
             />
           </div>
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Password
+            </label>
             <motion.input
               type="password"
               name="password"
@@ -186,7 +214,12 @@ const ClientAuth = () => {
             />
           </div>
           <p className="text-right text-xs sm:text-sm text-charcoal">
-            <button onClick={() => setView('forget')} className="text-info hover:underline font-montserrat-medium">Forgot password?</button>
+            <button
+              onClick={() => setView("forget")}
+              className="text-info hover:underline font-montserrat-medium"
+            >
+              Forgot password?
+            </button>
           </p>
           <motion.button
             type="submit"
@@ -196,38 +229,33 @@ const ClientAuth = () => {
           >
             Sign In
           </motion.button>
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-charcoal">or</p>
-            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">Google</span>
-              </button>
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">LinkedIn</span>
-              </button>
-            </div>
-          </div>
           <p className="text-center text-xs sm:text-sm text-charcoal mt-2 sm:mt-3">
-            Don't have an account? <button onClick={() => setView('signup')} className="text-accent hover:underline font-montserrat-medium">Create one</button>
+            Don't have an account?{" "}
+            <button
+              onClick={() => setView("signup")}
+              className="text-accent hover:underline font-montserrat-medium"
+            >
+              Create one
+            </button>
           </p>
         </motion.form>
       );
-    } else if (view === 'forget') {
+    } else if (view === "forget") {
       return (
-        <motion.form 
+        <motion.form
           key="forget"
           variants={formVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           transition={{ duration: 0.3 }}
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Email Address</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Email Address
+            </label>
             <motion.input
               type="email"
               name="email"
@@ -247,24 +275,31 @@ const ClientAuth = () => {
             Send Reset Link
           </motion.button>
           <p className="text-center text-xs sm:text-sm text-charcoal">
-            <button onClick={() => setView('login')} className="text-accent hover:underline font-montserrat-medium">Back to Sign in</button>
+            <button
+              onClick={() => setView("login")}
+              className="text-accent hover:underline font-montserrat-medium"
+            >
+              Back to Sign in
+            </button>
           </p>
         </motion.form>
       );
-    } else if (view === 'reset') {
+    } else if (view === "reset") {
       return (
-        <motion.form 
+        <motion.form
           key="reset"
           variants={formVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           transition={{ duration: 0.3 }}
-          onSubmit={handleSubmit} 
+          onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">New Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              New Password
+            </label>
             <motion.input
               type="password"
               name="newPassword"
@@ -277,7 +312,9 @@ const ClientAuth = () => {
             <p className="text-xs text-gray-500">6+ characters</p>
           </div>
           <div className="space-y-1">
-            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">Confirm New Password</label>
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Confirm New Password
+            </label>
             <motion.input
               type="password"
               name="confirmPassword"
@@ -297,7 +334,12 @@ const ClientAuth = () => {
             Reset Password
           </motion.button>
           <p className="text-center text-xs sm:text-sm text-charcoal">
-            <button onClick={() => setView('login')} className="text-accent hover:underline font-montserrat-medium">Back to Sign in</button>
+            <button
+              onClick={() => setView("login")}
+              className="text-accent hover:underline font-montserrat-medium"
+            >
+              Back to Sign in
+            </button>
           </p>
         </motion.form>
       );
@@ -307,20 +349,20 @@ const ClientAuth = () => {
 
   const renderRightContent = () => (
     <div className="flex flex-col justify-center items-center text-center px-2 py-4 sm:py-6">
-      <motion.div 
+      <motion.div
         className="relative w-full max-w-xs sm:max-w-sm overflow-hidden rounded-2xl mb-4 shadow-xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
       >
-        <motion.img 
+        <motion.img
           key="client-image"
-          src="https://i.pinimg.com/1200x/1c/ed/74/1ced7439e0ca1fd2cfe309227520686a.jpg" 
-          alt="Exquisite Spices" 
+          src={spices}
+          alt="Exquisite Spices"
           className="w-full h-32 sm:h-48 lg:h-64 object-cover hidden sm:block"
           whileHover={{ scale: 1.05 }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
       </motion.div>
       <motion.h2
         className="font-playfair-display-bold text-lg sm:text-xl lg:text-3xl text-text-dark mb-2 sm:mb-4"
@@ -336,17 +378,18 @@ const ClientAuth = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
       >
-        Discover premium organic spices that transform every meal into a masterpiece.
+        Discover premium organic spices that transform every meal into a
+        masterpiece.
       </motion.p>
     </div>
   );
 
   const getTitleText = () => {
-    if (view === 'signup') return 'Sign up';
-    if (view === 'login') return 'Sign in';
-    if (view === 'forget') return 'Forgot Password';
-    if (view === 'reset') return 'Reset Password';
-    return '';
+    if (view === "signup") return "Sign up";
+    if (view === "login") return "Sign in";
+    if (view === "forget") return "Forgot Password";
+    if (view === "reset") return "Reset Password";
+    return "";
   };
 
   return (
@@ -356,14 +399,14 @@ const ClientAuth = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(220,20,60,0.05),transparent_50%),radial-gradient(circle_at_80%_20%,rgba(34,139,34,0.05),transparent_50%),radial-gradient(circle_at_40%_40%,rgba(80,200,120,0.05),transparent_50%)]"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         className="relative z-10 w-full max-w-4xl mx-auto h-full flex flex-col lg:flex-row items-center justify-center gap-2 sm:gap-4 lg:gap-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
         {/* Right: Image + Text - Responsive and stacked on small screens (first on mobile) */}
-        <motion.div 
+        <motion.div
           className="hidden lg:flex w-full lg:w-1/2 order-1 lg:order-2 flex justify-center flex-1"
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -374,14 +417,14 @@ const ClientAuth = () => {
 
         {/* Left: Form - Centered, no border, responsive height */}
         <motion.div
-          className="w-full lg:w-1/2 order-2 lg:order-1 bg-background rounded-3xl p-1 sm:p-2 sm:p-4 lg:p-6 lg:p-8 flex flex-col justify-center items-center flex-1 min-h-0"
+          className="w-full lg:w-1/2 order-2 lg:order-1 bg-background rounded-3xl p-1  sm:p-4  lg:p-8 flex flex-col justify-center items-center flex-1 min-h-0"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           <motion.h1
             key={view}
-            className="font-playfair-display-bold text-sm sm:text-base sm:text-lg lg:text-2xl text-text-dark mb-1 sm:mb-2 sm:mb-4 lg:mb-6 text-center"
+            className="font-playfair-display-bold text-sm sm:text-base  lg:text-2xl text-text-dark mb-0 sm:mb-4 lg:mb-6 text-center"
             variants={titleVariants}
             initial="hidden"
             animate="visible"
@@ -391,9 +434,7 @@ const ClientAuth = () => {
           </motion.h1>
 
           <div className="w-full max-w-md mx-auto flex-1 flex flex-col justify-center">
-            <AnimatePresence mode="wait">
-              {renderForm()}
-            </AnimatePresence>
+            <AnimatePresence mode="wait">{renderForm()}</AnimatePresence>
           </div>
         </motion.div>
       </motion.div>

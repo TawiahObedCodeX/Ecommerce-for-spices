@@ -6,8 +6,8 @@ import {
   MdShoppingCart, 
   MdPayment, 
   MdChatBubbleOutline, 
-  MdVisibility, 
-  MdTrackChanges,MdLogout 
+  MdTrackChanges,MdLogout,
+   MdOutlineMeetingRoom 
 } from 'react-icons/md';
 
 const ClientFloatingNavbar = () => {
@@ -25,8 +25,8 @@ const ClientFloatingNavbar = () => {
     { icon: MdShoppingCart, name: 'Cart' },
     { icon: MdPayment, name: 'Payment' },
     { icon: MdChatBubbleOutline, name: 'Chat' },
-    { icon: MdVisibility, name: 'View' },
     { icon: MdTrackChanges, name: 'Track' },
+     { icon: MdOutlineMeetingRoom, name: "One on One Section with Admin" },
     { icon: MdLogout, name: 'Logout' }
   ];
 
