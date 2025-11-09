@@ -1,5 +1,5 @@
 // Products.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import Navbar from '../Components/Navbar';
@@ -65,12 +65,18 @@ const products = [
 export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAuthenticated] = useState(false); // Mock authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication state on component mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem('clientAuthenticated') === 'true';
+    setIsAuthenticated(authStatus);
+  }, []);
 
   // Mock login handler
   const handleLoginRequired = () => {
-    // Redirect to client auth page for signup or login
-    window.location.href = '/clientauth';
+    // Redirect to client auth page for signup or login with from parameter
+    window.location.href = '/clientauth?from=products';
   };
 
   const filteredProducts = products.filter(product => 

@@ -1,7 +1,7 @@
 // ClientAuth.jsx - Centered form, no scroll, view switching via text links, forget password link in signup/login
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ClientAuth = () => {
   const [view, setView] = useState('signup'); // 'signup', 'login', 'forget', 'reset'
@@ -14,6 +14,22 @@ const ClientAuth = () => {
     newPassword: ''
   });
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the 'from' parameter from URL
+  const from = new URLSearchParams(location.search).get('from');
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const isAuthenticated = localStorage.getItem('clientAuthenticated') === 'true';
+    if (isAuthenticated) {
+      if (from === 'products') {
+        navigate('/products');
+      } else {
+        navigate('/dashboard-client');
+      }
+    }
+  }, [navigate, from]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,7 +44,14 @@ const ClientAuth = () => {
       setView('login');
     } else if (view === 'login') {
       alert('Logged in successfully!');
-      navigate('/dashbord-client');
+      // Set authentication state
+      localStorage.setItem('clientAuthenticated', 'true');
+      // Redirect based on 'from' parameter
+      if (from === 'products') {
+        navigate('/products');
+      } else {
+        navigate('/dashbord-client');
+      }
     } else if (view === 'forget') {
       alert('Reset link sent to your email!');
       setView('reset');
@@ -128,19 +151,6 @@ const ClientAuth = () => {
           >
             Create Account
           </motion.button>
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-charcoal">or</p>
-            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">Google</span>
-              </button>
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">LinkedIn</span>
-              </button>
-            </div>
-          </div>
           <p className="text-center text-xs sm:text-sm text-charcoal mt-2 sm:mt-3">
             Already have an account? <button onClick={() => setView('login')} className="text-accent hover:underline font-montserrat-medium">Sign in</button>
           </p>
@@ -196,19 +206,7 @@ const ClientAuth = () => {
           >
             Sign In
           </motion.button>
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-charcoal">or</p>
-            <div className="flex justify-center space-x-2 mt-2 sm:mt-3">
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">Google</span>
-              </button>
-              <button className="px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded flex items-center space-x-1 hover:bg-gray-50 transition-all text-xs">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/LinkedIn_logo.png" alt="LinkedIn" className="w-3 sm:w-4 h-3 sm:h-4" />
-                <span className="font-montserrat-medium">LinkedIn</span>
-              </button>
-            </div>
-          </div>
+ 
           <p className="text-center text-xs sm:text-sm text-charcoal mt-2 sm:mt-3">
             Don't have an account? <button onClick={() => setView('signup')} className="text-accent hover:underline font-montserrat-medium">Create one</button>
           </p>
