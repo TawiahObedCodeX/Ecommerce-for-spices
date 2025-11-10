@@ -1,5 +1,6 @@
 // ClientFloatingNavbar.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MdStorefront,
@@ -12,6 +13,7 @@ import {
 } from "react-icons/md";
 
 const ClientFloatingNavbar = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -22,18 +24,21 @@ const ClientFloatingNavbar = () => {
   }, []);
 
   const tabs = [
-    { icon: MdStorefront, name: "Store" },
-    { icon: MdShoppingCart, name: "Cart" },
-    { icon: MdPayment, name: "Payment" },
+    { icon: MdStorefront, name: "Store", route: "/dashbord-client" },
+    { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart" },
+    { icon: MdPayment, name: "Payment", route: "/dashbord-client/paymenttoadmin" },
     { icon: MdChatBubbleOutline, name: "Chat" },
-    { icon: MdTrackChanges, name: "Track" },
-    { icon: MdOutlineMeetingRoom, name: "One on One Section with Admin" },
+    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder" },
+    { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];
 
   const handleTabClick = (index) => {
     setActiveTab(index);
-    // Integrate with your navigation here, e.g., useNavigate from react-router-dom
+    const tab = tabs[index];
+    if (tab.route) {
+      navigate(tab.route);
+    }
   };
 
   return (

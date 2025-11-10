@@ -1,5 +1,6 @@
 // AdminFloatingNavbar.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MdAddCircleOutline,
@@ -12,6 +13,7 @@ import {
 } from "react-icons/md";
 
 const AdminFloatingNavbar = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -22,18 +24,21 @@ const AdminFloatingNavbar = () => {
   }, []);
 
   const tabs = [
-    { icon: MdAddCircleOutline, name: "Add" },
-    { icon: MdViewList, name: "View" },
-    { icon: MdAnalytics, name: "Analytics" },
-    { icon: MdMessage, name: "Message" },
-    { icon: MdLocalShipping, name: "Shipping" },
-    { icon: MdOutlineMeetingRoom, name: "One on One Section with Client" },
+    { icon: MdAddCircleOutline, name: "Add", route: "/dashboard-admin/addpostadd" },
+    { icon: MdViewList, name: "View", route: "/dashboard-admin/viewadd" },
+    { icon: MdAnalytics, name: "Analytics", route: "/dashboard-admin" },
+    { icon: MdMessage, name: "Message", route: "/dashboard-admin/ordermessage" },
+    { icon: MdLocalShipping, name: "Shipping", route: "/dashboard-admin/admintrackorder" },
+    { icon: MdOutlineMeetingRoom, name: "One on One with the Client", route: "/dashboard-admin/sectionwithClient" },
     { icon: MdLogout, name: "Logout" },
   ];
 
   const handleTabClick = (index) => {
     setActiveTab(index);
-    // Integrate with your navigation here, e.g., useNavigate from react-router-dom
+    const tab = tabs[index];
+    if (tab.route) {
+      navigate(tab.route);
+    }
   };
 
   return (
