@@ -1,4 +1,4 @@
-// AdminFloatingNavbar.jsx
+// Updated AdminFloatingNavbar.jsx - With notification badge on View icon
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,15 +17,18 @@ const AdminFloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
+    const count = parseInt(localStorage.getItem('adminNewProducts') || '0');
+    setNotificationCount(count);
     return () => clearTimeout(timer);
   }, []);
 
   const tabs = [
     { icon: MdAddCircleOutline, name: "Add", route: "/dashboard-admin/addpostadd" },
-    { icon: MdViewList, name: "View", route: "/dashboard-admin/viewadd" },
+    { icon: MdViewList, name: "View", route: "/dashboard-admin/viewadd", hasNotification: true },
     { icon: MdAnalytics, name: "Analytics", route: "/dashboard-admin" },
     { icon: MdMessage, name: "Message", route: "/dashboard-admin/ordermessage" },
     { icon: MdLocalShipping, name: "Shipping", route: "/dashboard-admin/admintrackorder" },
@@ -38,6 +41,11 @@ const AdminFloatingNavbar = () => {
     const tab = tabs[index];
     if (tab.route) {
       navigate(tab.route);
+      // Reset notification if clicking on View
+      if (index === 1 && notificationCount > 0) {
+        localStorage.setItem('adminNewProducts', '0');
+        setNotificationCount(0);
+      }
     }
   };
 
@@ -52,6 +60,7 @@ const AdminFloatingNavbar = () => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = index === activeTab;
+          const showBadge = tab.hasNotification && notificationCount > 0;
           return (
             <motion.button
               key={index}
@@ -79,6 +88,15 @@ const AdminFloatingNavbar = () => {
                   }`}
                 />
               </motion.div>
+              {showBadge && (
+                <motion.div
+                  className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  {notificationCount > 99 ? '99+' : notificationCount}
+                </motion.div>
+              )}
               {isActive && (
                 <motion.div
                   layoutId="activeIndicator"

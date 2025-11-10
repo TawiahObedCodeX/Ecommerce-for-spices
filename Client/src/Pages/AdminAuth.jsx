@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spiceslogo from "../assets/Spiceslogo.png";
+import Loading from "../Components/Loading";
 
 const AdminAuth = () => {
   const [view, setView] = useState("signup"); // 'signup', 'login', 'forget', 'reset'
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     companyName: "",
@@ -20,10 +22,15 @@ const AdminAuth = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     // Simulate API call
     console.log("Form submitted:", { role: "admin", view, data: formData });
+
+    // Simulate loading delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     if (view === "signup") {
       navigate("/dashboard-admin");
       setView("login");
@@ -44,6 +51,7 @@ const AdminAuth = () => {
       confirmPassword: "",
       newPassword: "",
     });
+    setIsLoading(false);
   };
 
   // Variants for form transitions
@@ -402,6 +410,10 @@ const AdminAuth = () => {
     if (view === "reset") return "Reset Password";
     return "";
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="h-screen bg-background flex items-center justify-center px-2 sm:px-4 relative overflow-hidden">

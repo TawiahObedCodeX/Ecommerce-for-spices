@@ -1,4 +1,4 @@
-// ClientFloatingNavbar.jsx
+// Updated ClientFloatingNavbar.jsx - With notification badge on Store icon
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,14 +17,17 @@ const ClientFloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
+    const count = parseInt(localStorage.getItem('clientNewProducts') || '0');
+    setNotificationCount(count);
     return () => clearTimeout(timer);
   }, []);
 
   const tabs = [
-    { icon: MdStorefront, name: "Store", route: "/dashbord-client" },
+    { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
     { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart" },
     { icon: MdPayment, name: "Payment", route: "/dashbord-client/paymenttoadmin" },
     { icon: MdChatBubbleOutline, name: "Chat" },
@@ -38,6 +41,11 @@ const ClientFloatingNavbar = () => {
     const tab = tabs[index];
     if (tab.route) {
       navigate(tab.route);
+      // Reset notification if clicking on Store
+      if (index === 0 && notificationCount > 0) {
+        localStorage.setItem('clientNewProducts', '0');
+        setNotificationCount(0);
+      }
     }
   };
 
@@ -52,6 +60,7 @@ const ClientFloatingNavbar = () => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = index === activeTab;
+          const showBadge = tab.hasNotification && notificationCount > 0;
           return (
             <motion.button
               key={index}
@@ -79,6 +88,15 @@ const ClientFloatingNavbar = () => {
                   }`}
                 />
               </motion.div>
+              {showBadge && (
+                <motion.div
+                  className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  {notificationCount > 99 ? '99+' : notificationCount}
+                </motion.div>
+              )}
               {isActive && (
                 <motion.div
                   layoutId="activeIndicator"
@@ -93,7 +111,7 @@ const ClientFloatingNavbar = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap z-50"
+                  className="absolute bottom-3 mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap z-50"
                 >
                   {tab.name}
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>

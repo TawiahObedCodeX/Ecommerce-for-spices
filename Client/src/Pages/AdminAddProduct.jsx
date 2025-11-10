@@ -1,3 +1,4 @@
+// Updated AdminAddProduct.jsx - Now saves to localStorage on submit
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiImage, FiVideo, FiStar, FiDollarSign, FiCheck, FiTag, FiAlignLeft, FiList } from 'react-icons/fi';
@@ -82,8 +83,8 @@ export default function AdminAddProduct() {
         video.preload = 'metadata';
         video.onloadedmetadata = () => {
           window.URL.revokeObjectURL(video.src);
-          if (video.duration > 30) {
-            alert('Video must be 30 seconds or less. Please trim and try again.');
+          if (video.duration > 60) {
+            alert('Video must be 60 seconds or less. Please trim and try again.');
             return;
           }
           const reader = new FileReader();
@@ -104,9 +105,43 @@ export default function AdminAddProduct() {
     }
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Save to localStorage
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const newProduct = {
+      id: Date.now(),
+      ...formData,
+      image: imagePreview, // Save preview URL
+      video: videoPreview, // Save preview URL
+      timestamp: new Date().toISOString(),
+    };
+    products.unshift(newProduct); // Add to front for latest first
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Update notification counts
+    let clientNotifs = parseInt(localStorage.getItem('clientNewProducts') || '0');
+    let adminNotifs = parseInt(localStorage.getItem('adminNewProducts') || '0');
+    clientNotifs += 1;
+    adminNotifs += 1;
+    localStorage.setItem('clientNewProducts', clientNotifs.toString());
+    localStorage.setItem('adminNewProducts', adminNotifs.toString());
+
     setIsSubmitting(false);
     setSubmitSuccess(true);
     setTimeout(() => setSubmitSuccess(false), 3000);
+
+    // Reset form
+    setFormData({
+      name: '',
+      category: '',
+      description: '',
+      price: '',
+      rating: 0,
+      image: null,
+      video: null,
+    });
+    setImagePreview(null);
+    setVideoPreview(null);
   };
 
   return (
@@ -366,12 +401,12 @@ export default function AdminAddProduct() {
             <motion.div className="group">
               <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center">
                 <FiVideo className="mr-2 text-orange-500 group-hover:scale-110 transition-transform duration-300" />
-                Short Video (30s max) *
+                Short Video (60s max) *
               </label>
               <motion.div
                 variants={hoverVariants}
                 whileHover="hover"
-                className="border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center hover:border-orange-500 transition-all duration-500 cursor-pointer bg-gradient-to-br from-orange-50 to-red-50"
+                className="border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center hover:border-orange-500 transition-all duration-500 cursor-pointer bg-linear-to-br from-orange-50 to-red-50"
               >
                 <input
                   type="file"
@@ -406,7 +441,7 @@ export default function AdminAddProduct() {
                           animate={{ scale: 1 }}
                           transition={{ type: "spring", stiffness: 500, damping: 15 }}
                         >
-                          <FiCheck className="mx-auto text-green-500 text-3xl animate-pulse" />
+                          <FiCheck className="mx-auto text-green-500 text-3xl " />
                         </motion.div>
                       </motion.div>
                     ) : (
@@ -423,7 +458,7 @@ export default function AdminAddProduct() {
                           <FiVideo className="mx-auto text-6xl text-orange-400 mb-3" />
                         </motion.div>
                         <p className="text-gray-700 font-semibold text-lg">Upload Flavor Burst</p>
-                        <p className="text-sm text-gray-500">MP4 • 30s Max • Up to 50MB</p>
+                        <p className="text-sm text-gray-500">MP4 • 60s Max • Up to 50MB</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -441,7 +476,7 @@ export default function AdminAddProduct() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute  top-6 left-[29rem] mt-8 p-6 bg-linear-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-center mx-auto max-w-2xl z-50"
+              className="absolute top-6 left-1/2 transform -translate-x-1/2 mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-center max-w-2xl z-50"
             >
               <motion.div
                 initial={{ scale: 0 }}
