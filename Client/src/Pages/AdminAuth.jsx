@@ -70,7 +70,7 @@ const AdminAuth = () => {
           exit="exit"
           transition={{ duration: 0.3 }}
           onSubmit={handleSubmit}
-          className=" max-w-md w-full"
+          className="space-y-1 sm:space-y-1.5 md:space-y-4 max-w-md w-full"
         >
           <div className="space-y-0.5">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
