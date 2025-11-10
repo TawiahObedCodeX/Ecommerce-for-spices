@@ -110,7 +110,7 @@ export default function AdminAddProduct() {
   };
 
   return (
-    <div className=" bg-white  px-4 sm:px-6 lg:px-">
+    <div className=" relative bg-white  px-4 sm:px-6 lg:px-">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -268,7 +268,7 @@ export default function AdminAddProduct() {
                 whileHover={!isSubmitting ? { scale: 1.05 } : {}}
                 whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                 transition={{ duration: 0.3 }}
-                className={`w-full px-8 py-5 rounded-2xl font-bold text-lg transition-all duration-500 transform ${
+                className={`w-full px-8 py-5 rounded-2xl font-bold text-lg transition-all duration-500 transform cursor-pointer ${
                   isSubmitting
                     ? 'bg-gray-400 cursor-not-allowed scale-95'
                     : 'bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 hover:from-orange-600 hover:via-red-600 hover:to-orange-700 text-white'
@@ -285,7 +285,7 @@ export default function AdminAddProduct() {
                   </>
                 ) : (
                   <>
-                    <FiCheck className="text-xl group-hover:animate-bounce" />
+                    <FiCheck className="text-xl " />
                     <span>Launch This Spice</span>
                   </>
                 )}
@@ -441,7 +441,7 @@ export default function AdminAddProduct() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-center mx-auto max-w-2xl"
+              className="absolute  top-6 left-[29rem] mt-8 p-6 bg-linear-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-center mx-auto max-w-2xl z-50"
             >
               <motion.div
                 initial={{ scale: 0 }}
