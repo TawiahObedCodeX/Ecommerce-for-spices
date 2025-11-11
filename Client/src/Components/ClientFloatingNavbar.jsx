@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - With notification badge on Store icon (fixed bottom positioning for consistency)
+// Updated ClientFloatingNavbar.jsx - Added storage event listener for 'cart' key changes across tabs, ensured real-time updates with CustomEvent bubbles
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,28 +17,50 @@ const ClientFloatingNavbar = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [storeNotificationCount, setStoreNotificationCount] = useState(0);
+  const [cartNotificationCount, setCartNotificationCount] = useState(0);
+
+  const updateCounts = () => {
+    const storeCount = parseInt(localStorage.getItem('clientNewProducts') || '0');
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setStoreNotificationCount(storeCount);
+    setCartNotificationCount(cart.length);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
-    const updateCount = () => {
-      const count = parseInt(localStorage.getItem('clientNewProducts') || '0');
-      setNotificationCount(count);
-    };
-    updateCount();
+    updateCounts();
 
     // Listen for product added event
-    window.addEventListener('productAdded', updateCount);
+    window.addEventListener('productAdded', updateCounts);
+    // Listen for cart updated event
+    window.addEventListener('cartUpdated', updateCounts);
+    // Listen for localStorage changes in other tabs
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'cart' || e.key === 'clientNewProducts') {
+        updateCounts();
+      }
+    });
+
+    // Poll every 2 seconds for same-tab updates (fallback)
+    const interval = setInterval(updateCounts, 2000);
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('productAdded', updateCount);
+      window.removeEventListener('productAdded', updateCounts);
+      window.removeEventListener('cartUpdated', updateCounts);
+      window.removeEventListener('storage', (e) => {
+        if (e.key === 'cart' || e.key === 'clientNewProducts') {
+          updateCounts();
+        }
+      });
+      clearInterval(interval);
     };
   }, []);
 
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
-    { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart" },
+    { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
     { icon: MdPayment, name: "Payment", route: "/dashbord-client/paymenttoadmin" },
     { icon: MdChatBubbleOutline, name: "Chat" },
     { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder" },
@@ -51,12 +73,18 @@ const ClientFloatingNavbar = () => {
     const tab = tabs[index];
     if (tab.route) {
       navigate(tab.route);
-      // Reset notification if clicking on Store
-      if (index === 0 && notificationCount > 0) {
+      // Reset store notification if clicking on Store
+      if (index === 0 && storeNotificationCount > 0) {
         localStorage.setItem('clientNewProducts', '0');
-        setNotificationCount(0);
+        setStoreNotificationCount(0);
       }
     }
+  };
+
+  const getNotificationCount = (index) => {
+    if (index === 0) return storeNotificationCount;
+    if (index === 1) return cartNotificationCount;
+    return 0;
   };
 
   return (
@@ -70,6 +98,7 @@ const ClientFloatingNavbar = () => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = index === activeTab;
+          const notificationCount = getNotificationCount(index);
           const showBadge = tab.hasNotification && notificationCount > 0;
           return (
             <motion.button

@@ -1,8 +1,8 @@
-// Updated ClientBrowserAdds.jsx - Enhanced engaging, trustworthy UI with wider cards, reduced height, and captivating modal
+// Updated ClientBrowserAdds.jsx - Changed event listener from 'productAdded' to 'productsChanged'; Enhanced flying card animation to simulate movement toward cart icon (bottom center); Added full card clone in flying animation; Added timeout to clear flying card state; Removed unused ref; Ensured deletion propagates via existing storage listener
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiStar, FiShoppingCart, FiX, FiPlay, FiTag, FiShare2, FiHeart } from 'react-icons/fi';
+import { FiStar, FiShoppingCart, FiCheck, FiTag, FiHeart } from 'react-icons/fi';
 
 const DB_NAME = 'SpiceDB';
 const STORE_NAME = 'products';
@@ -48,27 +48,32 @@ const cardVariants = {
     },
   }),
   hover: {
-    scale: 1.03,
-    boxShadow: '0 20px 40px rgba(251, 146, 60, 0.2)',
-    transition: { duration: 0.4, ease: 'easeOut' },
+    scale: 1.02,
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+    transition: { duration: 0.3 },
   },
 };
 
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.8, y: 20 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+const flyVariants = {
+  initial: { opacity: 1, scale: 1 },
+  fly: {
+    x: [0, 0, window.innerWidth / 2],
+    y: [0, -50, window.innerHeight - 150],
+    scale: [1, 1.05, 0.8],
+    rotate: [0, 5, 0],
+    opacity: [1, 1, 0],
+    transition: {
+      duration: 1,
+      ease: [0.22, 1, 0.36, 1],
+    },
   },
-  exit: { opacity: 0, scale: 0.8, y: 20, transition: { duration: 0.2 } },
+  exit: { opacity: 0 },
 };
 
 export default function ClientBrowserAdds() {
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(null);
+  const [flyingCard, setFlyingCard] = useState(null);
   const navigate = useNavigate();
 
   // Initial load from IndexedDB
@@ -77,7 +82,6 @@ export default function ClientBrowserAdds() {
       try {
         const storedProducts = await getProducts();
         setProducts(storedProducts);
-        console.log('Loaded products in client browse:', storedProducts); // Debug log
       } catch (error) {
         console.error('Error loading products:', error);
       }
@@ -85,22 +89,21 @@ export default function ClientBrowserAdds() {
     loadProducts();
   }, []);
 
-  // Real-time update listener for productAdded event
+  // Real-time update listener for productsChanged event
   useEffect(() => {
-    const handleProductAdded = async () => {
+    const handleProductsChanged = async () => {
       try {
         const updatedProducts = await getProducts();
         setProducts(updatedProducts);
-        console.log('Updated products via event in client browse:', updatedProducts); // Debug log
       } catch (error) {
         console.error('Error updating products:', error);
       }
     };
 
-    window.addEventListener('productAdded', handleProductAdded);
+    window.addEventListener('productsChanged', handleProductsChanged);
 
     return () => {
-      window.removeEventListener('productAdded', handleProductAdded);
+      window.removeEventListener('productsChanged', handleProductsChanged);
     };
   }, []);
 
@@ -111,7 +114,6 @@ export default function ClientBrowserAdds() {
         try {
           const updatedProducts = await getProducts();
           setProducts(updatedProducts);
-          console.log('Updated products via storage event in client browse:', updatedProducts); // Debug log
         } catch (error) {
           console.error('Error updating products:', error);
         }
@@ -125,34 +127,33 @@ export default function ClientBrowserAdds() {
     };
   }, []);
 
-  const handleAddToCart = (product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleProceedToOrder = () => {
-    setIsModalOpen(false);
-    // Save selected product to localStorage for payment page
-    localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
-    navigate('/dashbord-client/paymenttoadmin');
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: selectedProduct.name,
-        text: `Check out this amazing ${selectedProduct.name}! Perfect for your next meal.`,
-        url: window.location.href,
-      });
+  const handleAddToCart = (product, index) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      existingItem.quantity += 1;
     } else {
-      navigator.clipboard.writeText(`Check out ${selectedProduct.name} at ${window.location.href}`);
-      alert('Link copied to clipboard! Share with friends and family.');
+      cart.push({ ...product, quantity: 1 });
     }
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // Trigger flying animation
+    setFlyingCard({ product, index });
+
+    // Clear flying card after animation
+    setTimeout(() => setFlyingCard(null), 1100);
+
+    // Dispatch event for navbar update
+    window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
+
+    // Success state
+    setAddSuccess(product.id);
+    setTimeout(() => setAddSuccess(null), 2000);
   };
 
   if (products.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -166,8 +167,8 @@ export default function ClientBrowserAdds() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-white">
-      <div className="max-w-7xl mx-auto"> {/* Wider container for more breathing room */}
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-7xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -175,7 +176,7 @@ export default function ClientBrowserAdds() {
         >
           Browse Spice Delights
         </motion.h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8"> {/* Wider cards: xl:grid-cols-4 for more horizontal space */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product, i) => (
             <motion.div
               key={product.id}
@@ -184,57 +185,74 @@ export default function ClientBrowserAdds() {
               initial="hidden"
               animate="visible"
               whileHover="hover"
-              className="bg-gradient-to-br from-white to-orange-50 rounded-3xl overflow-hidden shadow-md group cursor-pointer transition-all duration-300 hover:shadow-xl border border-gray-100 hover:border-orange-200" // Subtle gradient bg, trustworthy borders
+              className="bg-white rounded-3xl overflow-hidden shadow-lg cursor-pointer group relative"
+              onClick={(e) => {
+                if (e.target.closest('button')) return;
+              }}
             >
-              <div className="relative overflow-hidden">
-                <motion.img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105" // Reduced height for squatter cards
-                  whileHover={{ scale: 1.05 }}
-                />
-                {/* Category badge with subtle animation */}
-                <motion.div 
+              {/* Flying clone */}
+              <AnimatePresence>
+                {flyingCard && flyingCard.index === i && (
+                  <motion.div
+                    variants={flyVariants}
+                    initial="initial"
+                    animate="fly"
+                    exit="exit"
+                    className="absolute inset-0 z-50 bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-48 object-cover flex-shrink-0"
+                    />
+                    <div className="p-4 flex-1 flex flex-col justify-end">
+                      <h3 className="text-lg font-bold text-gray-800 mb-1">{product.name}</h3>
+                      <p className="text-xl font-bold text-orange-600">¢{product.price}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <motion.img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="p-6">
+                <motion.span 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="absolute top-3 left-3"
+                  className="absolute top-3 left-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-orange-600 shadow-md"
                 >
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-sm text-orange-600 shadow-md border border-orange-200">
-                    <FiTag className="mr-1 w-3 h-3" />
-                    {product.category}
-                  </span>
-                </motion.div>
-                {/* Favorite overlay */}
+                  <FiTag className="mr-1 w-3 h-3" />
+                  {product.category}
+                </motion.span>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute top-3 right-3 p-2 bg-white/90 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <FiHeart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+                  <FiHeart className="w-5 h-5 text-gray-600 hover:text-red-500" />
                 </motion.button>
-              </div>
-              <div className="p-5"> {/* Slightly reduced padding */}
-                <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 leading-tight">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
-                <div className="flex items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+                <div className="flex items-center mb-2">
                   <div className="flex">
                     {[...Array(5)].map((_, j) => (
                       <FiStar
                         key={j}
-                        className={`text-base ${j < product.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
+                        className={`text-sm ${j < product.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
                       />
                     ))}
                   </div>
-                  <span className="ml-2 text-xs text-gray-500">({product.rating}/5)</span>
                 </div>
-                <p className="text-xl font-bold text-orange-600 mb-4">¢{product.price}</p>
+                <p className="text-2xl font-bold text-orange-600 mb-4">¢{product.price}</p>
                 <motion.button
-                  onClick={() => handleAddToCart(product)}
+                  onClick={() => handleAddToCart(product, i)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                  animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                  className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
                 >
-                  <FiShoppingCart className="w-4 h-4" />
+                  <FiShoppingCart />
                   <span>Add to Cart</span>
                 </motion.button>
               </div>
@@ -242,148 +260,17 @@ export default function ClientBrowserAdds() {
           ))}
         </div>
 
-        {/* Modal - Captivating, shareable design with spice-themed elements */}
+        {/* Success Toast */}
         <AnimatePresence>
-          {isModalOpen && (
+          {addSuccess && (
             <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-              onClick={() => setIsModalOpen(false)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg z-50 flex items-center space-x-2"
             >
-              <motion.div
-                className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden relative shadow-2xl" // Wider modal for immersive experience
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="absolute top-6 right-6 z-10 text-gray-600 hover:text-gray-800 transition-colors duration-200 bg-white/80 rounded-full p-2 shadow-md"
-                >
-                  <FiX size={20} />
-                </button>
-                {selectedProduct && (
-                  <div className="h-full flex">
-                    {/* Left: Hero Image with overlay */}
-                    <div className="relative w-1/2 bg-gradient-to-b from-orange-50 to-red-50 flex flex-col">
-                      <motion.img
-                        src={selectedProduct.image}
-                        alt={selectedProduct.name}
-                        className="w-full h-full object-cover"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                      />
-                      {/* Subtle spice overlay for theme */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-orange-500/10 via-transparent to-transparent" />
-                      {/* Category badge */}
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute bottom-4 left-4"
-                      >
-                        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-white/95 backdrop-blur-sm text-orange-600 shadow-lg">
-                          <FiTag className="mr-2 w-4 h-4" />
-                          {selectedProduct.category}
-                        </span>
-                      </motion.div>
-                    </div>
-                    {/* Right: Engaging Content */}
-                    <div className="w-1/2 p-8 flex flex-col justify-between bg-gradient-to-b from-white to-orange-50">
-                      <div>
-                        <motion.h3 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-4xl font-bold text-gray-800 mb-4 leading-tight"
-                        >
-                          {selectedProduct.name}
-                        </motion.h3>
-                        <motion.p 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="text-gray-600 mb-6 text-lg leading-relaxed"
-                        >
-                          {selectedProduct.description}
-                        </motion.p>
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="flex items-center mb-6"
-                        >
-                          <div className="flex">
-                            {[...Array(5)].map((_, j) => (
-                              <FiStar
-                                key={j}
-                                className={`text-xl ${j < selectedProduct.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-3 text-sm text-gray-600 font-medium">({selectedProduct.rating}/5)</span>
-                        </motion.div>
-                        <motion.p 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 }}
-                          className="text-5xl font-bold text-orange-600 mb-8"
-                        >
-                          ¢{selectedProduct.price}
-                        </motion.p>
-                      </div>
-                      {/* Engaging CTA Section */}
-                      <div className="space-y-4">
-                        {/* Video - Compact and integrated */}
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="mb-6"
-                        >
-                          <video
-                            src={selectedProduct.video}
-                            controls
-                            className="w-full h-32 rounded-2xl object-cover shadow-md"
-                          >
-                            Your browser does not support the video tag.
-                          </video>
-                        </motion.div>
-                        {/* Share and Proceed Buttons */}
-                        <div className="flex space-x-3">
-                          <motion.button
-                            onClick={handleShare}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="flex-1 py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300"
-                          >
-                            <FiShare2 className="w-5 h-5" />
-                            <span>Share with Friends</span>
-                          </motion.button>
-                          <motion.button
-                            onClick={handleProceedToOrder}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold text-lg flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300"
-                          >
-                            <FiPlay className="w-5 h-5" />
-                            <span>Proceed to Order</span>
-                          </motion.button>
-                        </div>
-                        {/* Trust badge */}
-                        <motion.p 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 }}
-                          className="text-xs text-gray-500 text-center italic"
-                        >
-                          Trusted by 10k+ spice lovers • Fresh & Authentic
-                        </motion.p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+              <FiCheck size={20} />
+              <span>Added to Cart!</span>
             </motion.div>
           )}
         </AnimatePresence>

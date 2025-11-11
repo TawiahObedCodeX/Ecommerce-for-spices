@@ -1,4 +1,4 @@
-// Updated AdminAddProduct.jsx - Switched to IndexedDB to handle large media files and avoid quota errors
+// Updated AdminAddProduct.jsx - Changed event dispatch from 'productAdded' to 'productsChanged' for unified product list updates
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiImage, FiVideo, FiStar, FiDollarSign, FiCheck, FiTag, FiAlignLeft, FiList } from 'react-icons/fi';
@@ -168,8 +168,8 @@ export default function AdminAddProduct() {
       localStorage.setItem('clientNewProducts', clientNotifs.toString());
       localStorage.setItem('adminNewProducts', adminNotifs.toString());
 
-      // Dispatch custom event to update navbars in real-time
-      window.dispatchEvent(new Event('productAdded'));
+      // Dispatch custom event to update navbars and lists in real-time
+      window.dispatchEvent(new Event('productsChanged'));
 
       // Trigger cross-tab update via localStorage
       localStorage.setItem('productsUpdated', Date.now().toString());

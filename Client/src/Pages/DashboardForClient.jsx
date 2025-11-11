@@ -20,9 +20,11 @@ export default function DashboardForClient() {
   }
 
   return (
-    <div className='flex h-screen  justify-center items-center '>
+    <div className='flex flex-col h-screen'>
+      <div className='flex-1 overflow-auto'>
+        <Outlet />
+      </div>
       <ClientNavbar />
-      <Outlet />
     </div>
   )
 }
