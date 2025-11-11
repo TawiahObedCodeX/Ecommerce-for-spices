@@ -126,6 +126,9 @@ export default function AdminAddProduct() {
     localStorage.setItem('clientNewProducts', clientNotifs.toString());
     localStorage.setItem('adminNewProducts', adminNotifs.toString());
 
+    // Dispatch custom event to update navbars in real-time
+    window.dispatchEvent(new Event('productAdded'));
+
     setIsSubmitting(false);
     setSubmitSuccess(true);
     setTimeout(() => setSubmitSuccess(false), 3000);

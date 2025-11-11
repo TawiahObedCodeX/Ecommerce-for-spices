@@ -21,9 +21,19 @@ const ClientFloatingNavbar = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
-    const count = parseInt(localStorage.getItem('clientNewProducts') || '0');
-    setNotificationCount(count);
-    return () => clearTimeout(timer);
+    const updateCount = () => {
+      const count = parseInt(localStorage.getItem('clientNewProducts') || '0');
+      setNotificationCount(count);
+    };
+    updateCount();
+
+    // Listen for product added event
+    window.addEventListener('productAdded', updateCount);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('productAdded', updateCount);
+    };
   }, []);
 
   const tabs = [
