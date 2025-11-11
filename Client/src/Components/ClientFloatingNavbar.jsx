@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - With notification badge on Store icon
+// Updated ClientFloatingNavbar.jsx - With notification badge on Store icon (fixed bottom positioning for consistency)
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,7 +64,7 @@ const ClientFloatingNavbar = () => {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
       transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.2 }}
-      className="fixed  bottom-40 left-0 right-0 md:left-4 md:right-4 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-purple-100/50 md:rounded-3xl md:border"
+      className="fixed bottom-5 left-0 right-0 md:left-4 md:right-4 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-purple-100/50 md:rounded-3xl md:border"
     >
       <nav className="flex justify-around items-center relative">
         {tabs.map((tab, index) => {
@@ -121,7 +121,7 @@ const ClientFloatingNavbar = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute bottom-3 mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap z-50"
+                  className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap z-50"
                 >
                   {tab.name}
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>

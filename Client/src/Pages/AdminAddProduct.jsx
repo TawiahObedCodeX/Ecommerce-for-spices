@@ -1,7 +1,50 @@
-// Updated AdminAddProduct.jsx - Now saves to localStorage on submit
+// Updated AdminAddProduct.jsx - Switched to IndexedDB to handle large media files and avoid quota errors
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiImage, FiVideo, FiStar, FiDollarSign, FiCheck, FiTag, FiAlignLeft, FiList } from 'react-icons/fi';
+
+const DB_NAME = 'SpiceDB';
+const STORE_NAME = 'products';
+const VERSION = 1;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+async function saveProduct(product) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.put(product);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getProducts() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result.sort((a, b) => b.id - a.id);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -104,47 +147,51 @@ export default function AdminAddProduct() {
       return;
     }
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Save to localStorage
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const newProduct = {
-      id: Date.now(),
-      ...formData,
-      image: imagePreview, // Save preview URL
-      video: videoPreview, // Save preview URL
-      timestamp: new Date().toISOString(),
-    };
-    products.unshift(newProduct); // Add to front for latest first
-    localStorage.setItem('products', JSON.stringify(products));
+      // Save to IndexedDB
+      const newProduct = {
+        id: Date.now(),
+        ...formData,
+        image: imagePreview, // Save preview URL
+        video: videoPreview, // Save preview URL
+        timestamp: new Date().toISOString(),
+      };
+      await saveProduct(newProduct);
 
-    // Update notification counts
-    let clientNotifs = parseInt(localStorage.getItem('clientNewProducts') || '0');
-    let adminNotifs = parseInt(localStorage.getItem('adminNewProducts') || '0');
-    clientNotifs += 1;
-    adminNotifs += 1;
-    localStorage.setItem('clientNewProducts', clientNotifs.toString());
-    localStorage.setItem('adminNewProducts', adminNotifs.toString());
+      // Update notification counts in localStorage
+      let clientNotifs = parseInt(localStorage.getItem('clientNewProducts') || '0');
+      let adminNotifs = parseInt(localStorage.getItem('adminNewProducts') || '0');
+      clientNotifs += 1;
+      adminNotifs += 1;
+      localStorage.setItem('clientNewProducts', clientNotifs.toString());
+      localStorage.setItem('adminNewProducts', adminNotifs.toString());
 
-    // Dispatch custom event to update navbars in real-time
-    window.dispatchEvent(new Event('productAdded'));
+      // Dispatch custom event to update navbars in real-time
+      window.dispatchEvent(new Event('productAdded'));
 
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-    setTimeout(() => setSubmitSuccess(false), 3000);
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 3000);
 
-    // Reset form
-    setFormData({
-      name: '',
-      category: '',
-      description: '',
-      price: '',
-      rating: 0,
-      image: null,
-      video: null,
-    });
-    setImagePreview(null);
-    setVideoPreview(null);
+      // Reset form
+      setFormData({
+        name: '',
+        category: '',
+        description: '',
+        price: '',
+        rating: 0,
+        image: null,
+        video: null,
+      });
+      setImagePreview(null);
+      setVideoPreview(null);
+    } catch (error) {
+      console.error('Error adding product:', error);
+      alert('Failed to add product. Please check console for details and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -158,7 +205,7 @@ export default function AdminAddProduct() {
           className="text-center "
         >
           <motion.h1
-            className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
@@ -409,7 +456,7 @@ export default function AdminAddProduct() {
               <motion.div
                 variants={hoverVariants}
                 whileHover="hover"
-                className="border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center hover:border-orange-500 transition-all duration-500 cursor-pointer bg-linear-to-br from-orange-50 to-red-50"
+                className="border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center hover:border-orange-500 transition-all duration-500 cursor-pointer bg-gradient-to-br from-orange-50 to-red-50"
               >
                 <input
                   type="file"

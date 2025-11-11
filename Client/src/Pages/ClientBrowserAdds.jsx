@@ -1,4 +1,4 @@
-// ClientBrowserAdds.jsx - Displays products with clickable Add to Cart and modal
+// Updated ClientBrowserAdds.jsx - Displays products with clickable Add to Cart and modal, now with real-time updates via event listener
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,9 +38,24 @@ export default function ClientBrowserAdds() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Initial load from localStorage
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
     setProducts(storedProducts);
+  }, []);
+
+  // Real-time update listener for productAdded event
+  useEffect(() => {
+    const handleProductAdded = () => {
+      const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+      setProducts(storedProducts);
+    };
+
+    window.addEventListener('productAdded', handleProductAdded);
+
+    return () => {
+      window.removeEventListener('productAdded', handleProductAdded);
+    };
   }, []);
 
   const handleAddToCart = (product) => {

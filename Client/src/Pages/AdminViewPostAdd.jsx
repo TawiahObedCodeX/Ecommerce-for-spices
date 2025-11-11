@@ -1,4 +1,4 @@
-// AdminViewPostAdd.jsx - Displays products in cards for admin (Add to Cart disabled)
+// Updated AdminViewPostAdd.jsx - Displays products in cards for admin (Add to Cart disabled), now with real-time updates via event listener
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiStar, FiShoppingCart, FiX } from 'react-icons/fi';
@@ -24,9 +24,24 @@ const cardVariants = {
 export default function AdminViewPostAdd() {
   const [products, setProducts] = useState([]);
 
+  // Initial load from localStorage
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
     setProducts(storedProducts);
+  }, []);
+
+  // Real-time update listener for productAdded event
+  useEffect(() => {
+    const handleProductAdded = () => {
+      const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+      setProducts(storedProducts);
+    };
+
+    window.addEventListener('productAdded', handleProductAdded);
+
+    return () => {
+      window.removeEventListener('productAdded', handleProductAdded);
+    };
   }, []);
 
   if (products.length === 0) {
