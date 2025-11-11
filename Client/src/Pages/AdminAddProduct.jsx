@@ -171,6 +171,9 @@ export default function AdminAddProduct() {
       // Dispatch custom event to update navbars in real-time
       window.dispatchEvent(new Event('productAdded'));
 
+      // Trigger cross-tab update via localStorage
+      localStorage.setItem('productsUpdated', Date.now().toString());
+
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
 

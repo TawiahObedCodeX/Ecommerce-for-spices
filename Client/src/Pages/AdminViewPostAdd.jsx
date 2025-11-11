@@ -1,7 +1,39 @@
-// Updated AdminViewPostAdd.jsx - Displays products in cards for admin (Add to Cart disabled), now with real-time updates via event listener
+// Updated AdminViewPostAdd.jsx - Now uses IndexedDB for products
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiStar, FiShoppingCart, FiX } from 'react-icons/fi';
+import { FiStar, FiShoppingCart } from 'react-icons/fi';
+
+const DB_NAME = 'SpiceDB';
+const STORE_NAME = 'products';
+const VERSION = 1;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+async function getProducts() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result.sort((a, b) => b.id - a.id);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
 
 const cardVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -24,17 +56,16 @@ const cardVariants = {
 export default function AdminViewPostAdd() {
   const [products, setProducts] = useState([]);
 
-  // Initial load from localStorage
+  // Initial load from IndexedDB
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
-    setProducts(storedProducts);
+    getProducts().then(setProducts).catch(console.error);
   }, []);
 
   // Real-time update listener for productAdded event
   useEffect(() => {
-    const handleProductAdded = () => {
-      const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
-      setProducts(storedProducts);
+    const handleProductAdded = async () => {
+      const updatedProducts = await getProducts();
+      setProducts(updatedProducts);
     };
 
     window.addEventListener('productAdded', handleProductAdded);
@@ -46,7 +77,7 @@ export default function AdminViewPostAdd() {
 
   if (products.length === 0) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
