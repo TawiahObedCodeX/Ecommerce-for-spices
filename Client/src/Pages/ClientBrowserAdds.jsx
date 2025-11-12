@@ -1,8 +1,8 @@
-// Updated ClientBrowserAdds.jsx - Changed cart item to store only essential data to avoid localStorage quota issues with media files
+// Updated ClientBrowserAdds.jsx - Moved Category Tag to top-left of image with white background
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiStar, FiShoppingCart, FiCheck, FiTag, FiHeart } from 'react-icons/fi';
+import { Star, ShoppingCart, Check, Tag, Heart } from 'lucide-react'; // Use lucide where possible
 const DB_NAME = 'SpiceDB';
 const STORE_NAME = 'products';
 const VERSION = 1;
@@ -32,33 +32,23 @@ async function getProducts() {
     request.onerror = () => reject(request.error);
   });
 }
-const cardVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: (i) => ({
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
     opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3
+    }
+  }
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { 
+    opacity: 1, 
     y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  }),
-  hover: {
-    scale: 1.02,
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-    transition: { duration: 0.3 },
-  },
-  fly: {
-    scale: [1, 1.2, 0.3],
-    rotate: [0, 180, 360],
-    y: [0, -50, window.innerHeight],
-    x: [0, 0, window.innerWidth * 0.8],
-    opacity: [1, 1, 0],
-    transition: {
-      duration: 1,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
+    transition: { duration: 0.6, ease: "easeOut" }
+  }
 };
 export default function ClientBrowserAdds() {
   const [products, setProducts] = useState([]);
@@ -170,77 +160,127 @@ export default function ClientBrowserAdds() {
     );
   }
   return (
-    <div className="min-h-screen py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent"
+          className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-secondary/80 via-amber/80 to-secondary/80 bg-clip-text text-transparent"
         >
           Browse Spice Delights
         </motion.h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product, i) => (
-            <motion.div
-              key={product.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              ref={(el) => (productRefs.current[i] = el)}
-              className="bg-white rounded-3xl overflow-hidden shadow-lg cursor-pointer group relative"
-              onClick={(e) => {
-                if (e.target.closest('button')) return;
-              }}
-            >
-              <motion.img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="p-6">
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="absolute top-3 left-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-orange-600 shadow-md"
-                >
-                  <FiTag className="mr-1 w-3 h-3" />
-                  {product.category}
-                </motion.span>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  className="absolute top-3 right-3 p-2 bg-white/90 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <FiHeart className="w-5 h-5 text-gray-600 hover:text-red-500" />
-                </motion.button>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
-                <div className="flex items-center mb-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, j) => (
-                      <FiStar
-                        key={j}
-                        className={`text-sm ${j < product.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`}
-                      />
-                    ))}
+        <motion.section 
+          className=" px-4 md:px-8 lg:px-16 bg-background"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {products.map((product, index) => (
+              <motion.article 
+                key={product.id}
+                ref={(el) => (productRefs.current[index] = el)}
+                className="group bg-card rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-700 border border-border hover:border-secondary/50 relative cursor-pointer"
+                variants={itemVariants}
+                whileHover={{ y: -15, rotateX: 5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                onClick={(e) => {
+                  if (e.target.closest('button')) return;
+                }}
+              >
+                {/* Premium Badge */}
+                {product.certified && (
+                  <motion.div 
+                    className="absolute top-4 left-4 z-10 bg-success text-text-dark px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    Certified Organic
+                  </motion.div>
+                )}
+
+                {/* Image with Gradient Overlay */}
+                <div className="relative overflow-hidden bg-gradient-to-t from-background-dark/50 to-transparent">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* Category Tag - Moved to top-left of image */}
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="absolute top-4 left-4 z-10 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-secondary shadow-md"
+                  >
+                    <Tag className="mr-1 w-3 h-3" />
+                    {product.category}
+                  </motion.span>
+                  <motion.div 
+                    className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2"
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                  >
+                    <button className="bg-text-light/10 backdrop-blur-sm p-2 rounded-full hover:bg-info/20 shadow-md">
+                      <Heart className="w-5 h-5 text-secondary" />
+                    </button>
+                    <button 
+                      onClick={() => handleAddToCart(product, index)}
+                      className="bg-secondary/90 text-text-light p-2 rounded-full hover:bg-error shadow-md"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                    </button>
+                  </motion.div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-light text-xs text-charcoal">{product.origin || 'Unknown'}</span>
+                    <div className="flex text-success">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
+                      ))}
+                      <span className="ml-1 text-xs font-medium">({product.rating})</span>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-xl text-text-dark mb-2 leading-tight group-hover:text-secondary transition-colors duration-300">
+                    {product.name}
+                  </h3>
+                  <p className="font-light text-charcoal mb-4 h-12 overflow-hidden line-clamp-2">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <span className="font-bold text-2xl text-secondary tracking-tight">
+                      ¢{product.price}
+                    </span>
+                    <motion.button
+                      onClick={() => handleAddToCart(product, index)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
+                      transition={{ duration: 0.3 }}
+                      className="px-4 py-2 bg-gradient-to-r from-secondary to-amber text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
+                    </motion.button>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-orange-600 mb-4">¢{product.price}</p>
-                <motion.button
-                  onClick={() => handleAddToCart(product, i)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
-                >
-                  <FiShoppingCart />
-                  <span>Add to Cart</span>
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+
+                {/* Hover Glow Effect */}
+                <motion.div 
+                  className="absolute inset-0 rounded-3xl bg-gradient-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.article>
+            ))}
+          </div>
+        </motion.section>
+
         {/* Flying Card Animation to Cart Icon */}
         <AnimatePresence>
           {flyingCard && (
@@ -257,7 +297,7 @@ export default function ClientBrowserAdds() {
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               exit={{ opacity: 0 }}
             >
-              <div className="w-full h-full bg-white rounded-3xl overflow-hidden shadow-lg">
+              <div className="w-full h-full bg-card rounded-3xl overflow-hidden shadow-lg">
                 <img
                   src={flyingCard.product.image}
                   alt={flyingCard.product.name}
@@ -274,9 +314,9 @@ export default function ClientBrowserAdds() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg z-50 flex items-center space-x-2"
+              className="fixed top-4 right-4 bg-success text-text-light px-6 py-4 rounded-xl shadow-lg z-50 flex items-center space-x-2"
             >
-              <FiCheck size={20} />
+              <Check size={20} />
               <span>Added to Cart!</span>
             </motion.div>
           )}

@@ -1,8 +1,8 @@
-// Updated ClientAddtocart.jsx - Store only essential cart data in localStorage to avoid quota issues; fetch full product details from IndexedDB for display; added cross-tab storage listener; auto-remove deleted products
+// Updated ClientAddtocart.jsx - Redesigned UI to match provided cart images: clean white/gray layout, table-style product list, shipping options, removed gradient backgrounds
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingCart, FiTrash2, FiCreditCard, FiCheckCircle, FiX, FiPlayCircle, FiStar, FiTag } from 'react-icons/fi';
+import { FiShoppingCart, FiTrash2, FiCreditCard, FiCheckCircle, FiX, FiPlayCircle, FiStar, FiTag, FiArrowLeft } from 'react-icons/fi';
 
 const DB_NAME = 'SpiceDB';
 const STORE_NAME = 'products';
@@ -38,6 +38,7 @@ export default function ClientAddtocart() {
   const [fullCart, setFullCart] = useState([]); // Full cart with media
   const [isRemoving, setIsRemoving] = useState(null);
   const [videoModal, setVideoModal] = useState(null);
+  const [selectedShipping, setSelectedShipping] = useState('free-pickup'); // Default shipping option
   const navigate = useNavigate();
 
   // Load essential cart and fetch full details
@@ -137,16 +138,17 @@ export default function ClientAddtocart() {
 
   const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
   const tax = subtotal * 0.05;
-  const total = subtotal + tax;
+  const shippingCost = selectedShipping === 'free-pickup' ? 0 : 9.99; // Example: Free for pickup, $9.99 for delivery
+  const total = subtotal + tax + shippingCost;
 
   const handleProceedToPayment = () => {
-    localStorage.setItem('checkoutOrder', JSON.stringify({ items: fullCart, subtotal, tax, total }));
+    localStorage.setItem('checkoutOrder', JSON.stringify({ items: fullCart, subtotal, tax, shippingCost, total, shipping: selectedShipping }));
     navigate('/dashbord-client/paymenttoadmin');
   };
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center ">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -160,7 +162,7 @@ export default function ClientAddtocart() {
             whileHover={{ scale: 1.05 }}
             className="py-3 px-8 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold"
           >
-            Browse Store
+            Browse for product
           </motion.button>
         </motion.div>
       </div>
@@ -168,119 +170,177 @@ export default function ClientAddtocart() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen py-8 px-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent"
-        >
-          Your Spice Cart
-        </motion.h1>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {fullCart.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow"
-            >
-              <div className="relative">
-                <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
-                <motion.span 
-                  className="absolute top-3 left-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-orange-600 shadow-md"
-                >
-                  <FiTag className="mr-1 w-3 h-3" />
-                  {item.category}
-                </motion.span>
-              </div>
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-800">{item.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">{item.description}</p>
-                <div className="flex items-center">
-                  <div className="flex">
-                    {[...Array(5)].map((_, j) => (
-                      <FiStar key={j} className={`text-lg ${j < item.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`} />
-                    ))}
-                  </div>
-                  <span className="ml-2 text-sm text-gray-500">({item.rating}/5)</span>
-                </div>
-                <p className="text-2xl font-bold text-orange-600">¢{item.price} x {item.quantity}</p>
-                <div className="flex items-center space-x-4 pt-2">
-                  <div className="flex items-center space-x-2">
-                    <button onClick={() => updateCartQuantity(item.id, item.quantity - 1)} className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">-</button>
-                    <span className="font-semibold min-w-8 text-center">{item.quantity}</span>
-                    <button onClick={() => updateCartQuantity(item.id, item.quantity + 1)} className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">+</button>
-                  </div>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className={`p-2 rounded-full ${isRemoving === item.id ? 'bg-red-100 text-red-500' : 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500'}`}
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
-                  <motion.button
-                    onClick={() => openVideo(item.video)}
-                    whileHover={{ scale: 1.05 }}
-                    className="ml-auto p-2 bg-white rounded-full shadow-md border border-gray-200 hover:shadow-lg"
-                  >
-                    <FiPlayCircle size={24} className="text-orange-500" />
-                  </motion.button>
-                </div>
-              </div>
-              <AnimatePresence>
-                {isRemoving === item.id && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="absolute inset-0 bg-green-500/20 flex items-center justify-center"
-                  >
-                    <FiCheckCircle className="text-green-500 text-3xl" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <motion.h1
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl font-bold text-gray-800"
+          >
+            My Cart
+          </motion.h1>
+          <motion.button
+            onClick={() => navigate('/dashbord-client')}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-orange-500 hover:text-orange-600 font-medium flex items-center space-x-1"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            <span>Continue shopping</span>
+          </motion.button>
         </div>
-        {/* Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-100"
-        >
-          <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">Order Summary</h3>
-          <div className="space-y-3 text-lg mb-6">
+
+        {/* Cart Items Table */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Product</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Price</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Qty</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence>
+                {fullCart.map((item, index) => (
+                  <motion.tr
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-4">
+                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-gray-800 truncate">{item.name}</h3>
+                          <p className="text-xs text-gray-500 line-clamp-2">{item.description}</p>
+                          <div className="flex items-center mt-1">
+                            <div className="flex">
+                              {[...Array(5)].map((_, j) => (
+                                <FiStar key={j} className={`w-3 h-3 ${j < item.rating ? 'text-orange-500 fill-current' : 'text-gray-300'}`} />
+                              ))}
+                            </div>
+                            <span className="ml-1 text-xs text-gray-500">({item.rating})</span>
+                          </div>
+                          <motion.span 
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 mt-1"
+                          >
+                            <FiTag className="w-2 h-2 mr-1" />
+                            {item.category}
+                          </motion.span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-gray-800">¢{item.price}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <button onClick={() => updateCartQuantity(item.id, item.quantity - 1)} className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 text-sm">-</button>
+                        <span className="font-semibold min-w-8 text-center">{item.quantity}</span>
+                        <button onClick={() => updateCartQuantity(item.id, item.quantity + 1)} className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 text-sm">+</button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-semibold text-gray-800">¢{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                      <div className="flex items-center mt-2">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className={`p-1 rounded-full ${isRemoving === item.id ? 'bg-red-100 text-red-500' : 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500'}`}
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                        <motion.button
+                          onClick={() => openVideo(item.video)}
+                          whileHover={{ scale: 1.05 }}
+                          className="ml-2 p-1 bg-white rounded-full shadow-sm border border-gray-200 hover:shadow-md"
+                        >
+                          <FiPlayCircle size={16} className="text-orange-500" />
+                        </motion.button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Shipping and Summary */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Choose shipping mode:</h3>
+          <div className="space-y-4 mb-6">
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="radio"
+                name="shipping"
+                value="free-pickup"
+                checked={selectedShipping === 'free-pickup'}
+                onChange={(e) => setSelectedShipping(e.target.value)}
+                className="mt-1 h-4 w-4 text-orange-500 focus:ring-orange-500"
+              />
+              <div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                  <span className="font-semibold text-gray-800">Pick up in 30 min - FREE</span>
+                </div>
+                <p className="text-sm text-gray-600 ml-5">Available today 10:00 AM - 8:00 PM</p>
+              </div>
+            </label>
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="radio"
+                name="shipping"
+                value="delivery"
+                checked={selectedShipping === 'delivery'}
+                onChange={(e) => setSelectedShipping(e.target.value)}
+                className="mt-1 h-4 w-4 text-orange-500 focus:ring-orange-500"
+              />
+              <div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                  <span className="font-semibold text-gray-800">Delivery in 1-2 days - ¢9.99</span>
+                </div>
+                <p className="text-sm text-gray-600 ml-5">Arrives at home in 1-2 days</p>
+              </div>
+            </label>
+          </div>
+          <div className="border-t pt-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Subtotal ({cart.length} items)</span>
               <span>¢{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>¢{shippingCost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
               <span>Tax (5%)</span>
               <span>¢{tax.toFixed(2)}</span>
             </div>
-            <div className="border-t pt-3 flex justify-between font-bold text-2xl text-orange-600">
+            <div className="border-t pt-2 flex justify-between font-bold text-lg text-gray-800">
               <span>Total</span>
               <span>¢{total.toFixed(2)}</span>
             </div>
           </div>
-          <p className="text-sm text-gray-500 text-center mb-6 italic">Secure checkout • Fresh & authentic spices guaranteed</p>
-          <motion.button
-            onClick={handleProceedToPayment}
-            whileHover={{ scale: 1.02 }}
-            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 shadow-xl hover:shadow-2xl transition-all"
-          >
-            <FiCreditCard />
-            <span>Proceed to Secure Payment</span>
-          </motion.button>
-          <div className="flex justify-center mt-4 space-x-4 text-xs text-gray-500">
-            <span>Protected by SSL</span>
-            <span>•</span>
-            <span>Trusted Payments</span>
-          </div>
-        </motion.div>
+        </div>
 
-        {/* Video Modal - White container */}
+        {/* Checkout Button */}
+        <motion.button
+          onClick={handleProceedToPayment}
+          whileHover={{ scale: 1.02 }}
+          className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 shadow-xl hover:shadow-2xl transition-all"
+        >
+          <FiCreditCard />
+          <span>Checkout ¢{total.toFixed(2)}</span>
+        </motion.button>
+
+        {/* Video Modal */}
         <AnimatePresence>
           {videoModal && (
             <motion.div
