@@ -11,7 +11,7 @@ const mockMessages = [
     message: 'Please confirm my order for the Jollof spices. Excited to try it!',
     timestamp: '2025-11-10 10:30 AM',
     status: 'new',
-    avatar: 'https://via.placeholder.com/40?text=AM'
+    avatar: 'https://i.pinimg.com/1200x/b1/2b/b9/b12bb97ba6225f77a0dc315cdda2b61a.jpg'
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const mockMessages = [
     message: 'Need this shipped urgently for a family gathering.',
     timestamp: '2025-11-10 09:45 AM',
     status: 'read',
-    avatar: 'https://via.placeholder.com/40?text=KO'
+    avatar: 'https://i.pinimg.com/1200x/2e/40/e7/2e40e7bf228ec13f6742ffc4bf945051.jpg'
   },
   {
     id: 3,
@@ -33,7 +33,7 @@ const mockMessages = [
     message: 'Great quality last time! Ordering more.',
     timestamp: '2025-11-09 03:20 PM',
     status: 'new',
-    avatar: 'https://via.placeholder.com/40?text=EA'
+    avatar: 'https://i.pinimg.com/1200x/59/a4/ac/59a4ac19ab9cabb7218ea492d71d79eb.jpg'
   }
 ];
 

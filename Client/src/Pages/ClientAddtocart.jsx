@@ -354,7 +354,7 @@ export default function ClientAddtocart() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.8 }}
-                className="bg-white rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+                className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] "
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex justify-between items-center p-6 border-b">
