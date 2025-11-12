@@ -32,19 +32,6 @@ async function saveProduct(product) {
   });
 }
 
-async function getProducts() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const all = request.result.sort((a, b) => b.id - a.id);
-      resolve(all);
-    };
-    request.onerror = () => reject(request.error);
-  });
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },

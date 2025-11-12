@@ -64,7 +64,7 @@ const AdminFloatingNavbar = () => {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
       transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.2 }}
-      className="fixed  bottom-5 left-0 right-0 md:left-4 md:right-9 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-gray-200/50 md:rounded-3xl md:border"
+      className="fixed  bottom-3.5 left-0 right-0 md:left-4 md:right-9 md:max-w-md md:mx-auto bg-white/95 backdrop-blur-md shadow-2xl rounded-t-3xl px-4 md:px-6 py-3 z-50 border-t border-gray-200/50 md:rounded-3xl md:border"
     >
       <nav className="flex justify-around items-center relative">
         {tabs.map((tab, index) => {

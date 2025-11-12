@@ -334,10 +334,10 @@ export default function ClientAddtocart() {
         <motion.button
           onClick={handleProceedToPayment}
           whileHover={{ scale: 1.02 }}
-          className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 shadow-xl hover:shadow-2xl transition-all"
+          className="w-full py-4 bg-linear-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-2 shadow-xl hover:shadow-2xl transition-all"
         >
           <FiCreditCard />
-          <span>Checkout ¢{total.toFixed(2)}</span>
+          <span>make payment ¢{total.toFixed(2)}</span>
         </motion.button>
 
         {/* Video Modal */}

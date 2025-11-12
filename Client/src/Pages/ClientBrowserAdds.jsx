@@ -1,6 +1,5 @@
 // Updated ClientBrowserAdds.jsx - Moved Category Tag to top-left of image with white background
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Check, Tag, Heart } from 'lucide-react'; // Use lucide where possible
 const DB_NAME = 'SpiceDB';
@@ -54,7 +53,6 @@ export default function ClientBrowserAdds() {
   const [products, setProducts] = useState([]);
   const [addSuccess, setAddSuccess] = useState(null);
   const [flyingCard, setFlyingCard] = useState(null);
-  const navigate = useNavigate();
   const productRefs = useRef([]);
   // Initial load from IndexedDB
   useEffect(() => {
@@ -202,13 +200,13 @@ export default function ClientBrowserAdds() {
                 )}
 
                 {/* Image with Gradient Overlay */}
-                <div className="relative overflow-hidden bg-gradient-to-t from-background-dark/50 to-transparent">
+                <div className="relative overflow-hidden bg-linear-to-t from-background-dark/50 to-transparent">
                   <img 
                     src={product.image} 
                     alt={product.name} 
                     className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   {/* Category Tag - Moved to top-left of image */}
                   <motion.span
                     initial={{ opacity: 0, x: -10 }}
@@ -262,7 +260,7 @@ export default function ClientBrowserAdds() {
                       whileTap={{ scale: 0.98 }}
                       animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ duration: 0.3 }}
-                      className="px-4 py-2 bg-gradient-to-r from-secondary to-amber text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
+                      className="px-4 py-2 bg-linear-to-r from-orange-500 to-red-500 text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       <span>Add to Cart</span>
