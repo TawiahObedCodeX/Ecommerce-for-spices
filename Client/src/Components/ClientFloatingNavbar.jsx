@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - Added storage event listener for 'cart' key changes across tabs, ensured real-time updates with CustomEvent bubbles
+// Updated ClientFloatingNavbar.jsx - Updated cart notification count to total quantity (sum of quantities) instead of cart.length
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +11,6 @@ import {
   MdLogout,
   MdOutlineMeetingRoom,
 } from "react-icons/md";
-
 const ClientFloatingNavbar = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
@@ -19,18 +18,15 @@ const ClientFloatingNavbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [storeNotificationCount, setStoreNotificationCount] = useState(0);
   const [cartNotificationCount, setCartNotificationCount] = useState(0);
-
   const updateCounts = () => {
     const storeCount = parseInt(localStorage.getItem('clientNewProducts') || '0');
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     setStoreNotificationCount(storeCount);
-    setCartNotificationCount(cart.length);
+    setCartNotificationCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
   };
-
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     updateCounts();
-
     // Listen for product added event
     window.addEventListener('productAdded', updateCounts);
     // Listen for cart updated event
@@ -41,10 +37,8 @@ const ClientFloatingNavbar = () => {
         updateCounts();
       }
     });
-
     // Poll every 2 seconds for same-tab updates (fallback)
     const interval = setInterval(updateCounts, 2000);
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener('productAdded', updateCounts);
@@ -57,7 +51,6 @@ const ClientFloatingNavbar = () => {
       clearInterval(interval);
     };
   }, []);
-
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
     { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
@@ -67,7 +60,6 @@ const ClientFloatingNavbar = () => {
     { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];
-
   const handleTabClick = (index) => {
     setActiveTab(index);
     const tab = tabs[index];
@@ -80,13 +72,11 @@ const ClientFloatingNavbar = () => {
       }
     }
   };
-
   const getNotificationCount = (index) => {
     if (index === 0) return storeNotificationCount;
     if (index === 1) return cartNotificationCount;
     return 0;
   };
-
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
@@ -163,5 +153,4 @@ const ClientFloatingNavbar = () => {
     </motion.div>
   );
 };
-
 export default ClientFloatingNavbar;

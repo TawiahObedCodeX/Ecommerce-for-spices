@@ -1,12 +1,10 @@
-// Updated AdminViewPostAdd.jsx - Changed event listener from 'productAdded' to 'productsChanged'; Added dispatch of 'productsChanged' and localStorage 'productsUpdated' in confirmDelete for real-time sync across tabs and deletion propagation to client views
+// Updated AdminViewPostAdd.jsx - Added localStorage trigger and event dispatch on delete for real-time sync across tabs
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiStar, FiShoppingCart, FiEdit3, FiTrash2, FiX } from 'react-icons/fi';
-
 const DB_NAME = 'SpiceDB';
 const STORE_NAME = 'products';
 const VERSION = 1;
-
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, VERSION);
@@ -20,7 +18,6 @@ function openDB() {
     };
   });
 }
-
 async function getProducts() {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -34,7 +31,6 @@ async function getProducts() {
     request.onerror = () => reject(request.error);
   });
 }
-
 async function deleteProduct(id) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -45,7 +41,6 @@ async function deleteProduct(id) {
     request.onerror = () => reject(request.error);
   });
 }
-
 async function updateProduct(product) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -56,7 +51,6 @@ async function updateProduct(product) {
     request.onerror = () => reject(request.error);
   });
 }
-
 const cardVariants = {
   hidden: { opacity: 0, y: 50 },
   visible: (i) => ({
@@ -74,86 +68,63 @@ const cardVariants = {
     transition: { duration: 0.3 },
   },
 };
-
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
 };
-
 export default function AdminViewPostAdd() {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [formData, setFormData] = useState({});
-
   // Initial load from IndexedDB
   useEffect(() => {
     getProducts().then(setProducts).catch(console.error);
   }, []);
-
-  // Real-time update listener for productsChanged event
+  // Real-time update listener for productAdded event
   useEffect(() => {
-    const handleProductsChanged = async () => {
+    const handleProductAdded = async () => {
       const updatedProducts = await getProducts();
       setProducts(updatedProducts);
     };
-
-    window.addEventListener('productsChanged', handleProductsChanged);
-
+    window.addEventListener('productAdded', handleProductAdded);
     return () => {
-      window.removeEventListener('productsChanged', handleProductsChanged);
+      window.removeEventListener('productAdded', handleProductAdded);
     };
   }, []);
-
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({ ...product });
     setIsEditModalOpen(true);
   };
-
   const handleDelete = (id) => {
     setDeleteConfirmId(id);
   };
-
   const confirmDelete = async () => {
     if (deleteConfirmId) {
       await deleteProduct(deleteConfirmId);
       setProducts((prev) => prev.filter((p) => p.id !== deleteConfirmId));
-
-      // Dispatch custom event to update other views in real-time
-      window.dispatchEvent(new Event('productsChanged'));
-
-      // Trigger cross-tab update via localStorage
+      // Trigger cross-tab and same-tab updates
       localStorage.setItem('productsUpdated', Date.now().toString());
-
+      window.dispatchEvent(new Event('productsUpdated'));
       setDeleteConfirmId(null);
     }
   };
-
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (editingProduct) {
       await updateProduct({ ...editingProduct, ...formData });
       setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? { ...p, ...formData } : p)));
-
-      // Dispatch custom event to update other views in real-time
-      window.dispatchEvent(new Event('productsChanged'));
-
-      // Trigger cross-tab update via localStorage
-      localStorage.setItem('productsUpdated', Date.now().toString());
-
       setIsEditModalOpen(false);
       setEditingProduct(null);
     }
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   if (products.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -168,7 +139,6 @@ export default function AdminViewPostAdd() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -240,7 +210,6 @@ export default function AdminViewPostAdd() {
             </motion.div>
           ))}
         </div>
-
         {/* Delete Confirmation Modal */}
         <AnimatePresence>
           {deleteConfirmId && (
@@ -272,7 +241,6 @@ export default function AdminViewPostAdd() {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Edit Modal */}
         <AnimatePresence>
           {isEditModalOpen && (

@@ -1,13 +1,11 @@
-// Updated ClientBrowserAdds.jsx - Changed event listener from 'productAdded' to 'productsChanged'; Enhanced flying card animation to simulate movement toward cart icon (bottom center); Added full card clone in flying animation; Added timeout to clear flying card state; Removed unused ref; Ensured deletion propagates via existing storage listener
-import React, { useState, useEffect } from 'react';
+// Updated ClientBrowserAdds.jsx - Changed cart item to store only essential data to avoid localStorage quota issues with media files
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiStar, FiShoppingCart, FiCheck, FiTag, FiHeart } from 'react-icons/fi';
-
 const DB_NAME = 'SpiceDB';
 const STORE_NAME = 'products';
 const VERSION = 1;
-
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, VERSION);
@@ -21,7 +19,6 @@ function openDB() {
     };
   });
 }
-
 async function getProducts() {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -35,7 +32,6 @@ async function getProducts() {
     request.onerror = () => reject(request.error);
   });
 }
-
 const cardVariants = {
   hidden: { opacity: 0, y: 50 },
   visible: (i) => ({
@@ -52,30 +48,24 @@ const cardVariants = {
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
     transition: { duration: 0.3 },
   },
-};
-
-const flyVariants = {
-  initial: { opacity: 1, scale: 1 },
   fly: {
-    x: [0, 0, window.innerWidth / 2],
-    y: [0, -50, window.innerHeight - 150],
-    scale: [1, 1.05, 0.8],
-    rotate: [0, 5, 0],
+    scale: [1, 1.2, 0.3],
+    rotate: [0, 180, 360],
+    y: [0, -50, window.innerHeight],
+    x: [0, 0, window.innerWidth * 0.8],
     opacity: [1, 1, 0],
     transition: {
       duration: 1,
       ease: [0.22, 1, 0.36, 1],
     },
   },
-  exit: { opacity: 0 },
 };
-
 export default function ClientBrowserAdds() {
   const [products, setProducts] = useState([]);
   const [addSuccess, setAddSuccess] = useState(null);
   const [flyingCard, setFlyingCard] = useState(null);
   const navigate = useNavigate();
-
+  const productRefs = useRef([]);
   // Initial load from IndexedDB
   useEffect(() => {
     const loadProducts = async () => {
@@ -88,10 +78,9 @@ export default function ClientBrowserAdds() {
     };
     loadProducts();
   }, []);
-
-  // Real-time update listener for productsChanged event
+  // Real-time update listener for productAdded event
   useEffect(() => {
-    const handleProductsChanged = async () => {
+    const handleProductAdded = async () => {
       try {
         const updatedProducts = await getProducts();
         setProducts(updatedProducts);
@@ -99,14 +88,26 @@ export default function ClientBrowserAdds() {
         console.error('Error updating products:', error);
       }
     };
-
-    window.addEventListener('productsChanged', handleProductsChanged);
-
+    window.addEventListener('productAdded', handleProductAdded);
     return () => {
-      window.removeEventListener('productsChanged', handleProductsChanged);
+      window.removeEventListener('productAdded', handleProductAdded);
     };
   }, []);
-
+  // Real-time update listener for productsUpdated event (handles deletes)
+  useEffect(() => {
+    const handleProductsUpdated = async () => {
+      try {
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts);
+      } catch (error) {
+        console.error('Error updating products:', error);
+      }
+    };
+    window.addEventListener('productsUpdated', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('productsUpdated', handleProductsUpdated);
+    };
+  }, []);
   // Cross-tab update listener for localStorage changes
   useEffect(() => {
     const handleStorageChange = async (e) => {
@@ -119,38 +120,41 @@ export default function ClientBrowserAdds() {
         }
       }
     };
-
     window.addEventListener('storage', handleStorageChange);
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-
   const handleAddToCart = (product, index) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        category: product.category,
+        price: product.price,
+        rating: product.rating,
+        quantity: 1,
+      };
+      cart.push(cartItem);
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Trigger flying animation
-    setFlyingCard({ product, index });
-
-    // Clear flying card after animation
-    setTimeout(() => setFlyingCard(null), 1100);
-
+    // Capture card rect for flying animation (uses full product.image briefly)
+    const cardRect = productRefs.current[index]?.getBoundingClientRect();
+    if (cardRect) {
+      setFlyingCard({ product, index, rect: cardRect });
+      setTimeout(() => setFlyingCard(null), 1000);
+    }
     // Dispatch event for navbar update
     window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
-
     // Success state
     setAddSuccess(product.id);
     setTimeout(() => setAddSuccess(null), 2000);
   };
-
   if (products.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -165,7 +169,6 @@ export default function ClientBrowserAdds() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -185,40 +188,19 @@ export default function ClientBrowserAdds() {
               initial="hidden"
               animate="visible"
               whileHover="hover"
+              ref={(el) => (productRefs.current[i] = el)}
               className="bg-white rounded-3xl overflow-hidden shadow-lg cursor-pointer group relative"
               onClick={(e) => {
                 if (e.target.closest('button')) return;
               }}
             >
-              {/* Flying clone */}
-              <AnimatePresence>
-                {flyingCard && flyingCard.index === i && (
-                  <motion.div
-                    variants={flyVariants}
-                    initial="initial"
-                    animate="fly"
-                    exit="exit"
-                    className="absolute inset-0 z-50 bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover flex-shrink-0"
-                    />
-                    <div className="p-4 flex-1 flex flex-col justify-end">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1">{product.name}</h3>
-                      <p className="text-xl font-bold text-orange-600">¢{product.price}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
               <motion.img
                 src={product.image}
                 alt={product.name}
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="p-6">
-                <motion.span 
+                <motion.span
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="absolute top-3 left-3 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-orange-600 shadow-md"
@@ -259,7 +241,32 @@ export default function ClientBrowserAdds() {
             </motion.div>
           ))}
         </div>
-
+        {/* Flying Card Animation to Cart Icon */}
+        <AnimatePresence>
+          {flyingCard && (
+            <motion.div
+              className="fixed z-50 pointer-events-none"
+              initial={{ opacity: 1, scale: 1, rotate: 0 }}
+              animate={{
+                x: (window.innerWidth / 2 - flyingCard.rect.width / 2) - flyingCard.rect.left,
+                y: (window.innerHeight - 150) - flyingCard.rect.top,
+                scale: 0.3,
+                opacity: 0,
+                rotate: 360,
+              }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="w-full h-full bg-white rounded-3xl overflow-hidden shadow-lg">
+                <img
+                  src={flyingCard.product.image}
+                  alt={flyingCard.product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Success Toast */}
         <AnimatePresence>
           {addSuccess && (

@@ -1,29 +1,111 @@
-// Updated ClientAddtocart.jsx - Added real-time listener for cartUpdated event to refresh cart state immediately
+// Updated ClientAddtocart.jsx - Store only essential cart data in localStorage to avoid quota issues; fetch full product details from IndexedDB for display; added cross-tab storage listener; auto-remove deleted products
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiShoppingCart, FiTrash2, FiCreditCard, FiCheckCircle, FiX, FiPlayCircle, FiStar, FiTag } from 'react-icons/fi';
 
+const DB_NAME = 'SpiceDB';
+const STORE_NAME = 'products';
+const VERSION = 1;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+async function getProductById(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get(id);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 export default function ClientAddtocart() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState([]); // Essential cart data
+  const [fullCart, setFullCart] = useState([]); // Full cart with media
   const [isRemoving, setIsRemoving] = useState(null);
   const [videoModal, setVideoModal] = useState(null);
   const navigate = useNavigate();
 
+  // Load essential cart and fetch full details
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCart(storedCart);
+  }, []);
 
-    // Listen for cart updates in real-time
+  // Fetch full cart details when essential cart changes
+  useEffect(() => {
+    const fetchFullCart = async () => {
+      if (cart.length === 0) {
+        setFullCart([]);
+        return;
+      }
+      try {
+        const fullItems = await Promise.all(
+          cart.map(async (item) => {
+            try {
+              const full = await getProductById(item.id);
+              if (!full) {
+                return null;
+              }
+              return { ...item, image: full.image, video: full.video };
+            } catch {
+              return null;
+            }
+          })
+        );
+        const validFull = fullItems.filter(Boolean);
+        setFullCart(validFull);
+        // Clean up deleted products from cart
+        const validCart = cart.filter((_, idx) => fullItems[idx] !== null);
+        if (validCart.length !== cart.length) {
+          setCart(validCart);
+          localStorage.setItem('cart', JSON.stringify(validCart));
+          window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
+        }
+      } catch (error) {
+        console.error('Error fetching full cart:', error);
+      }
+    };
+    fetchFullCart();
+  }, [cart]);
+
+  // Listen for cart updates in real-time (same tab)
+  useEffect(() => {
     const handleCartUpdated = () => {
       const updatedCart = JSON.parse(localStorage.getItem('cart') || '[]');
       setCart(updatedCart);
     };
-
     window.addEventListener('cartUpdated', handleCartUpdated);
-
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdated);
+    };
+  }, []);
+
+  // Cross-tab listener for localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'cart') {
+        const updatedCart = JSON.parse(e.newValue || '[]');
+        setCart(updatedCart);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
@@ -58,7 +140,7 @@ export default function ClientAddtocart() {
   const total = subtotal + tax;
 
   const handleProceedToPayment = () => {
-    localStorage.setItem('checkoutOrder', JSON.stringify({ items: cart, subtotal, tax, total }));
+    localStorage.setItem('checkoutOrder', JSON.stringify({ items: fullCart, subtotal, tax, total }));
     navigate('/dashbord-client/paymenttoadmin');
   };
 
@@ -96,7 +178,7 @@ export default function ClientAddtocart() {
           Your Spice Cart
         </motion.h1>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {cart.map((item, index) => (
+          {fullCart.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
