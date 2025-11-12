@@ -1,4 +1,4 @@
-// Updated ClientAddtocart.jsx - Redesigned UI to match provided cart images: clean white/gray layout, table-style product list, shipping options, removed gradient backgrounds
+// Updated ClientAddtocart.jsx - No changes needed, already connects via localStorage and navigation
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

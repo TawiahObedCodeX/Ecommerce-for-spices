@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - Updated cart notification count to total quantity (sum of quantities) instead of cart.length
+// Updated ClientFloatingNavbar.jsx - No changes needed, already routes Payment tab to payment page
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
