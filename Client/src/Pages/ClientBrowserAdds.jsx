@@ -1,4 +1,4 @@
-// Updated ClientBrowserAdds.jsx - Improved flying animation smoothness: Better easing, accurate cart icon positioning via ref, bezier curve simulation for path, scale-out at icon with burst effect, smooth return fade
+// Updated ClientBrowserAdds.jsx - Improved flying animation smoothness with bezier easing, staged scale/rotate, and better path calculation for cart icon entry
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Check, Tag, Heart } from 'lucide-react'; // Use lucide where possible
@@ -55,7 +55,6 @@ export default function ClientBrowserAdds() {
   const [flyingCard, setFlyingCard] = useState(null);
   const [soldOutProducts, setSoldOutProducts] = useState(new Set()); // Track sold out for animation
   const productRefs = useRef([]);
-  const cartIconRef = useRef(null); // Ref for actual cart icon position
   // Initial load from IndexedDB
   useEffect(() => {
     const loadProducts = async () => {
@@ -126,26 +125,21 @@ export default function ClientBrowserAdds() {
       cart.push(cartItem);
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-    // Get actual cart icon position
-    const cartRect = cartIconRef.current?.getBoundingClientRect() || {
-      left: window.innerWidth / 2 - 25,
-      top: window.innerHeight - 80,
-      width: 50,
-      height: 50
-    };
+    // Capture card rect for flying animation
     const cardRect = productRefs.current[index]?.getBoundingClientRect();
+    // More accurate cart icon position (bottom navbar, 2nd tab, approx 1/7 width)
+    const navbarHeight = 80;
+    const cartIconWidth = 50;
+    const cartIconX = (window.innerWidth / 7) * 2 - cartIconWidth / 2; // 2nd position
+    const cartIconRect = {
+      left: cartIconX,
+      top: window.innerHeight - navbarHeight - cartIconWidth / 2,
+      width: cartIconWidth,
+      height: cartIconWidth
+    };
     if (cardRect) {
-      setFlyingCard({ 
-        product, 
-        index, 
-        startRect: cardRect, 
-        endRect: cartRect,
-        phase: 'flyTo' // Track phase for return
-      });
-      setTimeout(() => {
-        setFlyingCard(prev => ({ ...prev, phase: 'burst' }));
-        setTimeout(() => setFlyingCard(null), 800);
-      }, 1200);
+      setFlyingCard({ product, index, startRect: cardRect, endRect: cartIconRect });
+      setTimeout(() => setFlyingCard(null), 2000); // Extended for full animation cycle
     }
     // Dispatch event for navbar update
     window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
@@ -305,34 +299,33 @@ export default function ClientBrowserAdds() {
           </div>
         </motion.section>
 
-        {/* Flying Card Animation - Smoother with bezier easing, path simulation, burst at icon, fade return */}
+        {/* Flying Card Animation to Cart Icon - Smoother with bezier ease, staged transforms */}
         <AnimatePresence>
           {flyingCard && (
             <>
               <motion.div
-                className="fixed z-[100] pointer-events-none"
+                className="fixed z-50 pointer-events-none"
                 initial={false}
                 animate={{
-                  x: flyingCard.endRect.left - flyingCard.startRect.left + (flyingCard.endRect.width / 2 - flyingCard.startRect.width / 2),
-                  y: flyingCard.endRect.top - flyingCard.startRect.top + (flyingCard.endRect.height / 2 - flyingCard.startRect.height / 2),
-                  scale: flyingCard.phase === 'flyTo' ? [1, 0.6, 0.3] : [0.3, 0],
-                  opacity: flyingCard.phase === 'flyTo' ? [1, 1, 1] : [1, 0],
-                  rotate: [0, 10, 360],
-                  borderRadius: flyingCard.phase === 'flyTo' ? "16px" : "50%",
-                }}
-                style={{
-                  width: flyingCard.startRect.width,
-                  height: flyingCard.startRect.height,
+                  x: flyingCard.endRect.left - flyingCard.startRect.left,
+                  y: flyingCard.endRect.top - flyingCard.startRect.top,
+                  scale: [1, 0.8, 0.3, 0],
+                  opacity: [1, 1, 1, 0],
+                  rotate: [0, 90, 180, 360],
                 }}
                 transition={{ 
-                  x: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }, // Bezier for smooth curve feel
-                  y: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] },
-                  scale: { duration: 1.2, times: [0, 0.8, 1] },
-                  rotate: { duration: 1.2 },
-                  opacity: { duration: 0.3, delay: 1.0 }
+                  duration: 1.2, 
+                  ease: [0.25, 0.46, 0.45, 0.94], // Bezier for smooth curve
+                  times: [0, 0.3, 0.7, 1] // Staged: hold scale, then shrink/rotate
+                }}
+                onAnimationComplete={() => {
+                  // Trigger return glow/confirmation
+                  setTimeout(() => {
+                    setFlyingCard(prev => ({ ...prev, confirming: true }));
+                  }, 150);
                 }}
               >
-                <div className="w-full h-full bg-card rounded-3xl overflow-hidden shadow-2xl">
+                <div className="w-full h-full bg-card rounded-3xl overflow-hidden shadow-lg">
                   <img
                     src={flyingCard.product.image}
                     alt={flyingCard.product.name}
@@ -340,23 +333,31 @@ export default function ClientBrowserAdds() {
                   />
                 </div>
               </motion.div>
-              {/* Burst effect at cart icon */}
-              {flyingCard.phase === 'burst' && (
+              {flyingCard.confirming && (
                 <motion.div
-                  className="fixed z-[101] pointer-events-none"
-                  style={{
-                    left: flyingCard.endRect.left,
-                    top: flyingCard.endRect.top,
+                  className="fixed z-50 pointer-events-none"
+                  initial={{
+                    x: flyingCard.endRect.left - flyingCard.startRect.left,
+                    y: flyingCard.endRect.top - flyingCard.startRect.top,
+                    scale: 0,
+                    opacity: 0,
                   }}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ 
-                    scale: [0, 1.5, 0], 
+                  animate={{
+                    x: 0,
+                    y: 0,
+                    scale: [0, 0.6, 0],
                     opacity: [0, 1, 0],
-                    backgroundColor: "#10b981"
+                    rotate: [0, -180],
                   }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  transition={{ 
+                    duration: 0.8, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.3
+                  }}
                 >
-                  <Check className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-2xl">
+                    <Check className="text-white w-8 h-8 animate-pulse" />
+                  </div>
                 </motion.div>
               )}
             </>
@@ -376,8 +377,6 @@ export default function ClientBrowserAdds() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Invisible ref for cart icon position */}
-        <div ref={cartIconRef} className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-10 h-10" style={{ opacity: 0 }} />
       </div>
     </div>
   );
