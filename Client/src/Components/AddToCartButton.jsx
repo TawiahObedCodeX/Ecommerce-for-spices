@@ -10,7 +10,7 @@ const Confetti = ({ isVisible }) => (
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full"
+            className="absolute w-2 h-2 bg-linear-to-r from-pink-400 to-purple-500 rounded-full"
             initial={{ x: "50%", y: "50%", scale: 0 }}
             animate={{
               x: Math.random() * 200 - 100,
@@ -110,7 +110,7 @@ const AddToCartButton = ({
     <div className={`relative inline-flex ${className}`}>
       {/* Pulsing Glow Ring */}
       <motion.div
-        className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-400/20 to-blue-400/20 blur-xl opacity-0"
+        className="absolute inset-0 rounded-xl bg-linear-to-r from-indigo-400/20 to-blue-400/20 blur-xl opacity-0"
         animate={isAnimating ? "idle" : "hover"}
         variants={{
           hover: { opacity: 1, scale: 1.1 },
@@ -132,7 +132,7 @@ const AddToCartButton = ({
           shadow-xl focus:outline-none focus:ring-4 transition-all duration-300
           overflow-hidden border-0
           ${isAuthenticated
-            ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl focus:ring-purple-500/50 disabled:opacity-60 disabled:cursor-not-allowed before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:to-white/20 before:animate-shimmer before:opacity-0 hover:before:opacity-100'
+            ? 'bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl focus:ring-purple-500/50 disabled:opacity-60 disabled:cursor-not-allowed before:absolute before:inset-0 before:bg-linear-to-r before:from-white/0 before:to-white/20 before:animate-shimmer before:opacity-0 hover:before:opacity-100'
             : 'bg-gray-400 text-gray-200 cursor-not-allowed'
           }
         `}
@@ -141,7 +141,7 @@ const AddToCartButton = ({
       >
         {/* Shimmer Effect */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+          className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
           animate={{ x: ["-100%", "200%"] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
