@@ -454,7 +454,7 @@ export default function AdminAnalytics() {
                     className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200"
                   >
                     {/* Product Header */}
-                    <div className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+                    <div className="p-6 bg-linear-to-r from-gray-50 to-gray-100 border-b">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>

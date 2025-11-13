@@ -132,7 +132,7 @@ export default function AdminMessages() {
                   <img
                     src={message.avatar}
                     alt={message.clientName}
-                    className="w-10 h-10 rounded-full border-2 border-gray-200 flex-shrink-0 transition-transform duration-200 hover:scale-105"
+                    className="w-10 h-10 rounded-full border-2 border-gray-200 shrink-0 transition-transform duration-200 hover:scale-105"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">

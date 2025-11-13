@@ -146,7 +146,7 @@ export default function AdminViewPostAdd() {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 sm:mb-8 bg-gradient-to-r from-secondary/80 to-amber/80 bg-clip-text text-transparent"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 sm:mb-8 bg-linear-to-r from-secondary/80 to-amber/80 bg-clip-text text-transparent"
         >
           Spice Inventory
         </motion.h1>
@@ -179,13 +179,13 @@ export default function AdminViewPostAdd() {
                 )}
 
                 {/* Image with Gradient Overlay */}
-                <div className="relative overflow-hidden bg-gradient-to-t from-background-dark/50 to-transparent">
+                <div className="relative overflow-hidden bg-linear-to-t from-background-dark/50 to-transparent">
                   <img 
                     src={product.image} 
                     alt={product.name} 
                     className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   {/* Admin Edit and Delete Buttons on Hover - Stack vertically on small screens */}
                   <motion.div 
                     className="absolute top-2 sm:top-4 right-2 sm:right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col sm:flex-row gap-1 sm:gap-2 z-20"
@@ -198,7 +198,7 @@ export default function AdminViewPostAdd() {
                         handleEdit(product);
                       }}
                       whileHover={{ scale: 1.05 }}
-                      className="bg-info/90 text-text-light p-1.5 sm:p-2 rounded-full hover:bg-info shadow-md flex-shrink-0"
+                      className="bg-info/90 text-text-light p-1.5 sm:p-2 rounded-full hover:bg-info shadow-md shrink-0"
                     >
                       <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                     </motion.button>
@@ -208,7 +208,7 @@ export default function AdminViewPostAdd() {
                         handleDelete(product.id);
                       }}
                       whileHover={{ scale: 1.05 }}
-                      className="bg-error/90 text-text-light p-1.5 sm:p-2 rounded-full hover:bg-error shadow-md flex-shrink-0"
+                      className="bg-error/90 text-text-light p-1.5 sm:p-2 rounded-full hover:bg-error shadow-md shrink-0"
                     >
                       <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </motion.button>
@@ -250,7 +250,7 @@ export default function AdminViewPostAdd() {
 
                 {/* Hover Glow Effect */}
                 <motion.div 
-                  className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                  className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-linear-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />

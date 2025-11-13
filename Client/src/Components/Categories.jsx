@@ -202,15 +202,15 @@ const ProductPage = () => {
               </p>
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 shrink-0"></div>
                   <p className="text-sm text-gray-600">Partnered with UK family farms for ethical sourcing</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 shrink-0"></div>
                   <p className="text-sm text-gray-600">Zero-waste production: Every ingredient is utilized</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-green-700 rounded-full mt-2 shrink-0"></div>
                   <p className="text-sm text-gray-600">Carbon-neutral packaging and delivery</p>
                 </div>
               </div>
