@@ -1,4 +1,4 @@
-// Updated AdminViewPostAdd.jsx - Enhanced responsiveness for all screen sizes, with adjustments for small screens
+// Updated AdminViewPostAdd.jsx - Now listens for 'productsChanged' and 'productsUpdated' events for unified real-time updates (add/delete)
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Edit, Trash2, X } from 'lucide-react';
@@ -84,15 +84,17 @@ export default function AdminViewPostAdd() {
   useEffect(() => {
     getProducts().then(setProducts).catch(console.error);
   }, []);
-  // Real-time update listener for productAdded event
+  // Real-time update listener for productsChanged and productsUpdated events
   useEffect(() => {
-    const handleProductAdded = async () => {
+    const handleProductsChanged = async () => {
       const updatedProducts = await getProducts();
       setProducts(updatedProducts);
     };
-    window.addEventListener('productAdded', handleProductAdded);
+    window.addEventListener('productsChanged', handleProductsChanged);
+    window.addEventListener('productsUpdated', handleProductsChanged);
     return () => {
-      window.removeEventListener('productAdded', handleProductAdded);
+      window.removeEventListener('productsChanged', handleProductsChanged);
+      window.removeEventListener('productsUpdated', handleProductsChanged);
     };
   }, []);
   const handleEdit = (product) => {

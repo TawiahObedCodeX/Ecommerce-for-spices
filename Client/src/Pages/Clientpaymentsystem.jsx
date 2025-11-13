@@ -1,8 +1,9 @@
-// Updated PaymentSystem.jsx - Connected to cart: loads full order from 'checkoutOrder', displays multiple items in summary, clears cart on success
+// Updated PaymentSystem.jsx - Enhanced UI: Spice-themed gradients, animated progress bar, product cards with images, trust badges, countdown timer for urgency, confetti on success, more vibrant colors and micro-animations for a premium, legit feel clients will love
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCreditCard, FiSmartphone, FiGlobe, FiTruck, FiShield, FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiStar, FiX, FiCheckCircle, FiPlus } from 'react-icons/fi';
+import { FiCreditCard, FiSmartphone, FiGlobe, FiTruck, FiShield, FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiStar, FiX, FiCheckCircle, FiPlus, FiPercent, FiClock, FiAward, FiLock, FiShoppingCart } from 'react-icons/fi';
+import Confetti from 'react-confetti'; // Assume installed or use CSS alternative
 
 const paymentMethods = [
   { id: 1, name: 'Credit/Debit Card', icon: FiCreditCard, description: 'Visa, Mastercard, Amex', active: true },
@@ -25,7 +26,7 @@ const itemVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.5 },
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 
@@ -44,12 +45,24 @@ export default function PaymentSystem() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(900); // 15 min countdown
   const user = { name: 'Annette Murphy', avatar: 'https://i.pravatar.cc/40?img=3' };
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedOrder = JSON.parse(localStorage.getItem('checkoutOrder') || '{}');
     setOrder(storedOrder);
+    // Countdown timer
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleInputChange = (e) => {
@@ -80,18 +93,19 @@ export default function PaymentSystem() {
     setTimeout(() => {
       setShowSuccess(false);
       navigate('/dashbord-client');
-    }, 3000);
+    }, 4000);
   };
 
   if (!order || !order.items || order.items.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 bg-gray-50">
-        <div className="text-center max-w-md mx-auto p-8 bg-white rounded-lg shadow-sm border">
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">No Order Found</h1>
+      <div className="min-h-screen flex items-center justify-center py-12">
+        <div className="text-center max-w-md mx-auto p-8 ">
+          <FiShoppingCart className="mx-auto text-6xl text-orange-500 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">No Order Found</h1>
           <p className="text-gray-600 mb-6">Your cart is empty or order not ready. Add items to cart first.</p>
           <button 
             onClick={() => navigate('/dashbord-client/addtocart')} 
-            className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold hover:shadow-lg transition-all"
           >
             Go to Cart
           </button>
@@ -104,124 +118,160 @@ export default function PaymentSystem() {
   const subtotal = order.subtotal;
   const total = order.total;
   const shippingType = order.shipping;
+  const promoDiscount = order.promoDiscount || 0;
 
   const currentYear = new Date().getFullYear();
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-8 px-4 flex items-center justify-center">
-      <div className="max-w-4xl w-full mx-auto">
+    <div className="min-h-screen  py-8 px-4">
+      <Confetti
+        width={window.innerWidth}
+        height={window.innerHeight}
+        recycle={false}
+        numberOfPieces={200}
+        gravity={0.2}
+        run={showSuccess}
+      />
+      <div className="max-w-6xl mx-auto">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200"
+          className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-orange-200/50"
         >
-          {/* Header */}
-          <div className="px-6 py-4 bg-white border-b flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
+          {/* Header - Enhanced with spice theme */}
+          <div className="px-6 py-6 bg-linear-to-r from-orange-500 to-red-500 text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <FiShoppingCart className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-sm font-medium">SpiceVault Secure</span>
+                  <h1 className="text-2xl font-bold">Checkout</h1>
+                </div>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Tolly</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-100 rounded-full overflow-hidden">
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              <div className="flex items-center space-x-2 text-sm">
+                <FiUser className="w-4 h-4" />
+                <span>{user.name}</span>
               </div>
-              <span className="text-sm font-medium text-gray-700">{user.name}</span>
-              <div className="w-px h-6 bg-gray-200"></div>
-              <button className="text-sm text-gray-500 hover:text-gray-700">Sign out</button>
             </div>
           </div>
 
-          {/* Progress Steps */}
-          <div className="px-6 py-4 bg-gray-50">
-            <div className="flex justify-center space-x-8">
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center font-medium">1</div>
-                <span>Shipping</span>
-              </div>
-              <div className="flex-1 h-px bg-orange-200"></div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center font-medium">2</div>
+          {/* Countdown Timer */}
+          <div className="px-6 py-4 bg-yellow-50 border-b">
+            <p className="text-sm text-yellow-800 flex items-center justify-center">
+              <FiClock className="mr-2" />
+              Order expires in <span className="font-bold ml-1">{minutes}:{seconds.toString().padStart(2, '0')}</span>
+            </p>
+          </div>
+
+          {/* Progress Steps - Animated */}
+          <div className="px-6 py-4 bg-linear-to-r from-orange-50 to-red-50">
+            <div className="flex justify-center items-center space-x-6">
+              <motion.div className="flex items-center space-x-2 text-xs text-gray-600" initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+                <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold shadow-lg">1</div>
+                <span>Bag</span>
+              </motion.div>
+              <motion.div className="w-20 h-1 bg-orange-500 rounded-full" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.2 }} />
+              <motion.div className="flex items-center space-x-2 text-xs text-gray-600" initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+                <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold shadow-lg">2</div>
                 <span>Payment</span>
-              </div>
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="w-6 h-6 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-medium">3</div>
-                <span>Review</span>
-              </div>
+              </motion.div>
+              <motion.div className="w-20 h-1 bg-gray-200 rounded-full" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.4 }} />
+              <motion.div className="flex items-center space-x-2 text-xs text-gray-500" initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
+                <div className="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-medium">3</div>
+                <span>Confirm</span>
+              </motion.div>
             </div>
           </div>
 
           <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Payment Details */}
+            {/* Payment Details - Enhanced with icons and animations */}
             <motion.div variants={itemVariants} className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment details</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <FiCreditCard className="mr-2 text-orange-500" />
+                  Choose Payment
+                </h2>
                 <div className="space-y-4">
-                  {/* Payment Methods Tabs */}
-                  <div className="flex space-x-1 border-b border-gray-200">
+                  {/* Payment Methods - Card style */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                     {paymentMethods.map((method) => {
                       const Icon = method.icon;
                       const isActive = selectedMethod === method.id;
                       return (
-                        <button
+                        <motion.button
                           key={method.id}
                           onClick={() => handleMethodChange(method.id)}
-                          className={`px-4 py-2 text-xs font-medium flex items-center space-x-1 ${
+                          whileHover={{ scale: 1.02, y: -2 }}
+                          className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
                             isActive
-                              ? 'text-orange-600 border-b-2 border-orange-500'
-                              : 'text-gray-500 hover:text-gray-700'
+                              ? 'border-orange-500 bg-orange-50 shadow-lg'
+                              : 'border-gray-200 hover:border-orange-300 hover:shadow-md'
                           }`}
                         >
-                          <Icon size={14} />
-                          <span>{method.name.split(' ')[0]}</span>
-                        </button>
+                          <div className="flex items-center space-x-3">
+                            <motion.div 
+                              animate={{ rotate: isActive ? 360 : 0 }} 
+                              transition={{ duration: 0.5 }}
+                              className={`p-2 rounded-xl ${isActive ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'}`}
+                            >
+                              <Icon size={20} />
+                            </motion.div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{method.name}</p>
+                              <p className="text-xs text-gray-500">{method.description}</p>
+                            </div>
+                          </div>
+                        </motion.button>
                       );
                     })}
                   </div>
 
-                  {/* Card Form - Default/Active */}
+                  {/* Form fields with better styling */}
                   {selectedMethod === 1 && (
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-1">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Card Number</label>
-                          <div className="relative">
-                            <FiCreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                              type="text"
-                              name="cardNumber"
-                              placeholder="1234 5678 9012 3456"
-                              value={formData.cardNumber || ''}
-                              onChange={handleInputChange}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                              maxLength={19}
-                            />
-                          </div>
+                          <label className=" text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <FiCreditCard className="mr-2 text-orange-500" />
+                            Card Number
+                          </label>
+                          <input
+                            type="text"
+                            name="cardNumber"
+                            placeholder="1234 5678 9012 3456"
+                            value={formData.cardNumber || ''}
+                            onChange={handleInputChange}
+                            className="w-full px-12 py-4 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all text-sm shadow-sm"
+                            maxLength={19}
+                          />
                         </div>
                         <div className="md:col-span-1">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Name on Card</label>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Name on Card</label>
                           <input
                             type="text"
                             name="name"
                             placeholder="Annette Murphy"
                             value={formData.name || ''}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                            className="w-full px-4 py-4 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all text-sm shadow-sm"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Expiry Date</label>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Expiry Date</label>
                           <div className="flex space-x-2">
                             <select
                               name="expiryMonth"
                               value={formData.expiryMonth || ''}
                               onChange={handleInputChange}
-                              className="w-1/2 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                              className="w-1/2 px-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 text-sm"
                             >
                               <option value="">MM</option>
                               {Array.from({ length: 12 }, (_, i) => (
@@ -232,7 +282,7 @@ export default function PaymentSystem() {
                               name="expiryYear"
                               value={formData.expiryYear || ''}
                               onChange={handleInputChange}
-                              className="w-1/2 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                              className="w-1/2 px-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 text-sm"
                             >
                               <option value="">YY</option>
                               {Array.from({ length: 10 }, (_, i) => {
@@ -243,142 +293,187 @@ export default function PaymentSystem() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">CVV</label>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">CVV</label>
                           <input
                             type="text"
                             name="cvv"
                             placeholder="407"
                             value={formData.cvv || ''}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                            className="w-full px-4 py-4 border-2 border-gray-300 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 text-sm shadow-sm"
                             maxLength={4}
                           />
                         </div>
                       </div>
-                      <label className="flex items-center space-x-2 text-xs text-gray-600">
+                      <label className="flex items-center space-x-3 text-sm text-gray-600 p-3 bg-gray-50 rounded-2xl">
                         <input
                           type="checkbox"
                           checked={saveDetails}
                           onChange={(e) => setSaveDetails(e.target.checked)}
-                          className="rounded text-orange-500 focus:ring-orange-500"
+                          className="rounded border-orange-500 focus:ring-orange-500 text-orange-500"
                         />
-                        <span>Save details for future purchases</span>
+                        <span>Save for faster checkouts next time ✨</span>
                       </label>
                     </div>
                   )}
 
-                  {/* Other Methods Forms - Simplified for brevity */}
+                  {/* Simplified other methods */}
                   {selectedMethod === 2 && (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-900">Mobile Money Details</h4>
-                      <select name="provider" value={formData.provider || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm">
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-2xl">
+                      <h4 className="text-sm font-bold text-gray-900 flex items-center">
+                        <FiSmartphone className="mr-2" />
+                        Mobile Money
+                      </h4>
+                      <select name="provider" value={formData.provider || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm">
                         <option value="">Select Provider</option>
                         <option value="MTN MoMo">MTN MoMo</option>
                         <option value="Vodafone Cash">Vodafone Cash</option>
                         <option value="AirtelTigo Money">AirtelTigo Money</option>
                       </select>
-                      <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
-                      <input type="password" name="pin" placeholder="Transaction PIN" value={formData.pin || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
+                      <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
+                      <input type="password" name="pin" placeholder="Transaction PIN" value={formData.pin || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
                     </div>
                   )}
                   {selectedMethod === 3 && (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-900">PayPal Details</h4>
-                      <input type="email" name="email" placeholder="PayPal Email" value={formData.email || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
-                      <input type="password" name="password" placeholder="Password" value={formData.password || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-2xl">
+                      <h4 className="text-sm font-bold text-gray-900">PayPal</h4>
+                      <input type="email" name="email" placeholder="PayPal Email" value={formData.email || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
+                      <input type="password" name="password" placeholder="Password" value={formData.password || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
                     </div>
                   )}
                   {selectedMethod === 4 && (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-900">Bank Transfer Details</h4>
-                      <input type="text" name="bankName" placeholder="Bank Name" value={formData.bankName || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
-                      <input type="text" name="accountNumber" placeholder="Account Number" value={formData.accountNumber || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
-                      <input type="text" name="reference" placeholder="Reference Code" value={formData.reference || ''} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" />
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-2xl">
+                      <h4 className="text-sm font-bold text-gray-900">Bank Transfer</h4>
+                      <input type="text" name="bankName" placeholder="Bank Name" value={formData.bankName || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
+                      <input type="text" name="accountNumber" placeholder="Account Number" value={formData.accountNumber || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
+                      <input type="text" name="reference" placeholder="Reference Code" value={formData.reference || ''} onChange={handleInputChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm" />
                     </div>
                   )}
                   {selectedMethod === 5 && (
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <p className="text-sm text-yellow-800">Payment will be collected upon delivery. No upfront charge.</p>
-                    </div>
+                    <motion.div 
+                      initial={{ scale: 0.95 }} 
+                      animate={{ scale: 1 }} 
+                      className="p-6 bg-linear-to-r from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200 text-center"
+                    >
+                      <FiTruck className="mx-auto w-12 h-12 text-yellow-600 mb-3" />
+                      <p className="text-lg font-bold text-yellow-800">Cash on Delivery</p>
+                      <p className="text-sm text-yellow-700 mt-2">Pay safely when your spices arrive fresh at your door. No prepayment needed!</p>
+                    </motion.div>
                   )}
                 </div>
               </div>
 
-              {/* Security Note */}
-              <div className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
-                <FiShield className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-blue-800 leading-relaxed">Card is secure. Everything is private.</p>
+              {/* Trust Badges */}
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                <motion.div className="text-center p-3 bg-green-50 rounded-xl" whileHover={{ scale: 1.05 }}>
+                  <FiLock className="mx-auto w-6 h-6 text-green-600 mb-1" />
+                  <p className="text-xs text-green-800 font-medium">SSL Secured</p>
+                </motion.div>
+                <motion.div className="text-center p-3 bg-blue-50 rounded-xl" whileHover={{ scale: 1.05 }}>
+                  <FiAward className="mx-auto w-6 h-6 text-blue-600 mb-1" />
+                  <p className="text-xs text-blue-800 font-medium">Trusted</p>
+                </motion.div>
+                <motion.div className="text-center p-3 bg-purple-50 rounded-xl" whileHover={{ scale: 1.05 }}>
+                  <FiShield className="mx-auto w-6 h-6 text-purple-600 mb-1" />
+                  <p className="text-xs text-purple-800 font-medium">Fraud Guard</p>
+                </motion.div>
               </div>
             </motion.div>
 
-            {/* Order Summary - Updated for multiple items */}
-            <motion.div variants={itemVariants} className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900">Order summary</h2>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-10 h-10 object-cover rounded-lg hrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{item.category}</p>
-                      </div>
+            {/* Order Summary - Card-based products, vibrant */}
+            <motion.div variants={itemVariants} className="space-y-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <FiShoppingCart className="mr-2 text-orange-500" />
+                Your Spice Selection
+              </h2>
+              <div className="space-y-4 max-h-80 overflow-y-auto">
+                {order.items.map((item, idx) => (
+                  <motion.div 
+                    key={item.id} 
+                    initial={{ opacity: 0, x: 20 }} 
+                    animate={{ opacity: 1, x: 0 }} 
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center p-4 bg-linear-to-r from-orange-50 to-red-50 rounded-2xl border border-orange-200"
+                  >
+                    <img 
+                      src={item.image || 'https://via.placeholder.com/60?text=Spice'} 
+                      alt={item.name} 
+                      className="w-16 h-16 object-cover rounded-xl mr-4 shadow-md"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm truncate">{item.name}</p>
+                      <p className="text-xs text-gray-600 capitalize">{item.category} • x{item.quantity}</p>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 ml-2 shrink-0">¢{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
-                  </div>
+                    <span className="font-bold text-orange-600 text-lg ml-4">¢{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                  </motion.div>
                 ))}
               </div>
-              <div className="space-y-2 pt-3 border-t border-gray-200">
-                <div className="flex justify-between text-sm text-gray-600">
+              <div className="space-y-3 pt-4 border-t border-orange-200 bg-orange-50 p-4 rounded-2xl">
+                <div className="flex justify-between text-sm font-semibold text-gray-700">
                   <span>Subtotal</span>
                   <span>¢{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Estimated shipping ({shippingType})</span>
+                  <span>Shipping ({shippingType})</span>
                   <span>¢{deliveryCost.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-base font-semibold text-gray-900">
-                  <span>Total amount</span>
-                  <span>¢{total.toFixed(2)}</span>
+                {promoDiscount > 0 && (
+                  <motion.div 
+                    className="flex justify-between text-sm text-green-600 font-bold bg-green-50 p-2 rounded-xl"
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <span>🌶️ Spice Discount</span>
+                    <span>-¢{promoDiscount.toFixed(2)}</span>
+                  </motion.div>
+                )}
+                <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-orange-200">
+                  <span>Total</span>
+                  <span className="text-2xl text-orange-600">¢{total.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-3 pt-4">
-                <button className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-300 transition-colors flex items-center justify-center space-x-2">
-                  <FiPlus className="w-4 h-4" />
-                  <span>Add new</span>
-                </button>
-                <button
-                  onClick={handlePayment}
-                  disabled={isProcessing}
-                  className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold text-sm hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Confirming...</span>
-                    </>
-                  ) : (
-                    <span>Confirm order</span>
-                  )}
-                </button>
-                <button
-                  onClick={() => navigate('/dashbord-client/addtocart')}
-                  className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+              {/* Action Buttons - Prominent checkout */}
+              <motion.button
+                onClick={handlePayment}
+                disabled={isProcessing || timeLeft <= 0}
+                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px rgba(251, 146, 60, 0.3)" }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3 transition-all shadow-xl ${
+                  isProcessing || timeLeft <= 0
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-linear-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600'
+                }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Spicing Your Order...</span>
+                  </>
+                ) : timeLeft <= 0 ? (
+                  <>
+                    <FiClock className="w-5 h-5" />
+                    <span>Session Expired</span>
+                  </>
+                ) : (
+                  <>
+                    <FiCheckCircle className="w-5 h-5" />
+                    <span>Pay Now ¢{total.toFixed(2)}</span>
+                  </>
+                )}
+              </motion.button>
+              <button
+                onClick={() => navigate('/dashbord-client/addtocart')}
+                className="w-full py-3 border-2 border-gray-300 text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all"
+              >
+                Edit Cart
+              </button>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Error Modal */}
+        {/* Modals - Enhanced success with confetti trigger */}
+        {/* Error Modal - Same as before */}
         <AnimatePresence>
           {showError && (
             <motion.div
@@ -390,23 +485,27 @@ export default function PaymentSystem() {
               onClick={() => setShowError(false)}
             >
               <motion.div 
-                className="bg-white rounded-2xl p-6 max-w-md w-full relative"
+                className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button onClick={() => setShowError(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                  <FiX size={20} />
+                  <FiX size={24} />
                 </button>
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FiX className="w-8 h-8 text-red-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Oops!</h3>
+                  <motion.div 
+                    initial={{ scale: 0 }} 
+                    animate={{ scale: 1 }} 
+                    className="w-20 h-20 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  >
+                    <FiX className="w-10 h-10 text-red-500" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Oops! A Pinch Too Much</h3>
                   <p className="text-gray-600 mb-6">{errorMessage}</p>
                   <button
                     onClick={() => setShowError(false)}
-                    className="w-full py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+                    className="w-full py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-all"
                   >
-                    Got it
+                    Fix It
                   </button>
                 </div>
               </motion.div>
@@ -414,7 +513,7 @@ export default function PaymentSystem() {
           )}
         </AnimatePresence>
 
-        {/* Success Modal */}
+        {/* Success Modal - Enhanced with spice flair */}
         <AnimatePresence>
           {showSuccess && (
             <motion.div
@@ -422,34 +521,53 @@ export default function PaymentSystem() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
             >
               <motion.div 
-                className="bg-white rounded-2xl p-6 max-w-md w-full relative overflow-hidden"
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.3 }}
+                className="bg-linear-to-br from-green-50 to-emerald-50 rounded-3xl p-8 max-w-md w-full relative overflow-hidden shadow-2xl border border-green-200"
+                initial={{ scale: 0.9, rotate: -5 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 0.6, ease: "backOut" }}
+                onClick={(e) => e.stopPropagation()}
               >
-                <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-green-400 to-green-600"></div>
-                <div className="text-center pt-2">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                    <FiCheckCircle className="w-8 h-8 text-green-500" />
+                <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-green-400 to-emerald-500"></div>
+                <div className="relative z-10 text-center pt-4">
+                  <motion.div 
+                    initial={{ scale: 0 }} 
+                    animate={{ scale: 1 }} 
+                    transition={{ type: "spring", stiffness: 500 }}
+                    className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                  >
+                    <FiCheckCircle className="w-10 h-10 text-green-500 animate-bounce" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Spiced Up! 🌶️</h3>
+                  <p className="text-gray-700 mb-6">Your flavors are on the way. Get ready to ignite your kitchen!</p>
+                  <div className="space-y-3 text-sm text-gray-600 bg-white/50 p-4 rounded-2xl">
+                    <p><strong>Order ID:</strong> #{Math.floor(Math.random() * 1000000)}</p>
+                    <p><strong>ETA:</strong> 2-3 days • Track live</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Confirmed!</h3>
-                  <p className="text-gray-600 mb-6">Your order is on its way. Thank you for choosing us! 🚀</p>
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <p>Order ID: #{Math.floor(Math.random() * 1000000)}</p>
-                    <p>Estimated Delivery: 2-3 days</p>
-                  </div>
+                  <motion.button
+                    onClick={() => setShowSuccess(false)}
+                    whileHover={{ scale: 1.05 }}
+                    className="w-full py-3 bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-bold mt-4 shadow-lg"
+                  >
+                    Track My Order
+                  </motion.button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <p className="text-center text-xs text-gray-500 mt-6">
-          Trusted by thousands. Secure checkout guaranteed.
-        </p>
+        {/* Footer Trust */}
+        <motion.footer 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          transition={{ delay: 1 }}
+          className="text-center py-8 text-xs text-gray-500"
+        >
+          <p>🔒 Secured by SpiceVault • Loved by 50k+ flavor fans • 100% Satisfaction or Your Money Back</p>
+        </motion.footer>
       </div>
     </div>
   );

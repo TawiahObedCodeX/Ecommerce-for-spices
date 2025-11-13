@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - No changes needed, already routes Payment tab to payment page
+// Updated ClientFloatingNavbar.jsx - Enhanced cart icon to briefly scale and glow on 'cartUpdated' for animation sync
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,7 @@ const ClientFloatingNavbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [storeNotificationCount, setStoreNotificationCount] = useState(0);
   const [cartNotificationCount, setCartNotificationCount] = useState(0);
+  const [cartGlow, setCartGlow] = useState(false); // For animation sync
   const updateCounts = () => {
     const storeCount = parseInt(localStorage.getItem('clientNewProducts') || '0');
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -29,8 +30,12 @@ const ClientFloatingNavbar = () => {
     updateCounts();
     // Listen for product added event
     window.addEventListener('productAdded', updateCounts);
-    // Listen for cart updated event
-    window.addEventListener('cartUpdated', updateCounts);
+    // Listen for cart updated event - trigger glow
+    window.addEventListener('cartUpdated', () => {
+      updateCounts();
+      setCartGlow(true);
+      setTimeout(() => setCartGlow(false), 500);
+    });
     // Listen for localStorage changes in other tabs
     window.addEventListener('storage', (e) => {
       if (e.key === 'cart' || e.key === 'clientNewProducts') {
@@ -42,7 +47,11 @@ const ClientFloatingNavbar = () => {
     return () => {
       clearTimeout(timer);
       window.removeEventListener('productAdded', updateCounts);
-      window.removeEventListener('cartUpdated', updateCounts);
+      window.removeEventListener('cartUpdated', () => {
+        updateCounts();
+        setCartGlow(true);
+        setTimeout(() => setCartGlow(false), 500);
+      });
       window.removeEventListener('storage', (e) => {
         if (e.key === 'cart' || e.key === 'clientNewProducts') {
           updateCounts();
@@ -90,6 +99,7 @@ const ClientFloatingNavbar = () => {
           const isActive = index === activeTab;
           const notificationCount = getNotificationCount(index);
           const showBadge = tab.hasNotification && notificationCount > 0;
+          const isCart = index === 1;
           return (
             <motion.button
               key={index}
@@ -98,6 +108,8 @@ const ClientFloatingNavbar = () => {
               onMouseLeave={() => setHoveredIndex(null)}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
+              animate={isCart && cartGlow ? { scale: [1, 1.2, 1], boxShadow: "0 0 20px rgba(251, 146, 60, 0.5)" } : {}}
+              transition={isCart && cartGlow ? { duration: 0.5 } : {}}
               className={`relative flex items-center justify-center p-2 md:p-3 rounded-2xl transition-all duration-300 ease-out group ${
                 isActive
                   ? "bg-purple-500 text-white shadow-lg"

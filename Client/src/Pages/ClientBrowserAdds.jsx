@@ -1,4 +1,4 @@
-// Updated ClientBrowserAdds.jsx - Moved Category Tag to top-left of image with white background
+// Updated ClientBrowserAdds.jsx - Improved flying animation smoothness: Better easing, accurate cart icon positioning via ref, bezier curve simulation for path, scale-out at icon with burst effect, smooth return fade
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Check, Tag, Heart } from 'lucide-react'; // Use lucide where possible
@@ -53,7 +53,9 @@ export default function ClientBrowserAdds() {
   const [products, setProducts] = useState([]);
   const [addSuccess, setAddSuccess] = useState(null);
   const [flyingCard, setFlyingCard] = useState(null);
+  const [soldOutProducts, setSoldOutProducts] = useState(new Set()); // Track sold out for animation
   const productRefs = useRef([]);
+  const cartIconRef = useRef(null); // Ref for actual cart icon position
   // Initial load from IndexedDB
   useEffect(() => {
     const loadProducts = async () => {
@@ -66,36 +68,29 @@ export default function ClientBrowserAdds() {
     };
     loadProducts();
   }, []);
-  // Real-time update listener for productAdded event
+  // Real-time update listener for productsChanged and productsUpdated events
   useEffect(() => {
-    const handleProductAdded = async () => {
+    const handleProductsChanged = async () => {
       try {
         const updatedProducts = await getProducts();
+        // Detect sold out products for smooth UI transition
+        const oldIds = new Set(products.map(p => p.id));
+        const newIds = new Set(updatedProducts.map(p => p.id));
+        const soldOut = [...oldIds].filter(id => !newIds.has(id));
+        setSoldOutProducts(new Set(soldOut));
+        setTimeout(() => setSoldOutProducts(new Set()), 2000); // Show "Sold Out" for 2s
         setProducts(updatedProducts);
       } catch (error) {
         console.error('Error updating products:', error);
       }
     };
-    window.addEventListener('productAdded', handleProductAdded);
+    window.addEventListener('productsChanged', handleProductsChanged);
+    window.addEventListener('productsUpdated', handleProductsChanged);
     return () => {
-      window.removeEventListener('productAdded', handleProductAdded);
+      window.removeEventListener('productsChanged', handleProductsChanged);
+      window.removeEventListener('productsUpdated', handleProductsChanged);
     };
-  }, []);
-  // Real-time update listener for productsUpdated event (handles deletes)
-  useEffect(() => {
-    const handleProductsUpdated = async () => {
-      try {
-        const updatedProducts = await getProducts();
-        setProducts(updatedProducts);
-      } catch (error) {
-        console.error('Error updating products:', error);
-      }
-    };
-    window.addEventListener('productsUpdated', handleProductsUpdated);
-    return () => {
-      window.removeEventListener('productsUpdated', handleProductsUpdated);
-    };
-  }, []);
+  }, [products]);
   // Cross-tab update listener for localStorage changes
   useEffect(() => {
     const handleStorageChange = async (e) => {
@@ -131,11 +126,26 @@ export default function ClientBrowserAdds() {
       cart.push(cartItem);
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-    // Capture card rect for flying animation (uses full product.image briefly)
+    // Get actual cart icon position
+    const cartRect = cartIconRef.current?.getBoundingClientRect() || {
+      left: window.innerWidth / 2 - 25,
+      top: window.innerHeight - 80,
+      width: 50,
+      height: 50
+    };
     const cardRect = productRefs.current[index]?.getBoundingClientRect();
     if (cardRect) {
-      setFlyingCard({ product, index, rect: cardRect });
-      setTimeout(() => setFlyingCard(null), 1000);
+      setFlyingCard({ 
+        product, 
+        index, 
+        startRect: cardRect, 
+        endRect: cartRect,
+        phase: 'flyTo' // Track phase for return
+      });
+      setTimeout(() => {
+        setFlyingCard(prev => ({ ...prev, phase: 'burst' }));
+        setTimeout(() => setFlyingCard(null), 800);
+      }, 1200);
     }
     // Dispatch event for navbar update
     window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
@@ -179,7 +189,7 @@ export default function ClientBrowserAdds() {
               <motion.article 
                 key={product.id}
                 ref={(el) => (productRefs.current[index] = el)}
-                className="group bg-card rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-700 border border-border hover:border-secondary/50 relative cursor-pointer"
+                className={`group bg-card rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-700 border border-border hover:border-secondary/50 relative cursor-pointer ${soldOutProducts.has(product.id) ? 'grayscale opacity-50' : ''}`}
                 variants={itemVariants}
                 whileHover={{ y: -15, rotateX: 5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -187,8 +197,18 @@ export default function ClientBrowserAdds() {
                   if (e.target.closest('button')) return;
                 }}
               >
+                {/* Sold Out Badge */}
+                {soldOutProducts.has(product.id) && (
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute top-4 left-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg"
+                  >
+                    Sold Out!
+                  </motion.div>
+                )}
                 {/* Premium Badge */}
-                {product.certified && (
+                {product.certified && !soldOutProducts.has(product.id) && (
                   <motion.div 
                     className="absolute top-4 left-4 z-10 bg-success text-text-dark px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg"
                     initial={{ scale: 0 }}
@@ -224,12 +244,14 @@ export default function ClientBrowserAdds() {
                     <button className="bg-text-light/10 backdrop-blur-sm p-2 rounded-full hover:bg-info/20 shadow-md">
                       <Heart className="w-5 h-5 text-secondary" />
                     </button>
-                    <button 
-                      onClick={() => handleAddToCart(product, index)}
-                      className="bg-secondary/90 text-text-light p-2 rounded-full hover:bg-error shadow-md"
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                    </button>
+                    {!soldOutProducts.has(product.id) && (
+                      <button 
+                        onClick={() => handleAddToCart(product, index)}
+                        className="bg-secondary/90 text-text-light p-2 rounded-full hover:bg-error shadow-md"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                      </button>
+                    )}
                   </motion.div>
                 </div>
 
@@ -251,20 +273,24 @@ export default function ClientBrowserAdds() {
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <span className="font-bold text-2xl text-secondary tracking-tight">
+                    <span className={`font-bold text-2xl tracking-tight ${soldOutProducts.has(product.id) ? 'text-gray-400 line-through' : 'text-secondary'}`}>
                       ¢{product.price}
                     </span>
-                    <motion.button
-                      onClick={() => handleAddToCart(product, index)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
-                      transition={{ duration: 0.3 }}
-                      className="px-4 py-2 bg-linear-to-r from-orange-500 to-red-500 text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      <span>Add to Cart</span>
-                    </motion.button>
+                    {!soldOutProducts.has(product.id) ? (
+                      <motion.button
+                        onClick={() => handleAddToCart(product, index)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
+                        transition={{ duration: 0.3 }}
+                        className="px-4 py-2 bg-linear-to-r from-orange-500 to-red-500 text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Add to Cart</span>
+                      </motion.button>
+                    ) : (
+                      <span className="text-gray-500 text-sm font-medium">Sold Out</span>
+                    )}
                   </div>
                 </div>
 
@@ -279,30 +305,61 @@ export default function ClientBrowserAdds() {
           </div>
         </motion.section>
 
-        {/* Flying Card Animation to Cart Icon */}
+        {/* Flying Card Animation - Smoother with bezier easing, path simulation, burst at icon, fade return */}
         <AnimatePresence>
           {flyingCard && (
-            <motion.div
-              className="fixed z-50 pointer-events-none"
-              initial={{ opacity: 1, scale: 1, rotate: 0 }}
-              animate={{
-                x: (window.innerWidth / 2 - flyingCard.rect.width / 2) - flyingCard.rect.left,
-                y: (window.innerHeight - 150) - flyingCard.rect.top,
-                scale: 0.3,
-                opacity: 0,
-                rotate: 360,
-              }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="w-full h-full bg-card rounded-3xl overflow-hidden shadow-lg">
-                <img
-                  src={flyingCard.product.image}
-                  alt={flyingCard.product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </motion.div>
+            <>
+              <motion.div
+                className="fixed z-[100] pointer-events-none"
+                initial={false}
+                animate={{
+                  x: flyingCard.endRect.left - flyingCard.startRect.left + (flyingCard.endRect.width / 2 - flyingCard.startRect.width / 2),
+                  y: flyingCard.endRect.top - flyingCard.startRect.top + (flyingCard.endRect.height / 2 - flyingCard.startRect.height / 2),
+                  scale: flyingCard.phase === 'flyTo' ? [1, 0.6, 0.3] : [0.3, 0],
+                  opacity: flyingCard.phase === 'flyTo' ? [1, 1, 1] : [1, 0],
+                  rotate: [0, 10, 360],
+                  borderRadius: flyingCard.phase === 'flyTo' ? "16px" : "50%",
+                }}
+                style={{
+                  width: flyingCard.startRect.width,
+                  height: flyingCard.startRect.height,
+                }}
+                transition={{ 
+                  x: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }, // Bezier for smooth curve feel
+                  y: { duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] },
+                  scale: { duration: 1.2, times: [0, 0.8, 1] },
+                  rotate: { duration: 1.2 },
+                  opacity: { duration: 0.3, delay: 1.0 }
+                }}
+              >
+                <div className="w-full h-full bg-card rounded-3xl overflow-hidden shadow-2xl">
+                  <img
+                    src={flyingCard.product.image}
+                    alt={flyingCard.product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </motion.div>
+              {/* Burst effect at cart icon */}
+              {flyingCard.phase === 'burst' && (
+                <motion.div
+                  className="fixed z-[101] pointer-events-none"
+                  style={{
+                    left: flyingCard.endRect.left,
+                    top: flyingCard.endRect.top,
+                  }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: [0, 1.5, 0], 
+                    opacity: [0, 1, 0],
+                    backgroundColor: "#10b981"
+                  }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                >
+                  <Check className="w-8 h-8 text-white" />
+                </motion.div>
+              )}
+            </>
           )}
         </AnimatePresence>
         {/* Success Toast */}
@@ -319,6 +376,8 @@ export default function ClientBrowserAdds() {
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Invisible ref for cart icon position */}
+        <div ref={cartIconRef} className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-10 h-10" style={{ opacity: 0 }} />
       </div>
     </div>
   );
