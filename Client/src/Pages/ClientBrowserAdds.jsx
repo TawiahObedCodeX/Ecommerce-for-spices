@@ -163,7 +163,7 @@ export default function ClientBrowserAdds() {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-secondary/80 via-amber/80 to-secondary/80 bg-clip-text text-transparent"
+          className="text-5xl font-bold text-center mb-12 bg-linear-to-r from-secondary/80 via-amber/80 to-secondary/80 bg-clip-text text-transparent"
         >
           Browse Spice Delights
         </motion.h1>
@@ -270,7 +270,7 @@ export default function ClientBrowserAdds() {
 
                 {/* Hover Glow Effect */}
                 <motion.div 
-                  className="absolute inset-0 rounded-3xl bg-gradient-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                  className="absolute inset-0 rounded-3xl bg-linear-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />

@@ -160,7 +160,7 @@ export default function ClientAddtocart() {
           <motion.button
             onClick={() => navigate('/dashbord-client')}
             whileHover={{ scale: 1.05 }}
-            className="py-3 px-8 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold"
+            className="py-3 px-8 bg-linear-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold"
           >
             Browse for product
           </motion.button>

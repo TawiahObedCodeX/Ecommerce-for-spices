@@ -108,7 +108,7 @@ export default function PaymentSystem() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-8 px-4 flex items-center justify-center">
       <div className="max-w-4xl w-full mx-auto">
         <motion.div
           variants={containerVariants}
@@ -306,7 +306,7 @@ export default function PaymentSystem() {
 
               {/* Security Note */}
               <div className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
-                <FiShield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <FiShield className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-800 leading-relaxed">Card is secure. Everything is private.</p>
               </div>
             </motion.div>
@@ -321,14 +321,14 @@ export default function PaymentSystem() {
                       <img 
                         src={item.image} 
                         alt={item.name} 
-                        className="w-10 h-10 object-cover rounded-lg flex-shrink-0"
+                        className="w-10 h-10 object-cover rounded-lg hrink-0"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                         <p className="text-xs text-gray-500 truncate">{item.category}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 ml-2 flex-shrink-0">¢{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                    <span className="text-sm font-semibold text-gray-900 ml-2 shrink-0">¢{(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -430,7 +430,7 @@ export default function PaymentSystem() {
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-green-400 to-green-600"></div>
                 <div className="text-center pt-2">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                     <FiCheckCircle className="w-8 h-8 text-green-500" />

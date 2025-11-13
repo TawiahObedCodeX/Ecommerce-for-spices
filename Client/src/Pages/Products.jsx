@@ -130,8 +130,8 @@ export default function Products() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-6 py-3 rounded-full font-montserrat-semi-bold text-sm transition-all duration-300 whitespace-nowrap ${
                   selectedCategory === cat
-                    ? 'bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light shadow-lg hover:shadow-[0_0_10px_rgba(220,20,60,0.3)]'
-                    : 'bg-gradient-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light hover:bg-info/20 hover:border-info/30 border border-text-light/30'
+                    ? 'bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light shadow-lg hover:shadow-[0_0_10px_rgba(220,20,60,0.3)]'
+                    : 'bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light hover:bg-info/20 hover:border-info/30 border border-text-light/30'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
