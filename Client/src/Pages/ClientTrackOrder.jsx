@@ -74,7 +74,7 @@ export default function ClientTrackOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 py-8 px-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-red-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div 
@@ -150,7 +150,7 @@ export default function ClientTrackOrder() {
         <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <h2 className="text-xl font-bold mb-4 text-gray-800">Live Tracking Map</h2>
           <p className="text-sm text-gray-600 mb-4">Your spices are en route – watch them spice up your day!</p>
-          <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
+          <div className="relative h-64 bg-linear-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
             {/* Simple SVG Map of Accra area (mock coordinates scaled) */}
             <svg viewBox="0 0 400 250" className="w-full h-full">
               {/* Path from warehouse to depot */}

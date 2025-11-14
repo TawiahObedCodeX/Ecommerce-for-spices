@@ -161,7 +161,7 @@ export default function ClientAddtocart() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-red-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-50 to-red-50">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +173,7 @@ export default function ClientAddtocart() {
           <motion.button
             onClick={() => navigate('/dashbord-client')}
             whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(251, 146, 60, 0.3)" }}
-            className="py-4 px-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg shadow-lg"
+            className="py-4 px-10 bg-linear-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold text-lg shadow-lg"
           >
             Explore Spices
           </motion.button>
@@ -183,7 +183,7 @@ export default function ClientAddtocart() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-gray-50 to-orange-50">
+    <div className="min-h-screen py-8 px-4 bg-linear-to-br from-gray-50 to-orange-50">
       <div className="max-w-6xl mx-auto">
         {/* Header - Slightly asymmetric for human touch */}
         <div className="flex items-center justify-between mb-10">
@@ -193,7 +193,7 @@ export default function ClientAddtocart() {
             className="flex items-center space-x-3"
           >
             <FiShoppingCart className="text-3xl text-orange-500" />
-            <h1 className="text-3xl font-bold text-gray-800">Your Spice Haul ({cart.length} items)</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Your Spice product ({cart.length} items)</h1>
           </motion.div>
           <motion.button
             onClick={() => navigate('/dashbord-client')}
@@ -224,7 +224,7 @@ export default function ClientAddtocart() {
                     <motion.img 
                       src={item.image} 
                       alt={item.name} 
-                      className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl flex-shrink-0 shadow-lg"
+                      className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl shrink-0 shadow-lg"
                       whileHover={{ scale: 1.05 }}
                     />
                     <div className="flex-1 min-w-0">
@@ -263,7 +263,7 @@ export default function ClientAddtocart() {
                         >
                           -
                         </button>
-                        <span className="text-xl font-semibold min-w-[2rem] text-center">{item.quantity}</span>
+                        <span className="text-xl font-semibold min-w-8 text-center">{item.quantity}</span>
                         <button 
                           onClick={() => updateCartQuantity(item.id, item.quantity + 1)} 
                           className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors text-lg font-bold"
@@ -317,7 +317,7 @@ export default function ClientAddtocart() {
                 value="free-pickup"
                 checked={selectedShipping === 'free-pickup'}
                 onChange={(e) => setSelectedShipping(e.target.value)}
-                className="mt-1 h-5 w-5 text-orange-500 focus:ring-orange-500 mt-0.5"
+                className=" h-5 w-5 text-orange-500 focus:ring-orange-500 mt-0.5"
               />
               <div className="flex-1">
                 <div className="flex items-center mb-1">
@@ -334,7 +334,7 @@ export default function ClientAddtocart() {
                 value="delivery"
                 checked={selectedShipping === 'delivery'}
                 onChange={(e) => setSelectedShipping(e.target.value)}
-                className="mt-1 h-5 w-5 text-orange-500 focus:ring-orange-500 mt-0.5"
+                className=" h-5 w-5 text-orange-500 focus:ring-orange-500 mt-0.5"
               />
               <div className="flex-1">
                 <div className="flex items-center mb-1">
@@ -398,7 +398,7 @@ export default function ClientAddtocart() {
           onClick={handleProceedToPayment}
           whileHover={{ scale: 1.02, boxShadow: "0 15px 35px rgba(251, 146, 60, 0.4)" }}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center space-x-3 shadow-2xl mb-4"
+          className="w-full py-5 bg-linear-to-r from-orange-500 via-red-500 to-orange-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center space-x-3 shadow-2xl mb-4"
         >
           <FiCreditCard className="w-6 h-6" />
           <span>Proceed to Secure Checkout ¢{total.toFixed(2)}</span>
