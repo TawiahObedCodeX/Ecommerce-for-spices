@@ -71,7 +71,7 @@ const RoleSelector = () => {
       >
         {/* Compact Hero Title */}
         <motion.div variants={titleVariants} className="mb-6">
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-gray-900 mb-3 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent leading-tight">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl mb-3 bg-linear-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent leading-tight">
             Melo's Spice
           </h1>
           <motion.p
@@ -92,11 +92,11 @@ const RoleSelector = () => {
             onHoverStart={() => setIsClientHovered(true)}
             onHoverEnd={() => setIsClientHovered(false)}
           >
-            <Link to="/client-signup" className="block h-full">
+            <Link to="/clientform" className="block h-full">
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-amber-100 relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-amber-300 h-full flex flex-col justify-between">
                 {/* Subtle accent overlay */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-transparent to-red-50/50 rounded-2xl"
+                  className="absolute inset-0 bg-linear-to-br from-amber-50/50 via-transparent to-red-50/50 rounded-2xl"
                   initial={{ opacity: 0 }}
                   whileHover={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
@@ -143,11 +143,11 @@ const RoleSelector = () => {
             onHoverStart={() => setIsAdminHovered(true)}
             onHoverEnd={() => setIsAdminHovered(false)}
           >
-            <Link to="/admin-signup" className="block h-full">
+            <Link to="/adminform" className="block h-full">
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-emerald-100 relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-emerald-300 h-full flex flex-col justify-between">
                 {/* Subtle accent overlay */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-teal-50/50 rounded-2xl"
+                  className="absolute inset-0 bg-linear-to-br from-emerald-50/50 via-transparent to-teal-50/50 rounded-2xl"
                   initial={{ opacity: 0 }}
                   whileHover={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
