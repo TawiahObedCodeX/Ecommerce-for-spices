@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - Enhanced cart icon to briefly scale and glow on 'cartUpdated' for animation sync
+// Updated ClientFloatingNavbar.jsx - Fixed event listener removal, added payment notification (1 if pending order), enhanced glow sync
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,7 @@ import {
   MdLogout,
   MdOutlineMeetingRoom,
 } from "react-icons/md";
+
 const ClientFloatingNavbar = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
@@ -18,57 +19,62 @@ const ClientFloatingNavbar = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [storeNotificationCount, setStoreNotificationCount] = useState(0);
   const [cartNotificationCount, setCartNotificationCount] = useState(0);
+  const [paymentNotificationCount, setPaymentNotificationCount] = useState(0); // New: For pending checkout
   const [cartGlow, setCartGlow] = useState(false); // For animation sync
+
   const updateCounts = () => {
     const storeCount = parseInt(localStorage.getItem('clientNewProducts') || '0');
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const checkoutOrder = localStorage.getItem('checkoutOrder'); // Check for pending order
     setStoreNotificationCount(storeCount);
     setCartNotificationCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
+    setPaymentNotificationCount(checkoutOrder ? 1 : 0); // 1 if order pending
   };
+
+  // Define handlers explicitly for proper removal
+  const handleProductAdded = () => updateCounts();
+  const handleCartUpdated = () => {
+    updateCounts();
+    setCartGlow(true);
+    setTimeout(() => setCartGlow(false), 500);
+  };
+  const handleStorageChange = (e) => {
+    if (e.key === 'cart' || e.key === 'clientNewProducts' || e.key === 'checkoutOrder') {
+      updateCounts();
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     updateCounts();
-    // Listen for product added event
-    window.addEventListener('productAdded', updateCounts);
-    // Listen for cart updated event - trigger glow
-    window.addEventListener('cartUpdated', () => {
-      updateCounts();
-      setCartGlow(true);
-      setTimeout(() => setCartGlow(false), 500);
-    });
-    // Listen for localStorage changes in other tabs
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'cart' || e.key === 'clientNewProducts') {
-        updateCounts();
-      }
-    });
+
+    // Event listeners
+    window.addEventListener('productAdded', handleProductAdded);
+    window.addEventListener('cartUpdated', handleCartUpdated);
+    window.addEventListener('storage', handleStorageChange);
+
     // Poll every 2 seconds for same-tab updates (fallback)
     const interval = setInterval(updateCounts, 2000);
+
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('productAdded', updateCounts);
-      window.removeEventListener('cartUpdated', () => {
-        updateCounts();
-        setCartGlow(true);
-        setTimeout(() => setCartGlow(false), 500);
-      });
-      window.removeEventListener('storage', (e) => {
-        if (e.key === 'cart' || e.key === 'clientNewProducts') {
-          updateCounts();
-        }
-      });
+      window.removeEventListener('productAdded', handleProductAdded);
+      window.removeEventListener('cartUpdated', handleCartUpdated);
+      window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, []); // Empty deps since handlers are stable
+
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
     { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
-    { icon: MdPayment, name: "Payment", route: "/dashbord-client/paymenttoadmin" },
+    { icon: MdPayment, name: "Payment", route: "/dashbord-client/clientpaymentsystem", hasNotification: true }, // Enabled notification
     { icon: MdChatBubbleOutline, name: "Chat" },
-    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder" },
+    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder/:orderId" },
     { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];
+
   const handleTabClick = (index) => {
     setActiveTab(index);
     const tab = tabs[index];
@@ -79,13 +85,20 @@ const ClientFloatingNavbar = () => {
         localStorage.setItem('clientNewProducts', '0');
         setStoreNotificationCount(0);
       }
+      // Reset payment notification if clicking on Payment (after success, it's cleared in PaymentSystem)
+      if (index === 2 && paymentNotificationCount > 0) {
+        // No need to clear here - PaymentSystem clears on success
+      }
     }
   };
+
   const getNotificationCount = (index) => {
     if (index === 0) return storeNotificationCount;
     if (index === 1) return cartNotificationCount;
+    if (index === 2) return paymentNotificationCount; // New: Payment badge
     return 0;
   };
+
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
@@ -165,4 +178,5 @@ const ClientFloatingNavbar = () => {
     </motion.div>
   );
 };
+
 export default ClientFloatingNavbar;

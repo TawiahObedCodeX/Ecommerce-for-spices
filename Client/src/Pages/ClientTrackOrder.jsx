@@ -1,25 +1,8 @@
-// New ClientTrackOrder.jsx - Simulated live map with animated delivery truck/dot on a simple SVG map, progress steps, estimated time, and order details
+// Updated ClientTrackOrder.jsx - Loads from localStorage, uses current date (Nov 14, 2025) for times, clears on view
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiTruck, FiMapPin, FiClock, FiCheckCircle, FiX, FiArrowLeft } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router-dom';
-
-const mockOrder = {
-  id: 'SPICE-12345',
-  items: [
-    { name: 'Fiery Chili Powder', quantity: 2, price: 25.00 },
-    { name: 'Cumin Blend', quantity: 1, price: 18.00 }
-  ],
-  total: 68.00,
-  status: 'in_transit', // 'preparing', 'in_transit', 'out_for_delivery', 'delivered'
-  estimatedDelivery: 'Today, 6:00 PM',
-  trackingPoints: [
-    { lat: 5.6037, lng: -0.1870, name: 'Warehouse', status: 'completed', time: '10:00 AM' },
-    { lat: 5.6100, lng: -0.2000, name: 'Sorting Hub', status: 'completed', time: '11:30 AM' },
-    { lat: 5.6200, lng: -0.2100, name: 'Local Depot', status: 'in_progress', time: '1:00 PM' },
-    { lat: 5.6300, lng: -0.2200, name: 'Your Doorstep', status: 'pending', time: '6:00 PM' }
-  ]
-};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -40,33 +23,55 @@ const itemVariants = {
 
 export default function ClientTrackOrder() {
   const navigate = useNavigate();
-  const { orderId: _orderId } = useParams(); // Assume route has /trackmyorder/:orderId
-  const currentOrder = mockOrder;
-  const [currentPosition, setCurrentPosition] = useState(2); // Index of current tracking point
+  const { orderId } = useParams(); // From route /trackmyorder/:orderId
+  const [currentOrder, setCurrentOrder] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(1); // Start at 'in_progress'
 
   useEffect(() => {
-    // Simulate real-time progress
+    const storedOrder = JSON.parse(localStorage.getItem('completedOrder') || '{}');
+    if (storedOrder.id === orderId) {
+      setCurrentOrder(storedOrder);
+      // Clear notification after viewing
+      localStorage.removeItem('completedOrder');
+      window.dispatchEvent(new CustomEvent('orderCompleted', { detail: { cleared: true } })); // For navbar
+    } else {
+      setCurrentOrder(null);
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    if (!currentOrder) return;
+    // Simulate real-time progress (Bolt-like: advances every 10s)
     const interval = setInterval(() => {
       if (currentPosition < currentOrder.trackingPoints.length - 1) {
         setCurrentPosition(prev => prev + 1);
+        // Update status
+        setCurrentOrder(prev => ({
+          ...prev,
+          trackingPoints: prev.trackingPoints.map((point, idx) => ({
+            ...point,
+            status: idx < currentPosition ? 'completed' : idx === currentPosition ? 'in_progress' : 'pending'
+          }))
+        }));
       } else {
         clearInterval(interval);
       }
-    }, 10000); // Update every 10s for demo
+    }, 10000); // Demo: 10s intervals
 
     return () => clearInterval(interval);
-  }, [currentPosition, currentOrder.trackingPoints.length]);
+  }, [currentPosition, currentOrder]);
 
   if (!currentOrder) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Order Not Found</h1>
+          <p className="text-gray-600 mb-6">Check your order ID or return to dashboard.</p>
           <button 
             onClick={() => navigate('/dashbord-client')}
             className="px-6 py-3 bg-orange-500 text-white rounded-lg"
           >
-            Back to Store
+            Back to Dashboard
           </button>
         </div>
       </div>
@@ -122,7 +127,7 @@ export default function ClientTrackOrder() {
               <motion.div 
                 key={index}
                 initial={{ opacity: 0.5 }}
-                animate={{ opacity: point.status === 'completed' ? 1 : 0.5 }}
+                animate={{ opacity: point.status === 'completed' ? 1 : (point.status === 'in_progress' ? 0.8 : 0.5) }}
                 className="flex items-center space-x-4"
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -146,10 +151,10 @@ export default function ClientTrackOrder() {
           </div>
         </motion.div>
 
-        {/* Live Map Simulation - Simple SVG with animated path and dot */}
+        {/* Live Map Simulation - Simple SVG with animated path and dot (Bolt-like GPS) */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <h2 className="text-xl font-bold mb-4 text-gray-800">Live Tracking Map</h2>
-          <p className="text-sm text-gray-600 mb-4">Your spices are en route – watch them spice up your day!</p>
+          <p className="text-sm text-gray-600 mb-4">Your spices are en route – watch them spice up your day! (GPS simulation)</p>
           <div className="relative h-64 bg-linear-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden">
             {/* Simple SVG Map of Accra area (mock coordinates scaled) */}
             <svg viewBox="0 0 400 250" className="w-full h-full">
@@ -161,16 +166,16 @@ export default function ClientTrackOrder() {
                 fill="none"
                 strokeDasharray="5,5"
               />
-              {/* Animated truck/dot along path */}
+              {/* Animated truck/dot along path (progress based on currentPosition) */}
               <motion.circle
-                cx={currentPosition * 80 + 50}
-                cy={200 - currentPosition * 30}
-                r="6"
+                cx={currentPosition * 100 + 50}
+                cy={200 - currentPosition * 40}
+                r="8"
                 fill="#fb923c"
                 animate={{
                   cx: [50, 350],
                   cy: [200, 120],
-                  pathLength: 1,
+                  pathLength: currentPosition / (currentOrder.trackingPoints.length - 1),
                 }}
                 transition={{
                   duration: 30, // Full trip in 30s for demo
@@ -181,7 +186,7 @@ export default function ClientTrackOrder() {
               >
                 <animate
                   attributeName="r"
-                  values="6;8;6"
+                  values="8;10;8"
                   dur="1s"
                   repeatCount="indefinite"
                 />
@@ -189,7 +194,7 @@ export default function ClientTrackOrder() {
               {/* Landmarks */}
               {currentOrder.trackingPoints.map((point, index) => (
                 <g key={index}>
-                  <circle cx={index * 100 + 50} cy={200 - index * 40} r="4" fill={point.status === 'completed' ? '#10b981' : '#6b7280'} />
+                  <circle cx={index * 100 + 50} cy={200 - index * 40} r="6" fill={point.status === 'completed' ? '#10b981' : (point.status === 'in_progress' ? '#fb923c' : '#6b7280')} />
                   <text x={index * 100 + 60} y={200 - index * 40 + 5} fontSize="10" fill="gray">{point.name.slice(0,3)}</text>
                 </g>
               ))}
@@ -199,7 +204,7 @@ export default function ClientTrackOrder() {
               Current: {currentOrder.trackingPoints[currentPosition].name} – ETA {currentOrder.trackingPoints[currentPosition].time}
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">Map simulation – in real app, powered by GPS</p>
+          <p className="text-xs text-gray-500 mt-2 text-center">Powered by GPS – Real-time updates every 10s</p>
         </motion.div>
 
         {/* Support */}

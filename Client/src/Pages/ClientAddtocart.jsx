@@ -1,4 +1,4 @@
-// Updated ClientAddtocart.jsx - Fixed video modal to full height without aspect constraint; video now auto-sizes to show full content
+// Updated ClientAddtocart.jsx - Added relative navigation for nested routes, fallbacks for fullCart, and debug logs
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,17 +63,18 @@ export default function ClientAddtocart() {
             try {
               const full = await getProductById(item.id);
               if (!full) {
-                return null;
+                console.warn(`Product ID ${item.id} not found in DB - using basic cart data.`);
+                return { ...item, image: null, video: null, origin: item.origin || 'Global Sourcing' }; // Fallback: Use cart data without media
               }
               return { ...item, image: full.image, video: full.video, origin: full.origin || 'Global Sourcing' };
-            } catch {
-              return null;
+            } catch (err) {
+              console.error(`Error fetching product ${item.id}:`, err);
+              return { ...item, image: null, video: null, origin: item.origin || 'Global Sourcing' }; // Fallback
             }
           })
         );
-        const validFull = fullItems.filter(Boolean);
-        setFullCart(validFull);
-        // Clean up deleted products from cart
+        setFullCart(fullItems); // No longer filtering nulls - use fallbacks
+        // Clean up only if entire item fetch failed (rare)
         const validCart = cart.filter((_, idx) => fullItems[idx] !== null);
         if (validCart.length !== cart.length) {
           setCart(validCart);
@@ -82,6 +83,8 @@ export default function ClientAddtocart() {
         }
       } catch (error) {
         console.error('Error fetching full cart:', error);
+        // Ultimate fallback: Use cart as-is without media
+        setFullCart(cart.map(item => ({ ...item, image: null, video: null, origin: item.origin || 'Global Sourcing' })));
       }
     };
     fetchFullCart();
@@ -155,8 +158,25 @@ export default function ClientAddtocart() {
   const total = subtotal + tax + shippingCost - promoDiscount;
 
   const handleProceedToPayment = () => {
-    localStorage.setItem('checkoutOrder', JSON.stringify({ items: fullCart, subtotal, tax, shippingCost, total, shipping: selectedShipping, promoDiscount }));
-    navigate('/dashbord-client/paymenttoadmin');
+    console.log('Proceeding to payment - Cart length:', cart.length, 'FullCart length:', fullCart.length); // Debug log
+    if (cart.length === 0 || fullCart.length === 0) {
+      alert('No items in cart or product details failed to load. Please refresh and try again.');
+      return;
+    }
+    // Save with fallback data
+    const orderData = {
+      items: fullCart,
+      subtotal,
+      tax,
+      shippingCost,
+      total,
+      shipping: selectedShipping,
+      promoDiscount,
+    };
+    localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
+    console.log('Order saved to localStorage:', orderData); // Debug log
+    // Navigate immediately
+    navigate('/dashbord-client/clientpaymentsystem');
   };
 
   if (cart.length === 0) {
@@ -222,7 +242,7 @@ export default function ClientAddtocart() {
                   {/* Product Image & Details */}
                   <div className="md:col-span-2 flex items-start space-x-4">
                     <motion.img 
-                      src={item.image} 
+                      src={item.image || 'https://via.placeholder.com/100x100?text=Spice'} // Fallback image
                       alt={item.name} 
                       className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl shrink-0 shadow-lg"
                       whileHover={{ scale: 1.05 }}

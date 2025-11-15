@@ -48,13 +48,13 @@ export default function App() {
         </Route>
         {/* Admin Routes */}
         {/* Client Routes */}
-        <Route path="/dashbord-client" element={<DashboardForClient />}>
-          <Route index element={<ClientBrowserAdds/>} />
-          <Route path="addtocart" element={<ClientAddtocart/>} />
-          <Route path="paymenttoadmin" element={<Clientpaymentsystem/>} />
-          <Route path="sectionwiththeadmin" element={<ClientMeetingAdminvirtual/>} />
-          <Route path="trackmyorder" element={<ClientTrackOrder/>} />
-        </Route>
+<Route path="/dashbord-client" element={<DashboardForClient />}>
+  <Route index element={<ClientBrowserAdds />} />
+  <Route path="addtocart" element={<ClientAddtocart />} />
+  <Route path="clientpaymentsystem" element={<Clientpaymentsystem />} />
+  <Route path="sectionwiththeadmin" element={<ClientMeetingAdminvirtual />} />
+  <Route path="trackmyorder/:orderId" element={<ClientTrackOrder />} /> {/* Added :orderId */}
+</Route>
         {/* Client Routes */}
       </Route>
     )
