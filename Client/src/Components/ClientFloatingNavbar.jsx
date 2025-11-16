@@ -1,5 +1,5 @@
 // Updated ClientFloatingNavbar.jsx - Fixed event listener removal, added payment notification (1 if pending order), enhanced glow sync
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -22,27 +22,27 @@ const ClientFloatingNavbar = () => {
   const [paymentNotificationCount, setPaymentNotificationCount] = useState(0); // New: For pending checkout
   const [cartGlow, setCartGlow] = useState(false); // For animation sync
 
-  const updateCounts = () => {
+  const updateCounts = useCallback(() => {
     const storeCount = parseInt(localStorage.getItem('clientNewProducts') || '0');
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const checkoutOrder = localStorage.getItem('checkoutOrder'); // Check for pending order
     setStoreNotificationCount(storeCount);
     setCartNotificationCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
     setPaymentNotificationCount(checkoutOrder ? 1 : 0); // 1 if order pending
-  };
+  }, []);
 
   // Define handlers explicitly for proper removal
-  const handleProductAdded = () => updateCounts();
-  const handleCartUpdated = () => {
+  const handleProductAdded = useCallback(() => updateCounts(), [updateCounts]);
+  const handleCartUpdated = useCallback(() => {
     updateCounts();
     setCartGlow(true);
     setTimeout(() => setCartGlow(false), 500);
-  };
-  const handleStorageChange = (e) => {
+  }, [updateCounts]);
+  const handleStorageChange = useCallback((e) => {
     if (e.key === 'cart' || e.key === 'clientNewProducts' || e.key === 'checkoutOrder') {
       updateCounts();
     }
-  };
+  }, [updateCounts]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -63,7 +63,7 @@ const ClientFloatingNavbar = () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, []); // Empty deps since handlers are stable
+  }, [handleProductAdded, handleCartUpdated, handleStorageChange]); // Include handlers in deps
 
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
