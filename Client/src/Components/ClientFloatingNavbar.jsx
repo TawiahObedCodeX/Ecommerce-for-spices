@@ -63,7 +63,7 @@ const ClientFloatingNavbar = () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [handleProductAdded, handleCartUpdated, handleStorageChange]); // Include handlers in deps
+  }, [handleProductAdded, handleCartUpdated, handleStorageChange, updateCounts]); // Include handlers and updateCounts in deps
 
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
