@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCreditCard, FiSmartphone, FiGlobe, FiTruck, FiShield, FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiStar, FiX, FiCheckCircle, FiPlus, FiPercent, FiClock, FiAward, FiLock, FiShoppingCart } from 'react-icons/fi';
-import Confetti from 'react-confetti'; // Assume installed or use CSS alternative
 
 const paymentMethods = [
   { id: 1, name: 'Credit/Debit Card', icon: FiCreditCard, description: 'Visa, Mastercard, Amex', active: true },
@@ -158,14 +157,6 @@ export default function PaymentSystem() {
 
   return (
     <div className="min-h-screen  py-8 px-4">
-      <Confetti
-        width={window.innerWidth}
-        height={window.innerHeight}
-        recycle={false}
-        numberOfPieces={200}
-        gravity={0.2}
-        run={showSuccess}
-      />
       <div className="max-w-6xl mx-auto">
         <motion.div
           variants={containerVariants}

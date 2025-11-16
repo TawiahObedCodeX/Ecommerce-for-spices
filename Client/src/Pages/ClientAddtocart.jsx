@@ -159,13 +159,14 @@ export default function ClientAddtocart() {
 
   const handleProceedToPayment = () => {
     console.log('Proceeding to payment - Cart length:', cart.length, 'FullCart length:', fullCart.length); // Debug log
-    if (cart.length === 0 || fullCart.length === 0) {
-      alert('No items in cart or product details failed to load. Please refresh and try again.');
+    if (cart.length === 0) {
+      alert('No items in cart. Please add items before proceeding to checkout.');
       return;
     }
-    // Save with fallback data
+    // Save with fallback data - use fullCart if available, otherwise cart
+    const itemsToSave = fullCart.length > 0 ? fullCart : cart;
     const orderData = {
-      items: fullCart,
+      items: itemsToSave,
       subtotal,
       tax,
       shippingCost,
@@ -176,7 +177,7 @@ export default function ClientAddtocart() {
     localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
     console.log('Order saved to localStorage:', orderData); // Debug log
     // Navigate immediately
-    navigate('/dashbord-client/clientpaymentsystem');
+    navigate('clientpaymentsystem');
   };
 
   if (cart.length === 0) {

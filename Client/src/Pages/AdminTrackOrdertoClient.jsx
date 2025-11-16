@@ -73,13 +73,13 @@ export default function AdminTrackOrdertoClient() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-50 to-red-50">
+      <div className="min-h-screen flex items-center justify-center ">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center px-4 max-w-md"
         >
-          <FiPackage className="mx-auto text-8xl text-orange-400 mb-6 animate-bounce" />
+          <FiPackage className="mx-auto text-8xl text-orange-400 mb-6 " />
           <h1 className="text-4xl font-bold text-gray-800 mb-4">No Deliveries Yet</h1>
           <p className="text-xl text-gray-600 mb-8">Awaiting the first spice shipment. Clients are hungry for flavor!</p>
           <p className="text-sm text-gray-500">Pro tip: Share this tracking magic – friends will rave about the real-time GPS glow.</p>
@@ -253,7 +253,7 @@ export default function AdminTrackOrdertoClient() {
                   GPS Live Track (Accra Routes)
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">Watch the delivery dash – clients share this view for that "wow" factor!</p>
-                <div className="relative h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl overflow-hidden border border-blue-200">
+                <div className="relative h-64 bg-linear-to-br from-blue-50 to-indigo-100 rounded-xl overflow-hidden border border-blue-200">
                   <svg viewBox="0 0 400 250" className="w-full h-full">
                     <path
                       d="M 50 200 Q 150 150 250 100 Q 300 80 350 120"

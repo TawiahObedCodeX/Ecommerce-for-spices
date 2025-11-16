@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - Fixed event listener removal, added payment notification (1 if pending order), enhanced glow sync
+// Updated ClientFloatingNavbar.jsx - Fixed track tab route to '/dashbord-client/trackmyorder' (no param), added orderCompleted listener to clear payment badge. Ensured proceed to payment routes correctly (already does via cart).
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,8 +38,11 @@ const ClientFloatingNavbar = () => {
     setCartGlow(true);
     setTimeout(() => setCartGlow(false), 500);
   }, [updateCounts]);
+  const handleOrderCompleted = useCallback(() => {
+    updateCounts(); // Clears payment badge
+  }, [updateCounts]);
   const handleStorageChange = useCallback((e) => {
-    if (e.key === 'cart' || e.key === 'clientNewProducts' || e.key === 'checkoutOrder') {
+    if (e.key === 'cart' || e.key === 'clientNewProducts' || e.key === 'checkoutOrder' || e.key === 'completedOrder') {
       updateCounts();
     }
   }, [updateCounts]);
@@ -51,6 +54,7 @@ const ClientFloatingNavbar = () => {
     // Event listeners
     window.addEventListener('productAdded', handleProductAdded);
     window.addEventListener('cartUpdated', handleCartUpdated);
+    window.addEventListener('orderCompleted', handleOrderCompleted);
     window.addEventListener('storage', handleStorageChange);
 
     // Poll every 2 seconds for same-tab updates (fallback)
@@ -60,17 +64,18 @@ const ClientFloatingNavbar = () => {
       clearTimeout(timer);
       window.removeEventListener('productAdded', handleProductAdded);
       window.removeEventListener('cartUpdated', handleCartUpdated);
+      window.removeEventListener('orderCompleted', handleOrderCompleted);
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [handleProductAdded, handleCartUpdated, handleStorageChange, updateCounts]); // Include handlers and updateCounts in deps
+  }, [handleProductAdded, handleCartUpdated, handleOrderCompleted, handleStorageChange, updateCounts]); // Include handlers and updateCounts in deps
 
   const tabs = [
     { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
     { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
     { icon: MdPayment, name: "Payment", route: "/dashbord-client/clientpaymentsystem", hasNotification: true }, // Enabled notification
     { icon: MdChatBubbleOutline, name: "Chat" },
-    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder/:orderId" },
+    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder" }, // Fixed: No param, handled in component
     { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];
@@ -88,6 +93,13 @@ const ClientFloatingNavbar = () => {
       // Reset payment notification if clicking on Payment (after success, it's cleared in PaymentSystem)
       if (index === 2 && paymentNotificationCount > 0) {
         // No need to clear here - PaymentSystem clears on success
+      }
+      // For Track, component handles loading if no specific ID
+      if (index === 4) {
+        const completedOrder = JSON.parse(localStorage.getItem('completedOrder') || '{}');
+        if (completedOrder.id) {
+          navigate(`/dashbord-client/trackmyorder/${completedOrder.id}`);
+        }
       }
     }
   };
