@@ -1,4 +1,4 @@
-// Updated PaymentSystem.jsx - Enhanced UI: Spice-themed gradients, animated progress bar, product cards with images, trust badges, countdown timer for urgency, confetti on success, more vibrant colors and micro-animations for a premium, legit feel clients will love
+// Updated PaymentSystem.jsx - Added generation of full order object with tracking points, estimated delivery, and storage to both 'completedOrder' (for client) and 'orders' array (for admin). Uses current date Nov 16, 2025 for timestamps. Enhanced success modal with order ID display.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +46,7 @@ export default function PaymentSystem() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState(900); // 15 min countdown
+  const [generatedOrderId, setGeneratedOrderId] = useState(null); // New: For success display
   const user = { name: 'Annette Murphy', avatar: 'https://i.pravatar.cc/40?img=3' };
   const navigate = useNavigate();
 
@@ -85,14 +86,45 @@ export default function PaymentSystem() {
     setIsProcessing(true);
     await new Promise((resolve) => setTimeout(resolve, 2500));
     setIsProcessing(false);
-    // Clear cart and order on success
+    // Generate full order with tracking data (using Nov 16, 2025 as base)
+    const now = new Date('2025-11-16T20:23:00'); // Current time: 08:23 PM GMT
+    const orderId = 'SPICE' + Date.now();
+    const fullOrder = {
+      id: orderId,
+      items: order.items,
+      subtotal: order.subtotal,
+      tax: order.tax,
+      shippingCost: order.shippingCost,
+      total: order.total,
+      shipping: order.shipping,
+      promoDiscount: order.promoDiscount || 0,
+      status: 'placed',
+      timestamp: now.toISOString(),
+      trackingPoints: [
+        { name: 'Order Placed', time: now.toLocaleString('en-GH', { timeZone: 'GMT' }), status: 'completed' },
+        { name: 'Preparing Spices', time: new Date(now.getTime() + 10 * 60 * 1000).toLocaleString('en-GH', { timeZone: 'GMT' }), status: 'in_progress' },
+        { name: 'Out for Delivery', time: new Date(now.getTime() + 30 * 60 * 1000).toLocaleString('en-GH', { timeZone: 'GMT' }), status: 'pending' },
+        { name: 'Delivered to Doorstep', time: new Date(now.getTime() + 60 * 60 * 1000).toLocaleString('en-GH', { timeZone: 'GMT' }), status: 'pending' },
+      ],
+      estimatedDelivery: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toLocaleString('en-GH', { timeZone: 'GMT', weekday: 'long', month: 'short', day: 'numeric' }),
+      client: user.name,
+    };
+    setGeneratedOrderId(orderId);
+    // Store for client tracking
+    localStorage.setItem('completedOrder', JSON.stringify(fullOrder));
+    // Store for admin (append to array)
+    let adminOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    adminOrders.push(fullOrder);
+    localStorage.setItem('orders', JSON.stringify(adminOrders));
+    // Clear cart and checkout
     localStorage.setItem('cart', '[]');
     localStorage.removeItem('checkoutOrder');
     window.dispatchEvent(new CustomEvent('cartUpdated', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('orderCompleted', { detail: { orderId } })); // For navbar update
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
-      navigate('/dashbord-client');
+      navigate('/dashbord-client/trackmyorder/' + orderId); // Auto-redirect to track
     }, 4000);
   };
 
@@ -513,7 +545,7 @@ export default function PaymentSystem() {
           )}
         </AnimatePresence>
 
-        {/* Success Modal - Enhanced with spice flair */}
+        {/* Success Modal - Enhanced with spice flair and order ID */}
         <AnimatePresence>
           {showSuccess && (
             <motion.div
@@ -543,8 +575,8 @@ export default function PaymentSystem() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Spiced Up! 🌶️</h3>
                   <p className="text-gray-700 mb-6">Your flavors are on the way. Get ready to ignite your kitchen!</p>
                   <div className="space-y-3 text-sm text-gray-600 bg-white/50 p-4 rounded-2xl">
-                    <p><strong>Order ID:</strong> #{Math.floor(Math.random() * 1000000)}</p>
-                    <p><strong>ETA:</strong> 2-3 days • Track live</p>
+                    <p><strong>Order ID:</strong> #{generatedOrderId}</p>
+                    <p><strong>ETA:</strong> {order.estimatedDelivery} • Track live</p>
                   </div>
                   <motion.button
                     onClick={() => setShowSuccess(false)}

@@ -1,4 +1,4 @@
-// Updated ClientTrackOrder.jsx - Loads from localStorage, uses current date (Nov 14, 2025) for times, clears on view
+// Updated ClientTrackOrder.jsx - Fixed to handle no orderId param (e.g., direct nav from navbar), loads from 'completedOrder' if no ID, auto-redirects if ID missing. Uses 'orders' array as fallback. Clears notification on load.
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiTruck, FiMapPin, FiClock, FiCheckCircle, FiX, FiArrowLeft } from 'react-icons/fi';
@@ -26,21 +26,38 @@ export default function ClientTrackOrder() {
   const { orderId } = useParams(); // From route /trackmyorder/:orderId
   const [currentOrder, setCurrentOrder] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(1); // Start at 'in_progress'
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedOrder = JSON.parse(localStorage.getItem('completedOrder') || '{}');
-    if (storedOrder.id === orderId) {
-      setCurrentOrder(storedOrder);
-      // Clear notification after viewing
-      localStorage.removeItem('completedOrder');
-      window.dispatchEvent(new CustomEvent('orderCompleted', { detail: { cleared: true } })); // For navbar
-    } else {
-      setCurrentOrder(null);
-    }
-  }, [orderId]);
+    const loadOrder = () => {
+      let storedOrder = null;
+      if (orderId) {
+        // Load from 'orders' array by ID
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        storedOrder = orders.find(o => o.id === orderId);
+      } else {
+        // Fallback to 'completedOrder' if no ID
+        storedOrder = JSON.parse(localStorage.getItem('completedOrder') || '{}');
+        if (storedOrder.id && Object.keys(storedOrder).length > 0) {
+          // Auto-redirect to full URL
+          navigate(`/dashbord-client/trackmyorder/${storedOrder.id}`);
+          setLoading(true);
+          return;
+        }
+      }
+      if (storedOrder && Object.keys(storedOrder).length > 0) {
+        setCurrentOrder(storedOrder);
+        // Clear notification after viewing
+        localStorage.removeItem('completedOrder');
+        window.dispatchEvent(new CustomEvent('orderCompleted', { detail: { cleared: true } })); // For navbar
+      }
+      setLoading(false);
+    };
+    loadOrder();
+  }, [orderId, navigate]);
 
   useEffect(() => {
-    if (!currentOrder) return;
+    if (!currentOrder || loading) return;
     // Simulate real-time progress (Bolt-like: advances every 10s)
     const interval = setInterval(() => {
       if (currentPosition < currentOrder.trackingPoints.length - 1) {
@@ -59,19 +76,30 @@ export default function ClientTrackOrder() {
     }, 10000); // Demo: 10s intervals
 
     return () => clearInterval(interval);
-  }, [currentPosition, currentOrder]);
+  }, [currentPosition, currentOrder, loading]);
 
-  if (!currentOrder) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your spice journey...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentOrder || Object.keys(currentOrder).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Order Not Found</h1>
-          <p className="text-gray-600 mb-6">Check your order ID or return to dashboard.</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">No Active Orders</h1>
+          <p className="text-gray-600 mb-6">Place an order to start tracking your spices!</p>
           <button 
             onClick={() => navigate('/dashbord-client')}
             className="px-6 py-3 bg-orange-500 text-white rounded-lg"
           >
-            Back to Dashboard
+            Back to Store
           </button>
         </div>
       </div>
@@ -168,8 +196,8 @@ export default function ClientTrackOrder() {
               />
               {/* Animated truck/dot along path (progress based on currentPosition) */}
               <motion.circle
-                cx={currentPosition * 100 + 50}
-                cy={200 - currentPosition * 40}
+                cx={50 + (currentPosition / (currentOrder.trackingPoints.length - 1)) * 300}
+                cy={200 - (currentPosition / (currentOrder.trackingPoints.length - 1)) * 80}
                 r="8"
                 fill="#fb923c"
                 animate={{
@@ -194,8 +222,8 @@ export default function ClientTrackOrder() {
               {/* Landmarks */}
               {currentOrder.trackingPoints.map((point, index) => (
                 <g key={index}>
-                  <circle cx={index * 100 + 50} cy={200 - index * 40} r="6" fill={point.status === 'completed' ? '#10b981' : (point.status === 'in_progress' ? '#fb923c' : '#6b7280')} />
-                  <text x={index * 100 + 60} y={200 - index * 40 + 5} fontSize="10" fill="gray">{point.name.slice(0,3)}</text>
+                  <circle cx={50 + (index / (currentOrder.trackingPoints.length - 1)) * 300} cy={200 - (index / (currentOrder.trackingPoints.length - 1)) * 80} r="6" fill={point.status === 'completed' ? '#10b981' : (point.status === 'in_progress' ? '#fb923c' : '#6b7280')} />
+                  <text x={50 + (index / (currentOrder.trackingPoints.length - 1)) * 300 + 10} y={200 - (index / (currentOrder.trackingPoints.length - 1)) * 80 + 5} fontSize="10" fill="gray">{point.name.slice(0,3)}</text>
                 </g>
               ))}
             </svg>
