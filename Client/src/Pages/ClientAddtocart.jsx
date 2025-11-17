@@ -176,8 +176,8 @@ export default function ClientAddtocart() {
     };
     localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
     console.log('Order saved to localStorage:', orderData); // Debug log
-    // Navigate immediately
-    navigate('clientpaymentsystem');
+    // Navigate immediately using absolute path
+    navigate('/dashbord-client/clientpaymentsystem');
   };
 
   if (cart.length === 0) {
