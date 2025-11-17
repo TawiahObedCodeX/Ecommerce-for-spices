@@ -158,24 +158,46 @@ export default function ClientAddtocart() {
   const total = subtotal + tax + shippingCost - promoDiscount;
 
   const handleProceedToPayment = () => {
+    console.log('Checkout button clicked, cart length:', cart.length);
     if (cart.length === 0) {
       alert('No items in cart. Please add items before proceeding to checkout.');
       return;
     }
-    // Save with fallback data - use fullCart if available, otherwise cart
-    const itemsToSave = fullCart.length > 0 ? fullCart : cart;
-    const orderData = {
-      items: itemsToSave,
-      subtotal,
-      tax,
-      shippingCost,
-      total,
-      shipping: selectedShipping,
-      promoDiscount,
-    };
-    localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
-    // Navigate using relative path
-    navigate('../clientpaymentsystem');
+    try {
+      // Save minimal data to avoid localStorage quota issues - exclude large media fields
+      const itemsToSave = (fullCart.length > 0 ? fullCart : cart).map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        category: item.category,
+        origin: item.origin,
+        rating: item.rating,
+        description: item.description,
+        // Exclude image and video to reduce storage size
+      }));
+      const orderData = {
+        items: itemsToSave,
+        subtotal,
+        tax,
+        shippingCost,
+        total,
+        shipping: selectedShipping,
+        promoDiscount,
+      };
+      localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
+      console.log('Order data saved to localStorage:', orderData);
+      // Navigate using absolute path for reliability
+      navigate('/dashbord-client/clientpaymentsystem');
+      console.log('Navigation initiated to payment page');
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      if (error.name === 'QuotaExceededError') {
+        alert('Storage quota exceeded. Please clear browser data or try with fewer items.');
+      } else {
+        alert('An error occurred during checkout. Please try again.');
+      }
+    }
   };
 
   if (cart.length === 0) {

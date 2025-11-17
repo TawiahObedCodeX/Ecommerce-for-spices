@@ -50,7 +50,9 @@ export default function PaymentSystem() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('PaymentSystem component mounted');
     const storedOrder = JSON.parse(localStorage.getItem('checkoutOrder') || '{}');
+    console.log('Loaded order from localStorage:', storedOrder);
     setOrder(storedOrder);
     // Countdown timer
     const timer = setInterval(() => {
