@@ -158,7 +158,6 @@ export default function ClientAddtocart() {
   const total = subtotal + tax + shippingCost - promoDiscount;
 
   const handleProceedToPayment = () => {
-    console.log('Proceeding to payment - Cart length:', cart.length, 'FullCart length:', fullCart.length); // Debug log
     if (cart.length === 0) {
       alert('No items in cart. Please add items before proceeding to checkout.');
       return;
@@ -175,9 +174,8 @@ export default function ClientAddtocart() {
       promoDiscount,
     };
     localStorage.setItem('checkoutOrder', JSON.stringify(orderData));
-    console.log('Order saved to localStorage:', orderData); // Debug log
-    // Navigate immediately using absolute path
-    navigate('/dashbord-client/clientpaymentsystem');
+    // Navigate using relative path
+    navigate('../clientpaymentsystem');
   };
 
   if (cart.length === 0) {
