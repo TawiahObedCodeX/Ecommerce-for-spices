@@ -75,7 +75,7 @@ const ClientFloatingNavbar = () => {
     { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
     { icon: MdPayment, name: "Payment", route: "/dashbord-client/clientpaymentsystem", hasNotification: true }, // Enabled notification
     { icon: MdChatBubbleOutline, name: "Chat" },
-    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder" }, // Fixed: No param, handled in component
+    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder/:orderId" }, // Fixed: No param, handled in component
     { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];

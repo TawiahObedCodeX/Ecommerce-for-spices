@@ -73,7 +73,7 @@ export default function ClientTrackOrder() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-rose-50">
+      <div className="min-h-screen flex items-center justify-center ">
         <motion.div initial={{ rotate: 0 }} animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="relative">
           <FiTruck className="text-8xl text-amber-500 mx-auto" />
           <div className="absolute inset-0 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
@@ -85,7 +85,7 @@ export default function ClientTrackOrder() {
 
   if (!currentOrder || Object.keys(currentOrder).length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-rose-50 px-4">
+      <div className="min-h-screen flex items-center justify-center  px-4">
         <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center max-w-md">
           <h1 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">No Journey in Motion</h1>
           <p className="text-gray-600 mb-8 leading-relaxed">Craft your next order to embark on a track of unparalleled elegance.</p>
