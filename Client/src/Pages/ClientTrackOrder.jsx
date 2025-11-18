@@ -91,7 +91,7 @@ export default function ClientTrackOrder() {
           <p className="text-gray-600 mb-8 leading-relaxed">Craft your next order to embark on a track of unparalleled elegance.</p>
           <button 
             onClick={() => navigate('/dashbord-client')}
-            className="px-8 py-4 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
+            className="px-8 py-4 bg-linear-to-r from-amber-500 to-rose-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
           >
             Explore Collection
           </button>
@@ -101,7 +101,7 @@ export default function ClientTrackOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 py-8 px-4">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-50 to-rose-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div 
@@ -132,7 +132,7 @@ export default function ClientTrackOrder() {
               <motion.div
                 key={index}
                 whileHover={{ x: 4 }}
-                className="flex items-center justify-between py-3 px-4 bg-gradient-to-r from-amber-50 to-rose-50 rounded-2xl border border-amber-100"
+                className="flex items-center justify-between py-3 px-4 bg-linear-to-r from-amber-50 to-rose-50 rounded-2xl border border-amber-100"
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
@@ -160,7 +160,7 @@ export default function ClientTrackOrder() {
             Voyage Milestones
           </h2>
           <div className="relative">
-            <div className="absolute left-1/2 md:left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500 to-rose-500 transform -translate-x-1/2 md:translate-x-0 hidden md:block" />
+            <div className="absolute left-1/2 md:left-8 top-0 bottom-0 w-0.5 bg-linear-to-b from-amber-500 to-rose-500 transform -translate-x-1/2 md:translate-x-0 hidden md:block" />
             <div className="space-y-6 md:space-y-0 md:space-x-8 md:flex md:justify-center">
               {currentOrder.trackingPoints.map((point, index) => (
                 <motion.div 
@@ -191,7 +191,7 @@ export default function ClientTrackOrder() {
               ))}
             </div>
           </div>
-          <div className="mt-8 p-5 bg-gradient-to-r from-emerald-50 to-amber-50 rounded-2xl border border-emerald-200">
+          <div className="mt-8 p-5 bg-linear-to-r from-emerald-50 to-amber-50 rounded-2xl border border-emerald-200">
             <p className="text-sm text-emerald-800 font-semibold flex items-center justify-center">
               <FiMapPin className="mr-2" />
               Anticipated Arrival: {currentOrder.estimatedDelivery} – Precision assured.
@@ -206,7 +206,7 @@ export default function ClientTrackOrder() {
             Live Odyssey Map
           </h2>
           <p className="text-sm text-gray-600 mb-6 italic">Witness the elegance of motion – your parcel's bespoke path unfolds.</p>
-          <div className="relative h-80 bg-gradient-to-br from-blue-50 via-indigo-50 to-amber-50 rounded-2xl overflow-hidden">
+          <div className="relative h-80 bg-linear-to-br from-blue-50 via-indigo-50 to-amber-50 rounded-2xl overflow-hidden">
             <svg viewBox="0 0 600 300" className="w-full h-full">
               <path
                 d="M 80 250 Q 200 180 350 120 Q 450 90 520 150"
@@ -282,7 +282,7 @@ export default function ClientTrackOrder() {
         {/* Concierge */}
         <motion.div variants={itemVariants} className="text-center py-12">
           <p className="text-gray-600 mb-6 text-lg leading-relaxed">Your voyage captivates – yet assistance is ever at hand.</p>
-          <button className="px-8 py-4 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all tracking-wide">
+          <button className="px-8 py-4 bg-linear-to-r from-amber-500 to-rose-500 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all tracking-wide">
             Summon Concierge
           </button>
         </motion.div>
