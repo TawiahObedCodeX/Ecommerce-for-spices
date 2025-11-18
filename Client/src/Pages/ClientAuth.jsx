@@ -419,7 +419,7 @@ const ClientAuth = () => {
       >
         {/* Right: Image + Text - Responsive and stacked on small screens (first on mobile) */}
         <motion.div
-          className="hidden lg:flex w-full lg:w-1/2 order-1 lg:order-2 flex justify-center flex-1"
+          className="lg:flex w-full lg:w-1/2 order-1 lg:order-2 flex justify-center flex-1"
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
