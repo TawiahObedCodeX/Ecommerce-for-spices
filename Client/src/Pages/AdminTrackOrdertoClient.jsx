@@ -40,11 +40,14 @@ export default function AdminTrackOrder() {
   useEffect(() => {
     const storedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
     setOrders(storedOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
-    if (storedOrders.length > 0 && !selectedOrder) {
-      setSelectedOrder(storedOrders[0]);
+  }, []);
+
+  useEffect(() => {
+    if (orders.length > 0 && !selectedOrder) {
+      setSelectedOrder(orders[0]);
       setCurrentPosition(1);
     }
-  }, []);
+  }, [orders, selectedOrder]);
 
   useEffect(() => {
     if (!selectedOrder) return;
