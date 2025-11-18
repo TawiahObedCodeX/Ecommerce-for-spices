@@ -75,7 +75,7 @@ export default function AdminTrackOrder() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-100 via-gold-50 to-rose-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-amber-100 via-gold-50 to-rose-100">
         <motion.div
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -91,7 +91,7 @@ export default function AdminTrackOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-100 via-gold-50 to-rose-100 overflow-hidden relative">
+    <div className="min-h-screen bg-linear-to-br from-amber-100 via-gold-50 to-rose-100 overflow-hidden relative">
       {/* Ambient overlay for depth */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(245,158,11,0.1),transparent)]" />
 
@@ -147,7 +147,7 @@ export default function AdminTrackOrder() {
                   onClick={() => handleSelectOrder(order)}
                   className={`p-5 rounded-2xl cursor-pointer border transition-all duration-300 backdrop-blur-md hover:shadow-xl ${
                     selectedOrder?.id === order.id
-                      ? 'border-amber-500/80 bg-gradient-to-br from-amber-50 to-gold-50 shadow-2xl ring-2 ring-amber-200/50'
+                      ? 'border-amber-500/80 bg-linear-to-br from-amber-50 to-gold-50 shadow-2xl ring-2 ring-amber-200/50'
                       : 'border-gray-200/50 hover:border-amber-300/50 hover:bg-white/70'
                   }`}
                   role="button"
@@ -158,7 +158,7 @@ export default function AdminTrackOrder() {
                     <span className="font-bold text-gray-900 text-base tracking-wide">#{order.id.slice(-6)}</span>
                     <motion.div 
                       animate={{ scale: order.status === 'delivered' ? 1 : 1 }}
-                      className={`w-3 h-3 rounded-full mt-0.5 flex-shrink-0 ${
+                      className={`w-3 h-3 rounded-full mt-0.5 shrink-0 ${
                         order.status === 'delivered' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
                       }`} 
                     />
@@ -235,7 +235,7 @@ export default function AdminTrackOrder() {
                     whileHover={{ y: -6, transition: { duration: 0.3 } }}
                     className={`bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-${card.color}-100/50 overflow-hidden relative mx-auto max-w-sm`}
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${card.bg} opacity-70`} />
+                    <div className={`absolute inset-0 bg-linear-to-br ${card.bg} opacity-70`} />
                     <div className={`relative z-10 w-14 h-14 bg-${card.color}-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg drop-shadow-xl`}>
                       <card.icon size={24} />
                     </div>
@@ -261,7 +261,7 @@ export default function AdminTrackOrder() {
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">Where routes converge in harmonious precision – a symphony of transit.</p>
                   </div>
-                  <div className="relative h-96 bg-gradient-to-br from-indigo-50 via-blue-50 to-amber-50">
+                  <div className="relative h-96 bg-linear-to-br from-indigo-50 via-blue-50 to-amber-50">
                     <svg viewBox="0 0 1000 400" className="w-full h-full">
                       <path
                         d="M 100 350 Q 300 200 500 100 Q 700 50 900 150"
@@ -344,7 +344,7 @@ export default function AdminTrackOrder() {
                           point.status === 'in_progress' ? 'bg-amber-50 border-amber-200 animate-pulse' : 'bg-gray-50 border-gray-200'
                         }`}
                       >
-                        <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shadow-md ${
+                        <div className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shadow-md ${
                           point.status === 'completed' ? 'bg-emerald-500 text-white' :
                           point.status === 'in_progress' ? 'bg-amber-500 text-white' : 'bg-gray-300 text-gray-600'
                         }`}>
@@ -357,7 +357,7 @@ export default function AdminTrackOrder() {
                       </motion.div>
                     ))}
                   </div>
-                  <div className="p-4 bg-gradient-to-r from-amber-50 to-gold-50 rounded-2xl border border-amber-200 mt-4">
+                  <div className="p-4 bg-linear-to-r from-amber-50 to-gold-50 rounded-2xl border border-amber-200 mt-4">
                     <p className="text-sm text-amber-800 font-semibold">Horizon: {selectedOrder.estimatedDelivery}</p>
                     <p className="text-xs text-amber-700 mt-1 flex items-center">
                       <FiUser className="mr-1 w-3 h-3" />
