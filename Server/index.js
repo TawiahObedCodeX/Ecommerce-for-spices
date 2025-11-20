@@ -1,0 +1,13 @@
+import express from "express";
+const Server = express();
+
+// testing 
+Server.get("/", (req, res) => {
+  res.send(`Hello world try out Melo's Spices`);
+});
+
+const Port = process.env.PORT || 5000;
+
+Server.listen(Port, "0.0.0.0", () => {
+  console.log(`server is running at http://localhost:${Port}`);
+});
