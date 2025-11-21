@@ -1,7 +1,16 @@
 import express from "express";
+import dotenv from "dotenv"
+import cookieParser from "cookie-parser";
+
+
+
 const Server = express();
 
-// testing 
+// middleware
+Server.use(express.json());
+Server.use(cookieParser());
+
+// testing
 Server.get("/", (req, res) => {
   res.send(`Hello world try out Melo's Spices , it's still on work`);
 });
