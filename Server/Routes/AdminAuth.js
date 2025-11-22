@@ -1,37 +1,33 @@
+// routes/adminAuth.js
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
+import crypto from "crypto";
 import pool from "../Config/db.js";
-import { sendPasswordResetEmail } from "../utils/email.js"; // Reuse or duplicate for admin
 
 const router = express.Router();
 
-// Cookie options (same as client, but you can use a different name if needed)
+// Cookie options (secure in production)
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
   path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  signed: true,
 };
 
-// Generate JWT tokens
+// Generate Access + Refresh Tokens
 const generateTokens = (admin) => {
   const payload = {
     id: admin.id,
-    email: admin.email.toLowerCase(),
+    email: admin.email,
     role: admin.role, // 'admin' or 'superadmin'
     company_name: admin.company_name,
   };
 
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "15m",
-  });
-
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
   const refreshToken = jwt.sign(
-    { id: admin.id, role: admin.role },
+    { id: admin.id },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     { expiresIn: "30d" }
   );
@@ -39,74 +35,73 @@ const generateTokens = (admin) => {
   return { accessToken, refreshToken };
 };
 
-// ========================
-// 1. ADMIN SIGNUP (Restricted: Only superadmin or first admin)
-// ========================
+// ======================
+// 1. ADMIN SIGNUP
+// Only allow first admin OR superadmin to create new admins
+// ======================
 router.post("/signup", async (req, res) => {
-  const { full_name, company_name, email, password } = req.body;
-
-  if (!full_name || !company_name || !email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  if (password.length < 10) {
-    return res.status(400).json({ error: "Password must be at least 10 characters" });
-  }
+  const { full_name, company_name, email, password, role } = req.body;
 
   try {
-    const client = await pool.connect();
-
-    // Option 1: Allow signup only if NO admins exist (first admin = superadmin)
-    // Option 2: Or protect with a secret key (recommended for production)
-    const setupSecret = req.headers["x-setup-secret"] || req.body.setup_secret;
-
-    const adminCount = await client.query("SELECT COUNT(*) FROM admins");
-    const totalAdmins = parseInt(adminCount.rows[0].count);
-
-    if (totalAdmins > 0 && setupSecret !== process.env.ADMIN_SETUP_SECRET) {
-      client.release();
-      return res.status(403).json({ error: "Admin registration is restricted" });
+    // Required fields
+    if (!full_name || !company_name || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Check for duplicate email (case-insensitive)
-    const existing = await client.query("SELECT id FROM admins WHERE LOWER(email) = LOWER($1)", [email]);
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    // Only allow 'admin' or 'superadmin' roles
+    const validRoles = ["admin", "superadmin"];
+    const finalRole = role && validRoles.includes(role) ? role : "admin";
+
+    // Check if this would be the first admin → allow without auth
+    const totalAdmins = await pool.query("SELECT COUNT(*) FROM admins");
+    const isFirstAdmin = totalAdmins.rows[0].count === "0";
+
+    // In real app: protect this route with superadmin middleware
+    // For now: allow first admin, otherwise block direct signup
+    if (!isFirstAdmin) {
+      return res.status(403).json({
+        error: "Admin signup is restricted. Contact superadmin.",
+      });
+    }
+
+    // Check if email already exists (case-insensitive)
+    const existing = await pool.query(
+      "SELECT id FROM admins WHERE LOWER(email) = LOWER($1)",
+      [email]
+    );
     if (existing.rows.length > 0) {
-      client.release();
-      return res.status(409).json({ error: "Email already in use" });
+      return res.status(400).json({ error: "Email already in use" });
     }
 
     const password_hash = await bcrypt.hash(password, 12);
 
-    const role = totalAdmins === 0 ? "superadmin" : "admin"; // First one becomes superadmin
-
-    const result = await client.query(
-      `INSERT INTO admins (full_name, company_name, email, password_hash, role)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, email, full_name, company_name, role, created_at`,
-      [full_name.trim(), company_name.trim(), email.toLowerCase(), password_hash, role]
+    const newAdmin = await pool.query(
+      `INSERT INTO admins (
+        full_name, company_name, email, password_hash, role
+      ) VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, email, full_name, company_name, role, created_at`,
+      [full_name, company_name, email, password_hash, finalRole]
     );
 
-    const admin = result.rows[0];
+    const admin = newAdmin.rows[0];
     const { accessToken, refreshToken } = generateTokens(admin);
 
-    res.cookie("adminRefreshToken", refreshToken, {
-      ...cookieOptions,
-      path: "/api/admin", // Separate cookie path
-    });
-
-    client.release();
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
     return res.status(201).json({
-      message: "Admin account created successfully",
+      message: "Admin created successfully",
       admin: {
         id: admin.id,
-        full_name: admin.full_name,
         email: admin.email,
+        full_name: admin.full_name,
         company_name: admin.company_name,
         role: admin.role,
       },
       accessToken,
-      expiresIn: 900,
     });
   } catch (err) {
     console.error("Admin signup error:", err);
@@ -114,168 +109,140 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// ========================
+// ======================
 // 2. ADMIN LOGIN
-// ========================
+// ======================
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
-  }
-
   try {
-    const client = await pool.connect();
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
 
-    const result = await client.query(
-      `SELECT id, email, full_name, company_name, password_hash, role,
+    const result = await pool.query(
+      `SELECT id, email, full_name, company_name, role, password_hash,
               is_banned, failed_login_attempts, locked_until
        FROM admins WHERE LOWER(email) = LOWER($1)`,
       [email]
     );
 
     const admin = result.rows[0];
-
     if (!admin) {
-      client.release();
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (admin.is_banned) {
-      client.release();
       return res.status(403).json({ error: "Admin account is banned" });
     }
 
     if (admin.locked_until && new Date(admin.locked_until) > new Date()) {
-      client.release();
-      return res.status(403).json({
-        error: "Account locked due to too many failed attempts",
-        locked_until: admin.locked_until,
+      return res.status(403).json({ error: "Account locked due to too many attempts" });
+    }
+
+    const validPassword = await bcrypt.compare(password, admin.password_hash);
+    if (!validPassword) {
+      const attempts = admin.failed_login_attempts + 1;
+      const lockUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+
+      await pool.query(
+        `UPDATE admins 
+         SET failed_login_attempts = $1, locked_until = $2, last_login_ip = $3
+         WHERE id = $4`,
+        [attempts, lockUntil, req.ip, admin.id]
+      );
+
+      return res.status(401).json({
+        error: "Invalid credentials",
+        attempts_left: attempts >= 5 ? 0 : 5 - attempts,
       });
     }
 
-    const isValid = await bcrypt.compare(password, admin.password_hash);
-    if (!isValid) {
-      const attempts = admin.failed_login_attempts + 1;
-      let lockedUntil = null;
-
-      if (attempts >= 5) {
-        lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 min lock
-        await client.query(
-          "UPDATE admins SET failed_login_attempts = $1, locked_until = $2 WHERE id = $3",
-          [attempts, lockedUntil, admin.id]
-        );
-        client.release();
-        return res.status(403).json({ error: "Too many failed attempts. Account locked for 30 minutes." });
-      } else {
-        await client.query(
-          "UPDATE admins SET failed_login_attempts = $1 WHERE id = $2",
-          [attempts, admin.id]
-        );
-      }
-
-      client.release();
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    // Success: Reset attempts + log login
-    await client.query(
+    // Success → reset attempts
+    await pool.query(
       `UPDATE admins 
-       SET failed_login_attempts = 0, locked_until = NULL, 
-           last_login_at = NOW(), last_login_ip = $1 
+       SET failed_login_attempts = 0, locked_until = NULL,
+           last_login_at = NOW(), last_login_ip = $1
        WHERE id = $2`,
-      [req.ip || req.connection.remoteAddress, admin.id]
+      [req.ip, admin.id]
     );
 
     const { accessToken, refreshToken } = generateTokens(admin);
-
-    res.cookie("adminRefreshToken", refreshToken, {
-      ...cookieOptions,
-      path: "/api/admin",
-    });
-
-    client.release();
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
     return res.json({
-      message: "Admin login successful",
+      message: "Login successful",
       admin: {
         id: admin.id,
-        full_name: admin.full_name,
         email: admin.email,
+        full_name: admin.full_name,
         company_name: admin.company_name,
         role: admin.role,
       },
       accessToken,
-      expiresIn: 900,
     });
   } catch (err) {
     console.error("Admin login error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
-// ========================
-// 3. ADMIN FORGOT PASSWORD
-// ========================
+// ======================
+// 3. FORGOT PASSWORD
+// ======================
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email is required" });
 
   try {
-    const client = await pool.connect();
+    if (!email) return res.status(400).json({ error: "Email required" });
 
-    const result = await client.query(
+    const result = await pool.query(
       "SELECT id, full_name FROM admins WHERE LOWER(email) = LOWER($1)",
       [email]
     );
-
     const admin = result.rows[0];
 
-    // Always return same message (security)
+    // Always respond the same (security)
     if (!admin) {
-      client.release();
-      return res.json({ message: "If an admin account exists, a reset link has been sent." });
+      return res.json({ message: "If account exists, a reset link was sent." });
     }
 
-    const token = randomBytes(32).toString("hex");
+    const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    await client.query(
+    await pool.query(
       `UPDATE admins 
-       SET reset_password_token = $1, reset_password_expires_at = $2 
+       SET reset_password_token = $1, reset_password_expires_at = $2
        WHERE id = $3`,
       [token, expiresAt, admin.id]
     );
 
     const resetLink = `${process.env.ADMIN_DASHBOARD_URL}/reset-password?token=${token}`;
-    await sendPasswordResetEmail(admin.full_name, email, resetLink, true); // true = admin template
+    console.log("Admin Reset Link (send via email):", resetLink);
+    // sendEmail(admin.email, "Admin Password Reset", resetLink);
 
-    client.release();
-    return res.json({ message: "If an admin account exists, a reset link has been sent." });
+    return res.json({ message: "If account exists, a reset link was sent." });
   } catch (err) {
     console.error("Admin forgot password error:", err);
-    return res.status(500).json({ error: "Failed to send reset email" });
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
-// ========================
-// 4. ADMIN RESET PASSWORD
-// ========================
+// ======================
+// 4. RESET PASSWORD
+// ======================
 router.post("/reset-password", async (req, res) => {
-  const { token, password } = req.body;
-
-  if (!token || !password) {
-    return res.status(400).json({ error: "Token and password are required" });
-  }
-
-  if (password.length < 10) {
-    return res.status(400).json({ error: "Password must be at least 10 characters" });
-  }
+  const { token, newPassword } = req.body;
 
   try {
-    const client = await pool.connect();
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: "Token and password required" });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Password too short" });
+    }
 
-    const result = await client.query(
+    const result = await pool.query(
       `SELECT id FROM admins 
        WHERE reset_password_token = $1 
          AND reset_password_expires_at > NOW()`,
@@ -283,36 +250,72 @@ router.post("/reset-password", async (req, res) => {
     );
 
     if (!result.rows[0]) {
-      client.release();
       return res.status(400).json({ error: "Invalid or expired token" });
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const password_hash = await bcrypt.hash(newPassword, 12);
 
-    await client.query(
+    await pool.query(
       `UPDATE admins 
        SET password_hash = $1, 
            reset_password_token = NULL, 
-           reset_password_expires_at = NULL,
-           updated_at = NOW()
-       WHERE reset_password_token = $2`,
-      [password_hash, token]
+           reset_password_expires_at = NULL
+       WHERE id = $2`,
+      [password_hash, result.rows[0].id]
     );
 
-    client.release();
-    return res.json({ message: "Admin password reset successfully" });
+    return res.json({ message: "Password updated successfully" });
   } catch (err) {
     console.error("Admin reset password error:", err);
-    return res.status(500).json({ error: "Failed to reset password" });
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
-// ========================
-// 5. ADMIN LOGOUT
-// ========================
+// ======================
+// 5. AUTH MIDDLEWARE (for protected routes)
+// ======================
+export const adminAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+
+  if (!token) return res.status(401).json({ error: "Access token required" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const result = await pool.query(
+      "SELECT id, email, full_name, company_name, role FROM admins WHERE id = $1",
+      [decoded.id]
+    );
+    if (!result.rows[0]) return res.status(401).json({ error: "Invalid token" });
+
+    req.admin = result.rows[0];
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
+};
+
+// ======================
+// 6. GET CURRENT ADMIN (/me)
+// ======================
+router.get("/me", adminAuth, (req, res) => {
+  return res.json({
+    admin: {
+      id: req.admin.id,
+      email: req.admin.email,
+      full_name: req.admin.full_name,
+      company_name: req.admin.company_name,
+      role: req.admin.role,
+    },
+  });
+});
+
+// ======================
+// 7. LOGOUT
+// ======================
 router.post("/logout", (req, res) => {
-  res.clearCookie("adminRefreshToken", { ...cookieOptions, path: "/api/admin" });
-  return res.json({ message: "Admin logged out" });
+  res.clearCookie("refreshToken", cookieOptions);
+  return res.json({ message: "Logged out" });
 });
 
 export default router;

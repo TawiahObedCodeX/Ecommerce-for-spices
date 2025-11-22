@@ -2,32 +2,27 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../Config/db.js";
-import { randomBytes } from "crypto";
-import { sendPasswordResetEmail } from "../utils/email.js"; // You'll create this
+import { gen_random_uuid } from "pgcrypto"; // not needed in JS, just for reference
+import crypto from "crypto";
 
 const router = express.Router();
 
-// Cookie options (secure even in dev with mkcert)
+// Cookie settings (secure in production)
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production" ? true : false, // false only in dev without HTTPS
+  secure: process.env.NODE_ENV === "production", // true in prod, false in dev (for localhost)
   sameSite: "strict",
   path: "/",
-  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for refresh token cookie
-  signed: true,
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
-// Generate both access & refresh tokens
+// Generate JWT Access + Refresh Tokens
 const generateTokens = (user) => {
-  const payload = {
-    id: user.id,
-    email: user.email.toLowerCase(),
-    role: user.role || "user",
-  };
-
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "15m",
-  });
+  const accessToken = jwt.sign(
+    { id: user.id, email: user.email, role: user.role || "user" },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
 
   const refreshToken = jwt.sign(
     { id: user.id },
@@ -38,28 +33,26 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
-// ========================
+// ======================
 // 1. SIGNUP ROUTE
-// ========================
+// ======================
 router.post("/signup", async (req, res) => {
   const { full_name, email, password, age, phone } = req.body;
 
-  if (!full_name || !email || !password) {
-    return res.status(400).json({ error: "Full name, email and password are required" });
-  }
-
-  if (password.length < 8) {
-    return res.status(400).json({ error: "Password must be at least 8 characters" });
-  }
-
   try {
-    const client = await pool.connect();
+    // Basic validation
+    if (!full_name || !email || !password) {
+      return res.status(400).json({ error: "Full name, email, and password are required" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
 
     // Check if email already exists (case-insensitive thanks to CITEXT)
-    const existingUser = await client.query("SELECT id FROM clients WHERE email = $1", [email]);
+    const existingUser = await pool.query("SELECT id FROM clients WHERE email = $1", [email]);
     if (existingUser.rows.length > 0) {
-      client.release();
-      return res.status(409).json({ error: "Email already registered" });
+      return res.status(400).json({ error: "Email already registered" });
     }
 
     // Hash password
@@ -67,31 +60,30 @@ router.post("/signup", async (req, res) => {
     const password_hash = await bcrypt.hash(password, saltRounds);
 
     // Insert new client
-    const result = await client.query(
+    const newUser = await pool.query(
       `INSERT INTO clients (
         full_name, email, password_hash, age, phone
       ) VALUES ($1, $2, $3, $4, $5)
       RETURNING id, email, full_name, created_at`,
-      [full_name.trim(), email.toLowerCase(), password_hash, age || null, phone || null]
+      [full_name, email, password_hash, age || null, phone || null]
     );
 
-    const user = result.rows[0];
+    const user = newUser.rows[0];
+
+    // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Set refresh token in httpOnly cookie
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    client.release();
-
     return res.status(201).json({
       message: "Account created successfully",
       user: {
         id: user.id,
-        full_name: user.full_name,
         email: user.email,
+        full_name: user.full_name,
       },
       accessToken,
-      expiresIn: 900,
     });
   } catch (err) {
     console.error("Signup error:", err);
@@ -99,45 +91,38 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// ========================
+// ======================
 // 2. LOGIN ROUTE
-// ========================
+// ======================
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
-  }
-
   try {
-    const client = await pool.connect();
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
 
-    const result = await client.query(
+    // Find user + check status
+    const result = await pool.query(
       `SELECT id, email, full_name, password_hash, is_banned, failed_login_attempts, locked_until
        FROM clients WHERE email = $1`,
-      [email.toLowerCase()]
+      [email]
     );
 
     const user = result.rows[0];
 
     if (!user) {
-      client.release();
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Check if account is banned
     if (user.is_banned) {
-      client.release();
-      return res.status(403).json({ error: "Account is banned" });
+      return res.status(403).json({ error: "Your account is banned" });
     }
 
-    // Check if account is locked due to too many failed attempts
+    // Check if account is locked (too many failed attempts)
     if (user.locked_until && new Date(user.locked_until) > new Date()) {
-      client.release();
-      return res.status(403).json({
-        error: "Account temporarily locked. Try again later.",
-        locked_until: user.locked_until,
-      });
+      return res.status(403).json({ error: "Account locked. Try again later." });
     }
 
     // Compare password
@@ -145,49 +130,44 @@ router.post("/login", async (req, res) => {
     if (!isValidPassword) {
       // Increment failed attempts
       const attempts = user.failed_login_attempts + 1;
-      let lockedUntil = null;
+      const lockTime = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // 15 min lock after 5 tries
 
-      if (attempts >= 5) {
-        lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // lock for 15 mins
-        await client.query(
-          "UPDATE clients SET failed_login_attempts = $1, locked_until = $2 WHERE id = $3",
-          [attempts, lockedUntil, user.id]
-        );
-        client.release();
-        return res.status(403).json({ error: "Too many failed attempts. Account locked for 15 minutes." });
-      } else {
-        await client.query(
-          "UPDATE clients SET failed_login_attempts = $1 WHERE id = $2",
-          [attempts, user.id]
-        );
-      }
+      await pool.query(
+        `UPDATE clients 
+         SET failed_login_attempts = $1, locked_until = $2, last_login_ip = $3
+         WHERE id = $4`,
+        [attempts, lockTime, req.ip, user.id]
+      );
 
-      client.release();
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({ 
+        error: "Invalid email or password",
+        attempts_left: 5 - attempts > 0 ? 5 - attempts : 0
+      });
     }
 
-    // Successful login → reset failed attempts + update last login
-    await client.query(
+    // Successful login → reset failed attempts & update last login
+    await pool.query(
       `UPDATE clients 
-       SET failed_login_attempts = 0, locked_until = NULL, last_login_at = NOW(), last_login_ip = $1 
+       SET failed_login_attempts = 0, locked_until = NULL, 
+           last_login_at = NOW(), last_login_ip = $1
        WHERE id = $2`,
-      [req.ip || req.connection.remoteAddress, user.id]
+      [req.ip, user.id]
     );
 
+    // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
 
+    // Set refresh token cookie
     res.cookie("refreshToken", refreshToken, cookieOptions);
-    client.release();
 
     return res.json({
       message: "Login successful",
       user: {
         id: user.id,
-        full_name: user.full_name,
         email: user.email,
+        full_name: user.full_name,
       },
       accessToken,
-      expiresIn: 900,
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -195,70 +175,63 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ========================
-// 3. FORGOT PASSWORD (Send Reset Link)
-// ========================
+// ======================
+// 3. FORGOT PASSWORD (Send Reset Token)
+// ======================
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
-  if (!email) return res.status(400).json({ error: "Email is required" });
-
   try {
-    const client = await pool.connect();
+    if (!email) return res.status(400).json({ error: "Email is required" });
 
-    const result = await client.query("SELECT id, full_name FROM clients WHERE email = $1", [
-      email.toLowerCase(),
-    ]);
-
-    const user = result.rows[0];
+    const userResult = await pool.query("SELECT id, full_name FROM clients WHERE email = $1", [email]);
+    const user = userResult.rows[0];
 
     if (!user) {
-      // Security: Don't reveal if email exists
-      client.release();
-      return res.json({ message: "If the email exists, a reset link has been sent." });
+      // Don't reveal if email exists → security best practice
+      return res.json({ message: "If your email exists, a reset link has been sent." });
     }
 
-    // Generate secure token
-    const token = randomBytes(32).toString("hex");
+    // Generate secure random token
+    const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    await client.query(
+    await pool.query(
       `UPDATE clients 
-       SET reset_password_token = $1, reset_password_expires_at = $2 
+       SET reset_password_token = $1, reset_password_expires_at = $2
        WHERE id = $3`,
       [token, expiresAt, user.id]
     );
 
-    // Send email (implement this function)
+    // TODO: Send email with this link
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    await sendPasswordResetEmail(user.full_name, email, resetLink);
+    
+    console.log("Password reset link (send via email):", resetLink);
+    // Example: sendEmail(email, "Reset Your Password", `Click here: ${resetLink}`);
 
-    client.release();
-    return res.json({ message: "If the email exists, a password reset link has been sent." });
+    return res.json({ message: "If your email exists, a reset link has been sent." });
   } catch (err) {
     console.error("Forgot password error:", err);
-    return res.status(500).json({ error: "Failed to send reset email" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// ========================
-// 4. RESET PASSWORD (With Token)
-// ========================
+// ======================
+// 4. RESET PASSWORD
+// ======================
 router.post("/reset-password", async (req, res) => {
-  const { token, password } = req.body;
-
-  if (!token || !password) {
-    return res.status(400).json({ error: "Token and new password are required" });
-  }
-
-  if (password.length < 8) {
-    return res.status(400).json({ error: "Password must be at least 8 characters" });
-  }
+  const { token, newPassword } = req.body;
 
   try {
-    const client = await pool.connect();
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: "Token and new password are required" });
+    }
 
-    const result = await client.query(
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    const result = await pool.query(
       `SELECT id FROM clients 
        WHERE reset_password_token = $1 
          AND reset_password_expires_at > NOW()`,
@@ -266,33 +239,56 @@ router.post("/reset-password", async (req, res) => {
     );
 
     const user = result.rows[0];
-
     if (!user) {
-      client.release();
       return res.status(400).json({ error: "Invalid or expired reset token" });
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const password_hash = await bcrypt.hash(newPassword, 12);
 
-    await client.query(
+    await pool.query(
       `UPDATE clients 
        SET password_hash = $1, 
            reset_password_token = NULL, 
-           reset_password_expires_at = NULL,
-           updated_at = NOW()
+           reset_password_expires_at = NULL
        WHERE id = $2`,
       [password_hash, user.id]
     );
 
-    client.release();
     return res.json({ message: "Password reset successfully" });
   } catch (err) {
     console.error("Reset password error:", err);
-    return res.status(500).json({ error: "Failed to reset password" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Bonus: Logout (clear cookie)
+// ======================
+// 5. GET CURRENT USER (Protected Route)
+// ======================
+// Add this middleware to protect routes
+const authMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "Access token required" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userResult = await pool.query("SELECT id, email, full_name, avatar_url, created_at FROM clients WHERE id = $1", [decoded.id]);
+    req.user = userResult.rows[0];
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
+};
+
+router.get("/me", authMiddleware, async (req, res) => {
+  return res.json({
+    user: req.user,
+  });
+});
+
+// ======================
+// 6. LOGOUT (Optional - clear cookie)
+// ======================
 router.post("/logout", (req, res) => {
   res.clearCookie("refreshToken", cookieOptions);
   return res.json({ message: "Logged out successfully" });
