@@ -1,22 +1,56 @@
+/**
+ * ClientAuth Routes
+ * ---------------------------------------------
+ * Handles client (end-user) authentication flows:
+ *  - POST   /signup          Create a new client account
+ *  - POST   /login           Client login with email/password
+ *  - POST   /forgot-password Generate and store a reset token, send reset link
+ *  - POST   /reset-password  Reset password using valid token
+ *  - GET    /me              Get current authenticated client profile
+ *  - POST   /logout          Clear refresh token cookie
+ *
+ * Environment variables used:
+ *  - JWT_SECRET: required; used to sign access tokens
+ *  - JWT_REFRESH_SECRET: optional; used to sign refresh tokens (fallback to JWT_SECRET)
+ *  - NODE_ENV: when 'production', secure cookies are enabled
+ *  - FRONTEND_URL: base URL used to generate password reset link
+ *
+ * Database tables expected (columns referenced):
+ *  - clients(id, email, full_name, password_hash, age, phone,
+ *            is_banned, failed_login_attempts, locked_until,
+ *            last_login_at, last_login_ip,
+ *            reset_password_token, reset_password_expires_at,
+ *            created_at)
+ */
+
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../Config/db.js";
-import { gen_random_uuid } from "pgcrypto"; // not needed in JS, just for reference
 import crypto from "crypto";
 
 const router = express.Router();
 
-// Cookie settings (secure in production)
+/**
+ * Cookie settings for refresh tokens
+ * - httpOnly: JS cannot read cookie (XSS protection)
+ * - secure: only over HTTPS in production
+ * - sameSite strict: mitigates CSRF for cross-site requests
+ * - path '/' and 30 days lifetime
+ */
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // true in prod, false in dev (for localhost)
+  secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
   path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
-// Generate JWT Access + Refresh Tokens
+/**
+ * Generate JWT access and refresh tokens for a user
+ * @param {{ id: string | number, email: string, role?: string }} user
+ * @returns {{ accessToken: string, refreshToken: string }}
+ */
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, role: user.role || "user" },
@@ -33,9 +67,12 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
-// ======================
-// 1. SIGNUP ROUTE
-// ======================
+// ====================================================================
+// 1) SIGNUP
+// Route: POST /signup
+// Body: { full_name: string, email: string, password: string, age?: number, phone?: string }
+// Response: 201 Created with user summary and access token
+// ====================================================================
 router.post("/signup", async (req, res) => {
   const { full_name, email, password, age, phone } = req.body;
 
@@ -49,8 +86,11 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
-    // Check if email already exists (case-insensitive thanks to CITEXT)
-    const existingUser = await pool.query("SELECT id FROM clients WHERE email = $1", [email]);
+    // Check if email already exists
+    const existingUser = await pool.query(
+      "SELECT id FROM clients WHERE email = $1",
+      [email]
+    );
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: "Email already registered" });
     }
@@ -91,9 +131,13 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// ======================
-// 2. LOGIN ROUTE
-// ======================
+// ====================================================================
+// 2) LOGIN
+// Route: POST /login
+// Body: { email: string, password: string }
+// Response: 200 OK with user summary and access token
+// - Implements basic account lockout after 5 failed attempts (15 min)
+// ====================================================================
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -175,16 +219,22 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ======================
-// 3. FORGOT PASSWORD (Send Reset Token)
-// ======================
+// ====================================================================
+// 3) FORGOT PASSWORD (Send Reset Token)
+// Route: POST /forgot-password
+// Body: { email: string }
+// Response: 200 OK (always generic to avoid account enumeration)
+// ====================================================================
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
   try {
     if (!email) return res.status(400).json({ error: "Email is required" });
 
-    const userResult = await pool.query("SELECT id, full_name FROM clients WHERE email = $1", [email]);
+    const userResult = await pool.query(
+      "SELECT id, full_name FROM clients WHERE email = $1",
+      [email]
+    );
     const user = userResult.rows[0];
 
     if (!user) {
@@ -203,11 +253,9 @@ router.post("/forgot-password", async (req, res) => {
       [token, expiresAt, user.id]
     );
 
-    // TODO: Send email with this link
+    // TODO: Send email with this link using your mail provider
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    
     console.log("Password reset link (send via email):", resetLink);
-    // Example: sendEmail(email, "Reset Your Password", `Click here: ${resetLink}`);
 
     return res.json({ message: "If your email exists, a reset link has been sent." });
   } catch (err) {
@@ -216,9 +264,12 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// ======================
-// 4. RESET PASSWORD
-// ======================
+// ====================================================================
+// 4) RESET PASSWORD
+// Route: POST /reset-password
+// Body: { token: string, newPassword: string }
+// Response: 200 OK when password updated
+// ====================================================================
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
@@ -261,10 +312,10 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
-// ======================
-// 5. GET CURRENT USER (Protected Route)
-// ======================
-// Add this middleware to protect routes
+// ====================================================================
+// 5) AUTH MIDDLEWARE for client routes (used for /me)
+// Extracts Bearer token, validates, and loads basic user profile
+// ====================================================================
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -272,23 +323,38 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userResult = await pool.query("SELECT id, email, full_name, avatar_url, created_at FROM clients WHERE id = $1", [decoded.id]);
+    const userResult = await pool.query(
+      "SELECT id, email, full_name, avatar_url, created_at FROM clients WHERE id = $1",
+      [decoded.id]
+    );
     req.user = userResult.rows[0];
+
+    if (!req.user) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 };
 
+// ====================================================================
+// 6) GET CURRENT USER PROFILE
+// Route: GET /me (protected)
+// Response: 200 OK with user object from authMiddleware
+// ====================================================================
 router.get("/me", authMiddleware, async (req, res) => {
   return res.json({
     user: req.user,
   });
 });
 
-// ======================
-// 6. LOGOUT (Optional - clear cookie)
-// ======================
+// ====================================================================
+// 7) LOGOUT
+// Route: POST /logout
+// Clears refresh token cookie (no server-side token blacklist here)
+// ====================================================================
 router.post("/logout", (req, res) => {
   res.clearCookie("refreshToken", cookieOptions);
   return res.json({ message: "Logged out successfully" });
