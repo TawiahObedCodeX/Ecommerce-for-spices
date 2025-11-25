@@ -225,6 +225,7 @@ router.post("/login", async (req, res) => {
 // Body: { email: string }
 // Response: 200 OK (always generic to avoid account enumeration)
 // ====================================================================
+
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
