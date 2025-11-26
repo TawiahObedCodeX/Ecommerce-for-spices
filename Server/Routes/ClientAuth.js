@@ -138,6 +138,7 @@ router.post("/signup", async (req, res) => {
 // Response: 200 OK with user summary and access token
 // - Implements basic account lockout after 5 failed attempts (15 min)
 // ====================================================================
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
