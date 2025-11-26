@@ -20,8 +20,8 @@ Server.get("/", (req, res) => {
 });
 
 // Corrected fallback port
-const Port = process.env.PORT || 5000;
+const Port = process.env.PORT || 5002;
 
-Server.listen(Port, "127.0.0.1", () => {
+Server.listen(Port, "::1", () => {
   console.log(`server is running at http://localhost:${Port}`);
 });
