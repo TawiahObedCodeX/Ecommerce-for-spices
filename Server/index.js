@@ -1,18 +1,24 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import AdminAuth from './Routes/AdminAuth.js';
-import ClientAuth from './Routes/ClientAuth.js';
+import morgan from "morgan"; // <--- ADD THIS
+import AdminAuth from "./Routes/AdminAuth.js";
+import ClientAuth from "./Routes/ClientAuth.js";
 
 dotenv.config();
 
 const Server = express();
 
+// ==========================
 // Middleware
+// ==========================
+Server.use(morgan("dev")); // <--- ADD THIS (logs all requests)
 Server.use(express.json());
 Server.use(cookieParser());
-Server.use('/auth/admin', AdminAuth);
-Server.use('/auth/client', ClientAuth);
+
+// Routes
+Server.use("/auth/admin", AdminAuth);
+Server.use("/auth/client", ClientAuth);
 
 // Test Route
 Server.get("/", (req, res) => {

@@ -6,7 +6,7 @@ dotenv.config();
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
-  database: process.env.DB_NAME_CLIENT,   // FIXED
+  database: process.env.DB_NAME_ADMIN,   // FIXED
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
 });
