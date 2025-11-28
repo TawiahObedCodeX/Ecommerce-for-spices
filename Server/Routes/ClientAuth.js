@@ -160,7 +160,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Check if account is banned
+    // Check if account is banned 
     if (user.is_banned) {
       return res.status(403).json({ error: "Your account is banned" });
     }
