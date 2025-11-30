@@ -5,6 +5,7 @@ import morgan from "morgan"; // <--- ADD THIS
 import AdminAuth from "./Routes/AdminAuth.js";
 import ClientAuth from "./Routes/ClientAuth.js";
 import cors from "cors";
+import pool from "./Config/db.js"
 
 dotenv.config();
 
@@ -34,6 +35,12 @@ Server.get("/", (req, res) => {
 // Corrected fallback port
 const Port = process.env.PORT || 5002;
 
-Server.listen(Port, "localhost", () => {
+Server.listen(Port, "localhost", async () => {
   console.log(`server is running at http://localhost:${Port}`);
+  try {
+       const res = await pool.query('SELECT current_database(), current_schema(), version()');
+    console.log("DATABASE CHECK:", res.rows);
+  } catch (error) {
+    console.error("DB Check failed:", error);
+  }
 });
