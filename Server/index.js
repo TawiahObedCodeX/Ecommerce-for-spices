@@ -4,10 +4,16 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan"; // <--- ADD THIS
 import AdminAuth from "./Routes/AdminAuth.js";
 import ClientAuth from "./Routes/ClientAuth.js";
+import cors from "cors";
 
 dotenv.config();
 
 const Server = express();
+
+// ==========================
+// Middleware
+// ==========================
+Server.use(cors());
 
 // ==========================
 // Middleware
