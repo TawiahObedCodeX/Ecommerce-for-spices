@@ -20,6 +20,7 @@ const ClientAuth = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -84,6 +85,7 @@ const ClientAuth = () => {
         email: formData.email,
         password: formData.password,
         age: formData.age ? parseInt(formData.age) : undefined,
+        phone: formData.phone || undefined,
       }),
     });
 
@@ -107,7 +109,7 @@ const ClientAuth = () => {
     });
 
     // Show success toast
-    toast.success(`Welcome back, ${data.user.full_name}!`);
+    toast.success("Account created successfully");
 
     navigate("/dashboard-client");
   };
@@ -141,6 +143,7 @@ const ClientAuth = () => {
     setFormData({
       fullName: "",
       age: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -148,7 +151,7 @@ const ClientAuth = () => {
     });
 
     // Show success toast
-    toast.success("Account created successfully! Welcome to Melo's Spices.");
+    toast.success("Login successful");
 
     navigate("/dashboard-client");
   };
@@ -177,6 +180,7 @@ const ClientAuth = () => {
     setFormData({
       fullName: "",
       age: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -224,6 +228,7 @@ const ClientAuth = () => {
     setFormData({
       fullName: "",
       age: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -288,6 +293,19 @@ const ClientAuth = () => {
           </div>
           <div className="space-y-1">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Phone
+            </label>
+            <motion.input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all shadow-sm text-sm"
+              whileFocus={{ scale: 1.02 }}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
               Email Address
             </label>
             <motion.input
@@ -313,7 +331,21 @@ const ClientAuth = () => {
               whileFocus={{ scale: 1.02 }}
               required
             />
-            <p className="text-xs text-gray-500">6+ characters</p>
+            <p className="text-xs text-gray-500">8+ characters</p>
+          </div>
+          <div className="space-y-1">
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Confirm Password
+            </label>
+            <motion.input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all shadow-sm text-sm"
+              whileFocus={{ scale: 1.02 }}
+              required
+            />
           </div>
           <div className="flex items-start">
             <input
@@ -550,7 +582,7 @@ const ClientAuth = () => {
           className="w-full h-32 sm:h-48 lg:h-64 object-cover hidden sm:block"
           whileHover={{ scale: 1.05 }}
         />
-        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
       </motion.div>
       <motion.h2
         className="font-playfair-display-bold text-lg sm:text-xl lg:text-3xl text-text-dark mb-2 sm:mb-4"

@@ -108,7 +108,7 @@ const AdminAuth = () => {
     });
 
     // Show success toast
-    toast.success(`Welcome back, ${data.admin.full_name}!`);
+    toast.success("Account created successfully");
 
     navigate("/dashboard-admin");
   };
@@ -149,7 +149,7 @@ const AdminAuth = () => {
     });
 
     // Show success toast
-    toast.success("Admin account created successfully! Welcome aboard.");
+    toast.success("Login successful");
 
     navigate("/dashboard-admin");
   };
@@ -314,7 +314,7 @@ const AdminAuth = () => {
               whileFocus={{ scale: 1.02 }}
               required
             />
-            <p className="text-xs text-gray-500">6+ characters</p>
+            <p className="text-xs text-gray-500">8+ characters</p>
           </div>
           <div className="space-y-0.5">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
@@ -329,6 +329,23 @@ const AdminAuth = () => {
               whileFocus={{ scale: 1.02 }}
               required
             />
+          </div>
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="terms"
+              className="mt-1 mr-2 rounded"
+              required
+            />
+            <label
+              htmlFor="terms"
+              className="text-xs font-montserrat-regular text-charcoal"
+            >
+              I agree to all statements included in the{" "}
+              <a href="#" className="text-accent hover:underline">
+                terms of service
+              </a>
+            </label>
           </div>
           <motion.button
             type="submit"
