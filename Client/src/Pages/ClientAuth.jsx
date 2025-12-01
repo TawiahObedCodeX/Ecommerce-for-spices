@@ -1,13 +1,22 @@
-// ClientAuth.jsx - Centered form, no scroll, view switching via text links, forget password link in signup/login
+// ClientAuth.jsx - Frontend component for Client (User) Authentication
+// This component handles client signup, login, password reset flows
+// Integrates with backend API endpoints for secure user authentication
+// Uses JWT tokens for session management and protected client routes
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import spices from "../assets/Spiceslogo.png";
 import Loading from "../Components/Loading";
 
 const ClientAuth = () => {
+  // State management for different auth views
   const [view, setView] = useState("signup"); // 'signup', 'login', 'forget', 'reset'
+
+  // Loading state to show spinner during API calls
   const [isLoading, setIsLoading] = useState(false);
+
+  // Form data state for all input fields
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -16,33 +25,78 @@ const ClientAuth = () => {
     confirmPassword: "",
     newPassword: "",
   });
+
+  // Navigation hook for redirecting after successful auth
   const navigate = useNavigate();
+
+  // Backend API base URL - adjust for production deployment
+  const API_BASE = "http://localhost:5002";
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Main form submission handler - routes to specific auth methods
+  // Validates form data and calls appropriate backend API endpoint
+  // Handles success/error responses and user navigation
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    console.log("Form submitted:", { role: "client", view, data: formData });
 
-    // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    if (view === "signup") {
-      alert("Client account created successfully!");
-      navigate("/dashbord-client");
-    } else if (view === "login") {
-      navigate("/dashbord-client");
-    } else if (view === "forget") {
-      alert("Reset link sent to your email!");
-      setView("reset");
-    } else if (view === "reset") {
-      alert("Password reset successfully!");
-      setView("login");
+    try {
+      if (view === "signup") {
+        await handleSignup();
+      } else if (view === "login") {
+        await handleLogin();
+      } else if (view === "forget") {
+        await handleForgotPassword();
+      } else if (view === "reset") {
+        await handleResetPassword();
+      }
+    } catch (err) {
+      // Display error message as toast notification
+      toast.error(err.message || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Client signup API call
+  // Sends user registration data to backend
+  // On success: stores token, navigates to dashboard
+  const handleSignup = async () => {
+    // Frontend validation
+    if (formData.password !== formData.confirmPassword) {
+      throw new Error("Passwords do not match");
+    }
+    if (formData.password.length < 8) {
+      throw new Error("Password must be at least 8 characters");
+    }
+
+    // API call to backend signup endpoint
+    const response = await fetch(`${API_BASE}/auth/client/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        age: formData.age ? parseInt(formData.age) : undefined,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Signup failed");
+    }
+
+    // Store access token in localStorage for session management
+    localStorage.setItem("clientToken", data.accessToken);
+
+    // Clear form and navigate to client dashboard
     setFormData({
       fullName: "",
       age: "",
@@ -51,7 +105,131 @@ const ClientAuth = () => {
       confirmPassword: "",
       newPassword: "",
     });
-    setIsLoading(false);
+
+    // Show success toast
+    toast.success(`Welcome back, ${data.user.full_name}!`);
+
+    navigate("/dashboard-client");
+  };
+
+  // Client login API call
+  // Authenticates client credentials with backend
+  // On success: stores token, navigates to dashboard
+  const handleLogin = async () => {
+    // API call to backend login endpoint
+    const response = await fetch(`${API_BASE}/auth/client/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Login failed");
+    }
+
+    // Store access token for authenticated requests
+    localStorage.setItem("clientToken", data.accessToken);
+
+    // Clear form and navigate to client dashboard
+    setFormData({
+      fullName: "",
+      age: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      newPassword: "",
+    });
+
+    // Show success toast
+    toast.success("Account created successfully! Welcome to Melo's Spices.");
+
+    navigate("/dashboard-client");
+  };
+
+  // Forgot password API call
+  // Initiates password reset process by sending reset email
+  // Backend generates secure token and sends email link
+  const handleForgotPassword = async () => {
+    const response = await fetch(`${API_BASE}/auth/client/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to send reset email");
+    }
+
+    // Clear form and switch to reset view
+    setFormData({
+      fullName: "",
+      age: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      newPassword: "",
+    });
+    setView("reset");
+  };
+
+  // Reset password API call
+  // Uses token from email link to reset password
+  // Token should be extracted from URL parameters in real implementation
+  const handleResetPassword = async () => {
+    if (formData.newPassword !== formData.confirmPassword) {
+      throw new Error("Passwords do not match");
+    }
+    if (formData.newPassword.length < 8) {
+      throw new Error("Password must be at least 8 characters");
+    }
+
+    // In real implementation, get token from URL query params
+    // For now, using a placeholder - should be extracted from reset link
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (!token) {
+      throw new Error("Invalid reset link. Please request a new one.");
+    }
+
+    const response = await fetch(`${API_BASE}/auth/client/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token: token,
+        newPassword: formData.newPassword,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Password reset failed");
+    }
+
+    // Clear form and navigate back to login
+    setFormData({
+      fullName: "",
+      age: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      newPassword: "",
+    });
+    setView("login");
   };
 
   // Variants for form transitions
@@ -260,6 +438,7 @@ const ClientAuth = () => {
           onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
+
           <div className="space-y-1">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
               Email Address
@@ -304,6 +483,7 @@ const ClientAuth = () => {
           onSubmit={handleSubmit}
           className="space-y-2 sm:space-y-3 max-w-md w-full"
         >
+
           <div className="space-y-1">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
               New Password
@@ -317,7 +497,7 @@ const ClientAuth = () => {
               whileFocus={{ scale: 1.02 }}
               required
             />
-            <p className="text-xs text-gray-500">6+ characters</p>
+            <p className="text-xs text-gray-500">8+ characters</p>
           </div>
           <div className="space-y-1">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">

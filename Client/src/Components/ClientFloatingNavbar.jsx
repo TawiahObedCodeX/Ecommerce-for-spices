@@ -83,7 +83,11 @@ const ClientFloatingNavbar = () => {
   const handleTabClick = (index) => {
     setActiveTab(index);
     const tab = tabs[index];
-    if (tab.route) {
+    if (tab.name === "Logout") {
+      // Handle logout
+      localStorage.removeItem("clientToken");
+      navigate("/clientform");
+    } else if (tab.route) {
       navigate(tab.route);
       // Reset store notification if clicking on Store
       if (index === 0 && storeNotificationCount > 0) {

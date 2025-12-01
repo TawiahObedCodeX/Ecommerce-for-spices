@@ -49,7 +49,11 @@ const AdminFloatingNavbar = () => {
   const handleTabClick = (index) => {
     setActiveTab(index);
     const tab = tabs[index];
-    if (tab.route) {
+    if (tab.name === "Logout") {
+      // Handle logout
+      localStorage.removeItem("adminToken");
+      navigate("/adminform");
+    } else if (tab.route) {
       navigate(tab.route);
       // Reset notification if clicking on View
       if (index === 1 && notificationCount > 0) {
