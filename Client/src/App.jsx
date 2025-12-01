@@ -50,7 +50,7 @@ export default function App() {
         </Route>
         {/* Admin Routes */}
         {/* Client Routes */}
-<Route path="/dashbord-client" element={<DashboardForClient />}>
+ <Route path="/dashboard-client" element={<DashboardForClient />}>
   <Route index element={<ClientBrowserAdds />} />
   <Route path="addtocart" element={<ClientAddtocart />} />
   <Route path="clientpaymentsystem" element={<Clientpaymentsystem />} />

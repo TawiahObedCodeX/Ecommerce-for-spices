@@ -54,12 +54,11 @@ export default function DashboardForClient() {
   }
 
   return (
-    <div className='flex flex-col h-screen'>
+    <div className='flex flex-col h-screen  '>
       {/* Header with client name */}
-      <header className="bg-white shadow-sm border-b px-4 py-3 flex justify-end items-center">
-        <div className="text-right">
-          <p className="text-sm text-gray-600">Welcome,</p>
-          <p className="font-semibold text-gray-800">{clientName || "Client"}</p>
+      <header className="flex justify-end  mt-4 mr-6 items-center  ">
+        <div className="text-right bg-black rounded-2xl px-7 py-2  ">
+          <p className="text-sm text-white">Welcome, {clientName || "Client"}</p>
         </div>
       </header>
 
