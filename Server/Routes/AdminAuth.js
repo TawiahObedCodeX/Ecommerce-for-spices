@@ -56,18 +56,6 @@ router.post("/signup", async (req, res) => {
     const validRoles = ["admin", "superadmin"];
     const finalRole = role && validRoles.includes(role) ? role : "admin";
 
-    // Check if this would be the first admin → allow without auth
-    const totalAdmins = await pool.query("SELECT COUNT(*) FROM admins");
-    const isFirstAdmin = totalAdmins.rows[0].count === "0";
-
-    // In real app: protect this route with superadmin middleware
-    // For now: allow first admin, otherwise block direct signup
-    if (!isFirstAdmin) {
-      return res.status(403).json({
-        error: "Admin signup is restricted. Contact superadmin.",
-      });
-    }
-
     // Check if email already exists (case-insensitive)
     const existing = await pool.query(
       "SELECT id FROM admins WHERE LOWER(email) = LOWER($1)",

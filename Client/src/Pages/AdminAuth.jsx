@@ -24,6 +24,7 @@ const AdminAuth = () => {
     password: "",
     confirmPassword: "",
     newPassword: "",
+    role: "admin",
   });
 
   // Navigation hook for redirecting after successful auth
@@ -84,7 +85,7 @@ const AdminAuth = () => {
         company_name: formData.companyName,
         email: formData.email,
         password: formData.password,
-        role: "admin", // Default role, can be modified for superadmin
+        role: formData.role,
       }),
     });
 
@@ -105,6 +106,7 @@ const AdminAuth = () => {
       password: "",
       confirmPassword: "",
       newPassword: "",
+      role: "admin",
     });
 
     // Show success toast
@@ -146,6 +148,7 @@ const AdminAuth = () => {
       password: "",
       confirmPassword: "",
       newPassword: "",
+      role: "admin",
     });
 
     // Show success toast
@@ -182,6 +185,7 @@ const AdminAuth = () => {
       password: "",
       confirmPassword: "",
       newPassword: "",
+      role: "admin",
     });
     setView("reset");
   };
@@ -229,6 +233,7 @@ const AdminAuth = () => {
       password: "",
       confirmPassword: "",
       newPassword: "",
+      role: "admin",
     });
     setView("login");
   };
@@ -286,6 +291,22 @@ const AdminAuth = () => {
               whileFocus={{ scale: 1.02 }}
               required
             />
+          </div>
+          <div className="space-y-0.5">
+            <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">
+              Role
+            </label>
+            <motion.select
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all shadow-sm text-sm"
+              whileFocus={{ scale: 1.02 }}
+              required
+            >
+              <option value="admin">Admin</option>
+              <option value="superadmin">Super Admin</option>
+            </motion.select>
           </div>
           <div className="space-y-0.5">
             <label className="block text-xs sm:text-sm font-montserrat-medium text-charcoal">

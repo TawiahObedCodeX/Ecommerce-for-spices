@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @font-face {
@@ -7,215 +8,6 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-BlackItalic.ttf') format('truetype');
-  font-weight: 900;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-BoldItalic.ttf') format('truetype');
-  font-weight: 700;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-ExtraBoldItalic.ttf') format('truetype');
-  font-weight: 800;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-ExtraLightItalic.ttf') format('truetype');
-  font-weight: 200;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-LightItalic.ttf') format('truetype');
-  font-weight: 300;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-SemiBoldItalic.ttf') format('truetype');
-  font-weight: 600;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-Thin.ttf') format('truetype');
-  font-weight: 100;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../assets/Font/Montserrat-ThinItalic.ttf') format('truetype');
-  font-weight: 100;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-BlackItalic.ttf') format('truetype');
-  font-weight: 900;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-BoldItalic.ttf') format('truetype');
-  font-weight: 700;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-ExtraBoldItalic.ttf') format('truetype');
-  font-weight: 800;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PlayfairDisplay';
-  src: url('../assets/Font/PlayfairDisplay-SemiBoldItalic.ttf') format('truetype');
-  font-weight: 600;
-  font-style: italic;
-}
 
 /* Font utility classes */
 .font-momo-signature-regular {
@@ -333,73 +125,73 @@
 }
 
 .font-playfair-display-black {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 900;
   font-style: normal;
 }
 
 .font-playfair-display-black-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 900;
   font-style: italic;
 }
 
 .font-playfair-display-bold {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
   font-style: normal;
 }
 
 .font-playfair-display-bold-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
   font-style: italic;
 }
 
 .font-playfair-display-extra-bold {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 800;
   font-style: normal;
 }
 
 .font-playfair-display-extra-bold-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 800;
   font-style: italic;
 }
 
 .font-playfair-display-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 400;
   font-style: italic;
 }
 
 .font-playfair-display-medium {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 500;
   font-style: normal;
 }
 
 .font-playfair-display-medium-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 500;
   font-style: italic;
 }
 
 .font-playfair-display-regular {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 400;
   font-style: normal;
 }
 
 .font-playfair-display-semi-bold {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-playfair-display-semi-bold-italic {
-  font-family: 'PlayfairDisplay', serif;
+  font-family: 'Playfair Display', serif;
   font-weight: 600;
   font-style: italic;
 }
