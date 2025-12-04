@@ -92,7 +92,7 @@ export default function DashboardForClient() {
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right z-50">
                 <div className="p-4 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-semibold">
                       {initials}
                     </div>
                     <div>
