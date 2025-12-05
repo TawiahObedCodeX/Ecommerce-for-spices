@@ -646,14 +646,14 @@ const AdminAuth = () => {
 
         {/* Left: Form - Centered, no border, responsive height */}
         <motion.div
-          className="w-full lg:w-1/2 order-2 lg:order-1 bg-background rounded-3xl p-1 sm:p-2 sm:p-4 lg:p-6 lg:p-8 flex flex-col justify-center items-center flex-1 min-h-0"
+          className="w-full lg:w-1/2 order-2 lg:order-1 bg-background rounded-3xl p-1 sm:p-2 lg:p-6 lg:p-8 flex flex-col justify-center items-center flex-1 min-h-0"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           <motion.h1
             key={view}
-            className="font-playfair-display-bold text-sm sm:text-base sm:text-lg lg:text-2xl text-text-dark mb-0 sm:mb-2 text-center"
+            className="font-playfair-display-bold text-sm sm:text-base lg:text-2xl text-text-dark mb-0 sm:mb-2 text-center"
             variants={titleVariants}
             initial="hidden"
             animate="visible"

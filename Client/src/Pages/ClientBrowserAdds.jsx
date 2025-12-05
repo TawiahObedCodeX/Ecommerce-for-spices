@@ -241,7 +241,7 @@ export default function ClientBrowserAdds() {
                     {!soldOutProducts.has(product.id) && (
                       <button 
                         onClick={() => handleAddToCart(product, index)}
-                        className="bg-secondary/90 text-text-light p-2 rounded-full hover:bg-error shadow-md"
+                        className="bg-black text-text-light p-2 rounded-full hover:bg-error shadow-md"
                       >
                         <ShoppingCart className="w-5 h-5" />
                       </button>
@@ -277,7 +277,7 @@ export default function ClientBrowserAdds() {
                         whileTap={{ scale: 0.98 }}
                         animate={addSuccess === product.id ? { scale: [1, 1.1, 1] } : {}}
                         transition={{ duration: 0.3 }}
-                        className="px-4 py-2 bg-linear-to-r from-orange-500 to-red-500 text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
+                        className="px-4 py-2 bg-black text-text-light rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
                       >
                         <ShoppingCart className="w-4 h-4" />
                         <span>Add to Cart</span>

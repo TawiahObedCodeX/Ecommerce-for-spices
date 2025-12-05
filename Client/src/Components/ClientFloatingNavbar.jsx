@@ -141,7 +141,7 @@ const ClientFloatingNavbar = () => {
               transition={isCart && cartGlow ? { duration: 0.5 } : {}}
               className={`relative flex items-center justify-center p-2 md:p-3 rounded-2xl transition-all duration-300 ease-out group ${
                 isActive
-                  ? "bg-purple-500 text-white shadow-lg"
+                  ? "bg-black text-white shadow-lg"
                   : "text-gray-500 hover:text-purple-500 hover:bg-purple-50"
               }`}
               style={{ width: "auto", height: "auto" }}
@@ -170,7 +170,7 @@ const ClientFloatingNavbar = () => {
               {isActive && (
                 <motion.div
                   layoutId="activeIndicator"
-                  className="absolute inset-0 bg-purple-500 rounded-2xl -z-10"
+                  className="absolute inset-0 bg-black rounded-2xl -z-10"
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
