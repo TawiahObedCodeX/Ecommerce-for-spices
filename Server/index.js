@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan"; // <--- ADD THIS
 import AdminAuth from "./Routes/AdminAuth.js";
 import ClientAuth from "./Routes/ClientAuth.js";
+import  Adminproduct from "./Routes/adminProduct.js"
 import cors from "cors";
 import { createServer } from "net";
 import pool from "./Config/db.js"
@@ -27,6 +28,7 @@ Server.use(cookieParser());
 // Routes
 Server.use("/auth/admin", AdminAuth);
 Server.use("/auth/client", ClientAuth);
+Server.use("/admin/post", Adminproduct)
 
 // Test Route
 Server.get("/", (req, res) => {
