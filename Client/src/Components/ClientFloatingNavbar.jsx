@@ -1,4 +1,4 @@
-// Updated ClientFloatingNavbar.jsx - Fixed track tab route to '/dashbord-client/trackmyorder' (no param), added orderCompleted listener to clear payment badge. Ensured proceed to payment routes correctly (already does via cart).
+// Updated ClientFloatingNavbar.jsx - Fixed track tab route to '/dashboard-client/trackmyorder' (no param), added orderCompleted listener to clear payment badge. Ensured proceed to payment routes correctly (already does via cart).
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -71,12 +71,12 @@ const ClientFloatingNavbar = () => {
   }, [handleProductAdded, handleCartUpdated, handleOrderCompleted, handleStorageChange, updateCounts]); // Include handlers and updateCounts in deps
 
   const tabs = [
-    { icon: MdStorefront, name: "Store", route: "/dashbord-client", hasNotification: true },
-    { icon: MdShoppingCart, name: "Cart", route: "/dashbord-client/addtocart", hasNotification: true },
-    { icon: MdPayment, name: "Payment", route: "/dashbord-client/clientpaymentsystem", hasNotification: true }, // Enabled notification
+    { icon: MdStorefront, name: "Store", route: "/dashboard-client", hasNotification: true },
+    { icon: MdShoppingCart, name: "Cart", route: "/dashboard-client/addtocart", hasNotification: true },
+    { icon: MdPayment, name: "Payment", route: "/dashboard-client/clientpaymentsystem", hasNotification: true }, // Enabled notification
     { icon: MdChatBubbleOutline, name: "Chat" },
-    { icon: MdTrackChanges, name: "Track", route: "/dashbord-client/trackmyorder/:orderId" }, // Fixed: No param, handled in component
-    { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashbord-client/sectionwiththeadmin" },
+    { icon: MdTrackChanges, name: "Track", route: "/dashboard-client/trackmyorder/:orderId" }, // Fixed: No param, handled in component
+    { icon: MdOutlineMeetingRoom, name: "One on One with the Admin", route: "/dashboard-client/sectionwiththeadmin" },
     { icon: MdLogout, name: "Logout" },
   ];
 
@@ -102,7 +102,7 @@ const ClientFloatingNavbar = () => {
       if (index === 4) {
         const completedOrder = JSON.parse(localStorage.getItem('completedOrder') || '{}');
         if (completedOrder.id) {
-          navigate(`/dashbord-client/trackmyorder/${completedOrder.id}`);
+          navigate(`/dashboard-client/trackmyorder/${completedOrder.id}`);
         }
       }
     }
