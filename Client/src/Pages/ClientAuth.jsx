@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import spices from "../assets/Spiceslogo.png";
 import Loading from "../Components/Loading";
+import API_BASE_URL from "../config";
 
 const ClientAuth = () => {
   // State management for different auth views
@@ -29,9 +30,6 @@ const ClientAuth = () => {
 
   // Navigation hook for redirecting after successful auth
   const navigate = useNavigate();
-
-  // Backend API base URL - adjust for production deployment
-  const API_BASE = "http://localhost:5002";
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,7 +73,7 @@ const ClientAuth = () => {
     }
 
     // API call to backend signup endpoint
-    const response = await fetch(`${API_BASE}/auth/client/signup`, {
+    const response = await fetch(`${API_BASE_URL}/auth/client/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -119,7 +117,7 @@ const ClientAuth = () => {
   // On success: stores token, navigates to dashboard
   const handleLogin = async () => {
     // API call to backend login endpoint
-    const response = await fetch(`${API_BASE}/auth/client/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/client/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -160,7 +158,7 @@ const ClientAuth = () => {
   // Initiates password reset process by sending reset email
   // Backend generates secure token and sends email link
   const handleForgotPassword = async () => {
-    const response = await fetch(`${API_BASE}/auth/client/forgot-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/client/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +205,7 @@ const ClientAuth = () => {
       throw new Error("Invalid reset link. Please request a new one.");
     }
 
-    const response = await fetch(`${API_BASE}/auth/client/reset-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/client/reset-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

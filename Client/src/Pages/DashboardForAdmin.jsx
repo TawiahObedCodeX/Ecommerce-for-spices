@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import AdminFloatingNavbar from "../Components/AdminFloatingNavbar";
 import Loading from "../Components/Loading";
 import { LogOut, ChevronDown } from "lucide-react";
+import API_BASE_URL from "../config";
 
 export default function DashboardAdmin() {
   const [isLoading, setIsLoading] = useState(true);
@@ -10,7 +11,7 @@ export default function DashboardAdmin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("adminToken");
+    let token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/adminform");
       return;
@@ -18,9 +19,37 @@ export default function DashboardAdmin() {
 
     const fetchAdminProfile = async () => {
       try {
-        const response = await fetch("http://localhost:5002/auth/admin/me", {
+        let response = await fetch(`${API_BASE_URL}/auth/admin/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        // If token expired, try to refresh
+        if (response.status === 401) {
+          try {
+            const refreshResponse = await fetch(`${API_BASE_URL}/auth/admin/refresh`, {
+              method: 'POST',
+              credentials: 'include', // Include cookies for refresh token
+            });
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              localStorage.setItem('adminToken', refreshData.accessToken);
+              token = refreshData.accessToken;
+
+              // Retry the original request with new token
+              response = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            } else {
+              throw new Error('Session expired');
+            }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+            localStorage.removeItem("adminToken");
+            navigate("/adminform");
+            return;
+          }
+        }
 
         if (response.ok) {
           const data = await response.json();

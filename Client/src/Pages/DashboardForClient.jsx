@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import ClientNavbar from "../Components/ClientFloatingNavbar";
 import Loading from "../Components/Loading";
 import { LogOut, ChevronDown, User } from "lucide-react";
+import API_BASE_URL from "../config";
 
 export default function DashboardForClient() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +19,7 @@ export default function DashboardForClient() {
 
     const fetchClientProfile = async () => {
       try {
-        const response = await fetch("http://localhost:5002/auth/client/me", {
+        const response = await fetch(`${API_BASE_URL}/auth/client/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -6,12 +6,11 @@ import crypto from "crypto";
 import pool from "../Config/db.js";
 
 const router = express.Router();
-
 // Cookie options (secure in production)
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
+  sameSite: process.env.NODE_ENV === "production" ? "strict" : "none",
   path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
@@ -25,7 +24,7 @@ const generateTokens = (admin) => {
     company_name: admin.company_name,
   };
 
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
   const refreshToken = jwt.sign(
     { id: admin.id },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
@@ -299,7 +298,55 @@ router.get("/me", adminAuth, (req, res) => {
 });
 
 // ======================
-// 7. LOGOUT
+// 7. REFRESH TOKEN
+// ======================
+router.post("/refresh", async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Refresh token required" });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+
+    // Check if admin still exists and is active
+    const result = await pool.query(
+      `SELECT id, email, full_name, company_name, role, is_active, is_banned
+       FROM admins WHERE id = $1`,
+      [decoded.id]
+    );
+
+    const admin = result.rows[0];
+    if (!admin || !admin.is_active || admin.is_banned) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    // Generate new tokens
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(admin);
+
+    // Set new refresh token cookie
+    res.cookie("refreshToken", newRefreshToken, cookieOptions);
+
+    return res.json({
+      message: "Token refreshed",
+      accessToken,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        full_name: admin.full_name,
+        company_name: admin.company_name,
+        role: admin.role,
+      },
+    });
+  } catch (err) {
+    console.error("Refresh token error:", err.message);
+    return res.status(401).json({ error: "Invalid refresh token" });
+  }
+});
+
+// ======================
+// 8. LOGOUT
 // ======================
 router.post("/logout", (req, res) => {
   res.clearCookie("refreshToken", cookieOptions);

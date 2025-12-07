@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Spiceslogo from "../assets/Spiceslogo.png";
 import Loading from "../Components/Loading";
+import API_BASE_URL from "../config";
 
 const AdminAuth = () => {
   // State management for different auth views
@@ -29,9 +30,6 @@ const AdminAuth = () => {
 
   // Navigation hook for redirecting after successful auth
   const navigate = useNavigate();
-
-  // Backend API base URL - adjust for production deployment
-  const API_BASE = "http://localhost:5002";
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,7 +73,7 @@ const AdminAuth = () => {
     }
 
     // API call to backend signup endpoint
-    const response = await fetch(`${API_BASE}/auth/admin/signup`, {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,7 +118,7 @@ const AdminAuth = () => {
   // On success: stores token, navigates to dashboard
   const handleLogin = async () => {
     // API call to backend login endpoint
-    const response = await fetch(`${API_BASE}/auth/admin/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -161,7 +159,7 @@ const AdminAuth = () => {
   // Initiates password reset process by sending reset email
   // Backend generates secure token and sends email link
   const handleForgotPassword = async () => {
-    const response = await fetch(`${API_BASE}/auth/admin/forgot-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -208,7 +206,7 @@ const AdminAuth = () => {
       throw new Error("Invalid reset link. Please request a new one.");
     }
 
-    const response = await fetch(`${API_BASE}/auth/admin/reset-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/reset-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

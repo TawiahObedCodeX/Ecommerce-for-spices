@@ -1,55 +1,82 @@
-// Updated AdminViewPostAdd.jsx - Now listens for 'productsChanged' and 'productsUpdated' events for unified real-time updates (add/delete)
+// Updated AdminViewPostAdd.jsx - Integrated with backend API
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Edit, Trash2, X } from 'lucide-react';
-const DB_NAME = 'SpiceDB';
-const STORE_NAME = 'products';
-const VERSION = 1;
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, VERSION);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+
+const API_BASE = 'http://localhost:5005';
+
+// Helper function for authenticated requests with token refresh
+async function authenticatedFetch(url, options = {}) {
+  let token = localStorage.getItem('adminToken');
+  if (!token) {
+    throw new Error('No admin token found');
+  }
+
+  const makeRequest = (authToken) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+  };
+
+  let response = await makeRequest(token);
+
+  // If token expired, try to refresh
+  if (response.status === 401) {
+    try {
+      const refreshResponse = await fetch(`${API_BASE}/auth/admin/refresh`, {
+        method: 'POST',
+        credentials: 'include', // Include cookies for refresh token
+      });
+
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json();
+        localStorage.setItem('adminToken', refreshData.accessToken);
+        token = refreshData.accessToken;
+
+        // Retry the original request with new token
+        response = await makeRequest(token);
+      } else {
+        throw new Error('Session expired. Please login again.');
       }
-    };
-  });
+    } catch (refreshError) {
+      console.error('Token refresh failed:', refreshError);
+      throw new Error('Session expired. Please login again.');
+    }
+  }
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error);
+  return data;
 }
+
 async function getProducts() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const all = request.result.sort((a, b) => b.id - a.id);
-      resolve(all);
-    };
-    request.onerror = () => reject(request.error);
-  });
+  const data = await authenticatedFetch(`${API_BASE}/admin/post/`);
+  return data.products;
 }
+
 async function deleteProduct(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+  await authenticatedFetch(`${API_BASE}/admin/post/${id}`, {
+    method: 'DELETE',
   });
 }
+
 async function updateProduct(product) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.put(product);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+  const formData = new FormData();
+  formData.append('name', product.name);
+  formData.append('category', product.category);
+  formData.append('description', product.description || '');
+  formData.append('price', product.price);
+  formData.append('rating', product.rating);
+
+  const data = await authenticatedFetch(`${API_BASE}/admin/post/${product.id}`, {
+    method: 'PUT',
+    body: formData,
   });
+  return data.product;
 }
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -80,15 +107,27 @@ export default function AdminViewPostAdd() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [formData, setFormData] = useState({});
-  // Initial load from IndexedDB
+  // Initial load from API
   useEffect(() => {
-    getProducts().then(setProducts).catch(console.error);
+    const loadProducts = async () => {
+      try {
+        const products = await getProducts();
+        setProducts(products);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+    loadProducts();
   }, []);
   // Real-time update listener for productsChanged and productsUpdated events
   useEffect(() => {
     const handleProductsChanged = async () => {
-      const updatedProducts = await getProducts();
-      setProducts(updatedProducts);
+      try {
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts);
+      } catch (error) {
+        console.error('Error updating products:', error);
+      }
     };
     window.addEventListener('productsChanged', handleProductsChanged);
     window.addEventListener('productsUpdated', handleProductsChanged);
@@ -107,21 +146,31 @@ export default function AdminViewPostAdd() {
   };
   const confirmDelete = async () => {
     if (deleteConfirmId) {
-      await deleteProduct(deleteConfirmId);
-      setProducts((prev) => prev.filter((p) => p.id !== deleteConfirmId));
-      // Trigger cross-tab and same-tab updates
-      localStorage.setItem('productsUpdated', Date.now().toString());
-      window.dispatchEvent(new Event('productsUpdated'));
-      setDeleteConfirmId(null);
+      try {
+        await deleteProduct(deleteConfirmId);
+        setProducts((prev) => prev.filter((p) => p.id !== deleteConfirmId));
+        // Trigger cross-tab and same-tab updates
+        localStorage.setItem('productsUpdated', Date.now().toString());
+        window.dispatchEvent(new Event('productsUpdated'));
+        setDeleteConfirmId(null);
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product');
+      }
     }
   };
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (editingProduct) {
-      await updateProduct({ ...editingProduct, ...formData });
-      setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? { ...p, ...formData } : p)));
-      setIsEditModalOpen(false);
-      setEditingProduct(null);
+      try {
+        const updatedProduct = await updateProduct({ ...editingProduct, ...formData });
+        setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? updatedProduct : p)));
+        setIsEditModalOpen(false);
+        setEditingProduct(null);
+      } catch (error) {
+        console.error('Error updating product:', error);
+        alert('Failed to update product');
+      }
     }
   };
   const handleInputChange = (e) => {

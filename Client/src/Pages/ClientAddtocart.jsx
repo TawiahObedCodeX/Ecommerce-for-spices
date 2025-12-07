@@ -399,7 +399,7 @@ export default function ClientAddtocart() {
               <motion.button
                 onClick={applyPromo}
                 whileHover={{ scale: 1.02 }}
-                className="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors whitespace-nowrap"
+                className="px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-red-600 transition-colors whitespace-nowrap"
               >
                 Apply
               </motion.button>
@@ -439,7 +439,7 @@ export default function ClientAddtocart() {
           onClick={handleProceedToPayment}
           whileHover={{ scale: 1.02, boxShadow: "0 15px 35px rgba(251, 146, 60, 0.4)" }}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-5 bg-linear-to-r from-orange-500 via-red-500 to-orange-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center space-x-3 shadow-2xl mb-4"
+          className="w-full py-5 bg-black text-white rounded-2xl font-bold text-xl flex items-center justify-center space-x-3 shadow-2xl mb-4"
         >
           <FiCreditCard className="w-6 h-6" />
           <span>Proceed to Secure Checkout ¢{total.toFixed(2)}</span>

@@ -16,7 +16,10 @@ const Server = express();
 // ==========================
 // Middleware
 // ==========================
-Server.use(cors());
+Server.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 
 // ==========================
 // Middleware
@@ -24,6 +27,7 @@ Server.use(cors());
 Server.use(morgan("dev")); // <--- ADD THIS (logs all requests)
 Server.use(express.json());
 Server.use(cookieParser());
+Server.use('/uploads', express.static('uploads'));
 
 // Routes
 Server.use("/auth/admin", AdminAuth);

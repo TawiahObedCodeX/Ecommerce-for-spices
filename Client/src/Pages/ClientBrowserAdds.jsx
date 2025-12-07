@@ -2,34 +2,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Check, Tag, Heart } from 'lucide-react'; // Use lucide where possible
-const DB_NAME = 'SpiceDB';
-const STORE_NAME = 'products';
-const VERSION = 1;
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, VERSION);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-  });
-}
+const API_BASE = 'http://localhost:5005';
+
 async function getProducts() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const all = request.result.sort((a, b) => b.id - a.id);
-      resolve(all);
-    };
-    request.onerror = () => reject(request.error);
-  });
+  const response = await fetch(`${API_BASE}/admin/post/public`);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error);
+  return data.products;
 }
 const containerVariants = {
   hidden: { opacity: 0 },

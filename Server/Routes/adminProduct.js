@@ -69,7 +69,7 @@ router.post("/", adminAuth, upload.fields([{ name: "image" }, { name: "video" }]
       return res.status(400).json({ error: "Invalid video URL" });
     }
 
-    // At least one media must exist
+    // Both image and video must exist
     if (!finalImageUrl || !finalVideoUrl) {
       return res.status(400).json({ error: "Please provide image and video (file or valid URL)" });
     }
@@ -105,11 +105,26 @@ router.post("/", adminAuth, upload.fields([{ name: "image" }, { name: "video" }]
 router.get("/", adminAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, a.full_name as added_by 
+      `SELECT p.*, a.full_name as added_by
        FROM products p
        LEFT JOIN admins a ON p.admin_id = a.id
        WHERE p.is_active = true
        ORDER BY p.created_at DESC`
+    );
+    res.json({ products: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
+// GET all products (public for clients)
+router.get("/public", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, category, description, price, rating, image_url, video_url, created_at
+       FROM products
+       WHERE is_active = true
+       ORDER BY created_at DESC`
     );
     res.json({ products: result.rows });
   } catch (err) {
