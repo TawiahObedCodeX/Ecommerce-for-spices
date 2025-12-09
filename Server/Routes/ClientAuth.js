@@ -66,7 +66,6 @@ const generateTokens = (user) => {
 
   return { accessToken, refreshToken };
 };
-
 // ====================================================================
 // 1) SIGNUP
 // Route: POST /signup
