@@ -63,12 +63,12 @@ const Navbar = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3 sm:space-x-4">
             {/* User Icon - Hidden on small mobile, shown from md */}
-            <Link 
+            {/* <Link 
               to="/signup" 
               className="hidden md:flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-stone-100 text-[#2D1606] hover:bg-[#2D1606] hover:text-white transition-all"
             >
               <FiUser size={18} />
-            </Link>
+            </Link> */}
 
             {/* Cart Icon - Always visible with dynamic count */}
             <Link 
@@ -116,13 +116,13 @@ const Navbar = () => {
               ))}
 
               {/* Mobile-only User Link */}
-              <Link 
+              {/* <Link 
                 to="/signup" 
                 onClick={() => setMobileMenu(false)}
                 className="flex items-center gap-3 text-lg font-medium text-[#2D1606] pt-4 border-t border-stone-100"
               >
                 <FiUser size={22} /> Account
-              </Link>
+              </Link> */}
             </div>
           </motion.div>
         )}
