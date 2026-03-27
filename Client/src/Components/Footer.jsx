@@ -1,152 +1,179 @@
-// Footer.jsx - Updated for professional light gray theme
-import { motion } from 'framer-motion';
-
-const footerVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: "easeOut",
-      staggerChildren: 0.15
-    }
-  }
-};
-
-const linkVariants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.5, ease: "easeOut" }
-  },
-  hover: { 
-    x: 10,
-    scale: 1.08,
-    color: "#6b7280", // Subtle gray hover
-    transition: { duration: 0.3, ease: "easeOut" }
-  }
-};
+import React from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { FiPhone, FiMail, FiMapPin, FiInstagram, FiFacebook, FiTwitter } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
+  const footerLinks = [
+    { name: "Shop", path: "/products" },
+    { name: "Our Story", path: "/services" },
+    { name: "Contact", path: "/contact" },
+    { name: "Track Order", path: "#" },
+  ];
+
+  const socialLinks = [
+    { icon: <FiInstagram size={22} />, url: "https://instagram.com/melosartisan" },
+    { icon: <FiFacebook size={22} />, url: "https://facebook.com/melosartisan" },
+    { icon: <FiTwitter size={22} />, url: "https://twitter.com/melosartisan" },
+    { icon: <FaWhatsapp size={22} />, url: "https://wa.me/233244597912" },
+  ];
+
   return (
-    <motion.footer
-      className="bg-gray-100 text-gray-800 py-12 px-4 mt-28 sm:px-6 md:px-8 lg:px-12 relative overflow-hidden" // Light gray background, dark text
-      variants={footerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-20%" }}
-    >
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
-        {/* Company Info */}
-        <motion.div variants={linkVariants}>
-          <h3 className="text-xl font-bold mb-4 flex items-center text-gray-900"> {/* Darker for heading */}
-            <span className="mr-2">🌿</span>
-            Melo' Natural Spices
-          </h3>
-          <p className="text-sm text-gray-600 mb-4"> {/* Softer gray for body */}
-            Discover the finest organic spices sourced from nature's bounty. Elevate your meals with health and flavor.
-          </p>
-          <div className="flex space-x-4">
-            {['Facebook', 'Instagram', 'Twitter'].map((social) => (
-              <motion.a
-                key={social}
-                href="#"
-                className="text-gray-600 hover:text-gray-800 transition-colors" // Gray icons with darker hover
-                variants={linkVariants}
-                whileHover="hover"
+    <footer className="bg-[#2D1606] text-white overflow-hidden relative">
+      {/* Subtle top wave / divider */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
+
+      <div className="max-w-7xl mx-auto px-6 pt-20 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
+          
+          {/* Brand Column */}
+          <div className="lg:col-span-5">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="flex items-center space-x-3 mb-8"
+            >
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#2D1606] font-serif font-bold text-3xl">
+                M
+              </div>
+              <div>
+                <div className="text-4xl font-serif font-black tracking-tighter">MELO'S</div>
+                <div className="text-xs tracking-[0.3em] text-orange-400 font-medium">ARTISAN</div>
+              </div>
+            </motion.div>
+
+            <p className="text-orange-100/70 max-w-md text-[15px] leading-relaxed mb-10">
+              Handcrafted treasures from Ghana. Every piece is made with passion, 
+              tradition, and the finest natural materials.
+            </p>
+
+            {/* Contact Info with hover animation */}
+            <div className="space-y-6">
+              <motion.a 
+                href="tel:0539526814"
+                className="flex items-center gap-4 group"
+                whileHover={{ x: 8 }}
               >
-                <span className="text-xl">
-                  {social === 'Facebook' ? '📘' : social === 'Instagram' ? '📷' : '🐦'}
-                </span>
+                <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center group-hover:bg-orange-600 transition-colors">
+                  <FiPhone size={22} />
+                </div>
+                <div>
+                  <div className="text-sm text-orange-300">Call Us</div>
+                  <div className="font-medium">053 952 6814</div>
+                </div>
               </motion.a>
-            ))}
+
+              <motion.a 
+                href="https://wa.me/233244597912"
+                target="_blank"
+                className="flex items-center gap-4 group"
+                whileHover={{ x: 8 }}
+              >
+                <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center group-hover:bg-orange-600 transition-colors">
+                  <FaWhatsapp size={22} />
+                </div>
+                <div>
+                  <div className="text-sm text-orange-300">WhatsApp</div>
+                  <div className="font-medium">024 459 7912</div>
+                </div>
+              </motion.a>
+
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <FiMapPin size={22} />
+                </div>
+                <div>
+                  <div className="text-sm text-orange-300">Visit Us</div>
+                  <div className="font-medium">Accra, Ghana</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </motion.div>
 
-        {/* Quick Links */}
-        <motion.div variants={linkVariants}>
-          <h4 className="text-lg font-semibold mb-4 text-gray-900">Quick Links</h4>
-          {['Home', 'Shop', 'About Us', 'Contact'].map((link) => (
-            <motion.a
-              key={link}
-              href="#"
-              className="block text-sm  hover:text-gray-900 py-1" // Gray to dark on hover
-              variants={linkVariants}
-              whileHover="hover"
-            >
-              {link}
-            </motion.a>
-          ))}
-        </motion.div>
-
-        {/* Categories */}
-        <motion.div variants={linkVariants}>
-          <h4 className="text-lg font-semibold mb-4 text-gray-900">Spice Categories</h4>
-          {['Powders', 'Whole Spices', 'Blends', 'Herbs'].map((cat) => (
-            <motion.a
-              key={cat}
-              href="#"
-              className="block text-sm text-gray-600 hover:text-gray-900 py-1"
-              variants={linkVariants}
-              whileHover="hover"
-            >
-              {cat}
-            </motion.a>
-          ))}
-        </motion.div>
-
-        {/* Newsletter */}
-        <motion.div variants={linkVariants}>
-          <h4 className="text-lg font-semibold mb-4 text-gray-900">Stay Spiced</h4>
-          <p className="text-sm text-gray-600 mb-4">Subscribe for exclusive recipes and offers.</p>
-          <div className="flex">
-            <input
-              type="email"
-              placeholder="Your email"
-              className="flex-1 px-3 py-2 rounded-l-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 border border-gray-300" // Professional input styling
-            />
-            <motion.button
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-r-lg font-semibold" // Neutral gray button
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Subscribe
-            </motion.button>
+          {/* Quick Links */}
+          <div className="lg:col-span-3">
+            <h4 className="font-black tracking-widest text-orange-400 text-sm mb-8">EXPLORE</h4>
+            <div className="flex flex-col gap-y-5">
+              {footerLinks.map((link, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link
+                    to={link.path}
+                    className="text-lg hover:text-orange-400 transition-colors duration-300 font-medium block"
+                  >
+                    {link.name}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Copyright */}
-      <motion.div
-        className="border-t border-gray-300 mt-8 pt-6 text-center text-sm text-gray-500" // Light border, softer text
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-      >
-        <p>&copy; 2025 Melo' Natural Spices. All rights reserved. | Crafted with ❤️ and spices.</p>
-      </motion.div>
+          {/* Newsletter + Social */}
+          <div className="lg:col-span-4">
+            <h4 className="font-black tracking-widest text-orange-400 text-sm mb-6">STAY IN TOUCH</h4>
+            
+            <p className="text-orange-100/70 mb-6 text-[15px]">
+              Join our community and receive stories behind every creation.
+            </p>
 
-      {/* Subtle floating elements - Neutral grays for professionalism */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10"> {/* Much subtler */}
-        <motion.div 
-          className="absolute top-1/4 left-10 w-8 h-8 rounded-full bg-gray-300"
-          animate={{ y: [0, -20, 0], rotate: [0, 360, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute bottom-1/4 right-10 w-6 h-6 rounded-full bg-gray-400"
-          animate={{ y: [0, 20, 0], rotate: [360, 0, 360] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-        />
-        <motion.div 
-          className="absolute top-3/4 left-1/4 w-10 h-10 rounded-full bg-gray-200"
-          animate={{ x: [-10, 10, -10], scale: [1, 1.1, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        />
+            <div className="relative mb-10">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="w-full bg-white/10 border border-white/20 rounded-3xl px-7 py-5 text-white placeholder:text-orange-100/50 focus:outline-none focus:border-orange-500 transition-all"
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-orange-600 hover:bg-orange-500 px-8 py-3 rounded-3xl font-black text-sm tracking-widest transition-all"
+              >
+                JOIN
+              </motion.button>
+            </div>
+
+            {/* Social Icons with hover lift */}
+            <div className="flex gap-5">
+              {socialLinks.map((social, index) => (
+                <motion.a
+                  key={index}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-orange-600 rounded-2xl transition-all duration-300"
+                  whileHover={{ y: -6, scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {social.icon}
+                </motion.a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-orange-100/60">
+          <div>
+            © {currentYear} MELO'S Artisan. All rights reserved.
+          </div>
+          <div className="flex gap-6 text-xs tracking-widest">
+            <Link to="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="#" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="#" className="hover:text-white transition-colors">Shipping</Link>
+          </div>
+          <div className="text-[10px] tracking-[0.1em]">HANDCRAFTED IN GHANA WITH LOVE </div>
+        </div>
       </div>
-    </motion.footer>
+    </footer>
   );
 };
 

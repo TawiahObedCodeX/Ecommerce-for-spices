@@ -1,267 +1,393 @@
-// Products.jsx
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
-import Navbar from '../Components/Navbar';
-import Footer from '../Components/Footer';
-import AddToCartButton from '../Components/AddToCartButton';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiShoppingBag, FiStar, FiLayers, FiPhone } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
+import { useCart } from "../context/CartContext";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
-};
-
-const categories = [
-  'All', 'Cooking Essentials', 'Medicinal Herbs', 'Baking & Desserts', 'Exotic Blends', 'Ayurvedic Wellness', 'Tea & Infusions'
-];
+const ProductSkeleton = () => (
+  <div className="min-h-screen bg-[#FDF8F1] pt-24 animate-pulse">
+    <div className="w-full h-[85vh] bg-stone-200" />
+    <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 mt-20">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="h-[500px] bg-stone-200 rounded-[4rem]" />
+      ))}
+    </div>
+  </div>
+);
 
 const products = [
-  // Cooking Essentials
-  { id: 1, name: "Organic Black Peppercorns", category: "Cooking Essentials", price: 12.99, image: "https://i.pinimg.com/1200x/9e/44/87/9e44879f2e475f3fd86f5a1fe3981cfe.jpg", desc: "Whole Tellicherry peppercorns for grinding fresh—bold, aromatic heat.", rating: 4.9, certified: true, origin: "India" },
-  { id: 2, name: "Madras Curry Powder", category: "Cooking Essentials", price: 8.99, image: "https://i.pinimg.com/1200x/b7/bd/62/b7bd625ce2d0655d0cd796956df23665.jpg", desc: "Authentic blend of coriander, turmeric, and chili for vibrant curries.", rating: 4.8, certified: true, origin: "Sri Lanka" },
-  { id: 3, name: "Himalayan Pink Salt", category: "Cooking Essentials", price: 6.50, image: "https://i.pinimg.com/1200x/a2/0b/48/a20b489709f785f6d709e5ff39edc742.jpg", desc: "Pure, mineral-rich crystals harvested from ancient sea beds.", rating: 4.7, certified: false, origin: "Pakistan" },
-
-  // Medicinal Herbs
-  { id: 4, name: "Organic Turmeric Root Powder", category: "Medicinal Herbs", price: 9.99, image: "https://i.pinimg.com/1200x/e8/7d/f7/e87df702fbb3a05f9ca3d4fce53252ce.jpg", desc: "High-curcumin golden root for anti-inflammatory teas and tonics.", rating: 5.0, certified: true, origin: "India" },
-  { id: 5, name: "Dried Ginger Slices", category: "Medicinal Herbs", price: 7.99, image: "https://i.pinimg.com/1200x/d2/04/83/d204830627df52cc3c6d4bd792dbd5e7.jpg", desc: "Sun-dried for digestive wellness and immune support infusions.", rating: 4.9, certified: true, origin: "China" },
-  { id: 6, name: "Ashwagandha Powder", category: "Medicinal Herbs", price: 15.99, image: "https://i.pinimg.com/1200x/32/d4/9a/32d49a5e0ade8fb71ffeaf358641bd27.jpg", desc: "Adaptogenic root for stress reduction and vitality enhancement.", rating: 4.8, certified: true, origin: "India" },
-
-  // Baking & Desserts
-  { id: 7, name: "Ceylon Cinnamon Sticks", category: "Baking & Desserts", price: 8.50, image: "https://i.pinimg.com/1200x/3f/7f/af/3f7fafed9688768f48b1ec1eb3d0b700.jpg", desc: "True cinnamon with delicate sweetness for pastries and lattes.", rating: 4.9, certified: true, origin: "Sri Lanka" },
-  { id: 8, name: "Vanilla Bean Pods", category: "Baking & Desserts", price: 19.99, image: "https://i.pinimg.com/1200x/ed/cb/50/edcb5045599fee7e35130ad0fba139e7.jpg", desc: "Premium Madagascar beans for rich, authentic flavor in desserts.", rating: 5.0, certified: false, origin: "Madagascar" },
-  { id: 9, name: "Nutmeg Whole", category: "Baking & Desserts", price: 10.99, image: "https://i.pinimg.com/1200x/0b/de/6c/0bde6cc14a90a84a62e05a04336e91d0.jpg", desc: "Freshly grated for warm, nutty notes in pies and custards.", rating: 4.7, certified: true, origin: "Indonesia" },
-
-  // Exotic Blends
-  { id: 10, name: "Ras el Hanout", category: "Exotic Blends", price: 11.99, image: "https://i.pinimg.com/1200x/a5/c3/73/a5c373ce248c803b87944d9a7617d626.jpg", desc: "Moroccan master blend of 12 spices for tagines and roasts.", rating: 4.8, certified: true, origin: "Morocco" },
-  { id: 11, name: "Za'atar Seasoning", category: "Exotic Blends", price: 9.50, image: "https://i.pinimg.com/1200x/fb/20/05/fb2005c3512a9e82fafe14672258a3b8.jpg", desc: "Lebanese herb mix with sesame and sumac for flatbreads.", rating: 4.9, certified: true, origin: "Lebanon" },
-  { id: 12, name: "Garam Masala", category: "Exotic Blends", price: 10.50, image: "https://i.pinimg.com/1200x/4f/9c/2c/4f9c2c9ca1e83df63fc2ddf0e8a79aa8.jpg", desc: "Indian warming blend for curries and marinades.", rating: 4.8, certified: true, origin: "India" },
-
-  // Ayurvedic Wellness
-  { id: 13, name: "Triphala Powder", category: "Ayurvedic Wellness", price: 13.99, image: "https://i.pinimg.com/1200x/fe/28/dd/fe28dd7d6bdb64cc003d2d3472053460.jpg", desc: "Ayurvedic detox blend of three fruits for gentle cleansing.", rating: 4.7, certified: true, origin: "India" },
-  { id: 14, name: "Tulsi Holy Basil", category: "Ayurvedic Wellness", price: 8.99, image: "https://i.pinimg.com/1200x/b8/8f/34/b88f340b2b26feb0f2d691e1edbc1325.jpg", desc: "Sacred leaf for stress relief and respiratory health.", rating: 4.9, certified: true, origin: "India" },
-  { id: 15, name: "Shatavari Root", category: "Ayurvedic Wellness", price: 14.99, image: "https://i.pinimg.com/1200x/60/dd/02/60dd02330cffef606b3d350ff4de8406.jpg", desc: "Hormonal balance herb for women's wellness rituals.", rating: 4.8, certified: true, origin: "India" },
-
-  // Tea & Infusions
-  { id: 16, name: "Chamomile Flowers", category: "Tea & Infusions", price: 7.50, image: "https://i.pinimg.com/1200x/d1/4a/ad/d14aad7a811f2e7e20a9fb2cb752859d.jpg", desc: "Egyptian blooms for calming bedtime infusions.", rating: 4.9, certified: true, origin: "Egypt" },
-  { id: 17, name: "Peppermint Leaves", category: "Tea & Infusions", price: 6.99, image: "https://i.pinimg.com/1200x/65/e6/11/65e6115225cd88f6c2634fd2c01ab2ba.jpg", desc: "Organic leaves for digestive soothing and refreshment.", rating: 4.8, certified: true, origin: "USA" },
-  { id: 18, name: "Rooibos Loose Leaf", category: "Tea & Infusions", price: 9.99, image: "https://i.pinimg.com/1200x/34/6f/cd/346fcdfb1287a956d67425d7666b8f0e.jpg", desc: "South African red bush for antioxidant-rich caffeine-free brews.", rating: 4.7, certified: true, origin: "South Africa" }
+  {
+    id: 1,
+    name: "Handcrafted Leather Bag",
+    price: 320,
+    oldPrice: 380,
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800",
+    rating: "4.9",
+    desc: "Premium artisan leather with hand-stitched details from Ghana.",
+  },
+  {
+    id: 2,
+    name: "Wooden Bead Necklace",
+    price: 85,
+    oldPrice: 105,
+    image: "https://images.unsplash.com/photo-1515562141207-7a88fb9f3382?q=80&w=800",
+    rating: "4.8",
+    desc: "Natural wood beads with brass accents, handmade in Accra.",
+  },
+  {
+    id: 3,
+    name: "Ceramic Coffee Mug Set",
+    price: 145,
+    oldPrice: 170,
+    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf0f4?q=80&w=800",
+    rating: "5.0",
+    desc: "Hand-thrown ceramic set, microwave & dishwasher safe.",
+  },
+  {
+    id: 4,
+    name: "Woven Straw Basket",
+    price: 95,
+    oldPrice: 120,
+    image: "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?q=80&w=800",
+    rating: "4.7",
+    desc: "Traditional Ghanaian weaving technique with colorful accents.",
+  },
+  {
+    id: 5,
+    name: "Brass Earrings Pair",
+    price: 65,
+    oldPrice: 85,
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=800",
+    rating: "4.9",
+    desc: "Hand-forged brass with natural stones, lightweight & elegant.",
+  },
+  {
+    id: 6,
+    name: "Embroidered Throw Pillow",
+    price: 110,
+    oldPrice: 135,
+    image: "https://images.unsplash.com/photo-1584100936595-c6c4a6f1f1c4?q=80&w=800",
+    rating: "4.8",
+    desc: "Vibrant African-inspired embroidery on soft cotton.",
+  },
 ];
 
-export default function Products() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const featured = [
+  { 
+    id: 1, 
+    title: "The Saffron Reserve", 
+    price: "GHS 320",
+    tag: "Kashmir • Ghana Edition",
+    badge: "Limited Harvest",
+    desc: "Hand-harvested premium saffron with deep floral notes and rich crimson threads.",
+    img: "https://images.unsplash.com/photo-1600585154340-be6161a56a9c?q=80&w=2000",
+    accentColor: "#C2410C",
+    bgWord: "SAFFRON"
+  },
+  { 
+    id: 2, 
+    title: "Royal Cinnamon Bark", 
+    price: "GHS 145",
+    tag: "Ceylon • Single Origin",
+    badge: "Artisan Grade",
+    desc: "Ultra-fine Ceylon cinnamon with warm citrus sweetness, perfect for premium recipes.",
+    img: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?q=80&w=2000",
+    accentColor: "#92400E",
+    bgWord: "CINNAMON"
+  },
+  { 
+    id: 3, 
+    title: "Smoked Paprika Noir", 
+    price: "GHS 95",
+    tag: "Extremadura • Double Smoked",
+    badge: "Signature Blend",
+    desc: "Rich, smoky Spanish paprika with sweet depth and bold Mediterranean character.",
+    img: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?q=80&w=2000",
+    accentColor: "#B91C1C",
+    bgWord: "PAPRIKA"
+  }
+];
 
-  // Check authentication state on component mount
-  useEffect(() => {
-    const authStatus = localStorage.getItem('clientAuthenticated') === 'true';
-    setIsAuthenticated(authStatus);
-  }, []);
+/* ─── NEW CATCHY CAROUSEL ─── */
+const HeroCarousel = () => {
+  const [index, setIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef(null);
 
-  // Mock login handler
-  const handleLoginRequired = () => {
-    // Redirect to client auth page for signup or login with from parameter
-    window.location.href = '/clientauth?from=products';
+  const DURATION = 5500; // slightly faster for better engagement
+
+  const startTimer = () => {
+    clearInterval(intervalRef.current);
+    setProgress(0);
+    const startTime = Date.now();
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min((elapsed / DURATION) * 100, 100);
+      setProgress(pct);
+      if (elapsed >= DURATION) {
+        setIndex(i => (i + 1) % featured.length);
+      }
+    }, 30);
   };
 
-  const filteredProducts = products.filter(product => 
-    (selectedCategory === 'All' || product.category === selectedCategory) &&
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    startTimer();
+    return () => clearInterval(intervalRef.current);
+  }, [index]);
+
+  const item = featured[index];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <motion.section 
-        className="relative h-96 flex items-center justify-center bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20"
-        initial="hidden"
-        animate="visible"
-        variants={itemVariants}
-      >
-        <div className="absolute inset-0 bg-[url('/api/placeholder/1920/400')] bg-cover bg-center opacity-20" />
-        <motion.div 
-          className="text-center z-10 px-4"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="font-playfair-display-extra-bold text-4xl md:text-6xl  mb-4 drop-shadow-lg">
-            Curated Spice Collection
-          </h1>
-          <p className="font-montserrat-light text-xl  max-w-2xl mx-auto drop-shadow-md">
-            Ethically sourced, premium organic spices that transform ordinary moments into extraordinary experiences.
-          </p>
-        </motion.div>
-      </motion.section>
+    <section className="relative w-full h-[85vh] overflow-hidden bg-[#2D1606]">
 
-      {/* Filters & Search */}
-      <motion.section 
-        className="py-12 px-4 md:px-8 lg:px-16 bg-charcoal"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={itemVariants}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <motion.div 
-            className="flex flex-wrap justify-center gap-2"
-            variants={itemVariants}
+      {/* Background Image Slide */}
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={index}
+          src={item.img}
+          initial={{ scale: 1.15, opacity: 0.7 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 1.08, opacity: 0 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </AnimatePresence>
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#2D1606]/90 via-[#2D1606]/70 to-transparent" />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex items-center px-6 md:px-12 lg:px-20">
+        <div className="max-w-2xl">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 mb-6 px-5 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full"
           >
-            {categories.map((cat) => (
-              <motion.button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-full font-montserrat-semi-bold text-sm transition-all duration-300 whitespace-nowrap ${
-                  selectedCategory === cat
-                    ? 'bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light shadow-lg hover:shadow-[0_0_10px_rgba(220,20,60,0.3)]'
-                    : 'bg-linear-to-br from-secondary/10 via-accent/10 to-amber/20 text-text-light hover:bg-info/20 hover:border-info/30 border border-text-light/30'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {cat}
-              </motion.button>
-            ))}
+            <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
+            <span className="text-white text-xs font-black tracking-[0.25em] uppercase">{item.tag}</span>
           </motion.div>
-          <motion.div 
-            className="relative"
-            variants={itemVariants}
+
+          {/* Big Title */}
+          <motion.h1
+            key={item.title}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.25, 0.1, 0, 1] }}
+            className="text-[clamp(2.8rem,7vw,6.5rem)] font-black leading-none tracking-tighter text-white mb-4"
+            style={{ fontFamily: "Georgia, serif" }}
           >
-            <input
-              type="text"
-              placeholder="Search spices..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-3 rounded-full border border-border bg-text-light/10 text-text-light focus:outline-none focus:border-info focus:ring-2 focus:ring-info/20 transition-all duration-300 w-64 placeholder:text-text-light/60"
-            />
-            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            {item.title}
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            key={item.desc}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg md:text-xl text-orange-100/80 max-w-md mb-10 leading-relaxed"
+          >
+            {item.desc}
+          </motion.p>
+
+          {/* Price & CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex items-center gap-6"
+          >
+            <div className="text-5xl font-black text-white tracking-tight">
+              {item.price}
+            </div>
+            <button 
+              onClick={() => alert("Added to cart!")} 
+              className="group flex items-center gap-3 bg-orange-600 hover:bg-orange-500 px-10 py-5 rounded-full text-white font-black text-sm uppercase tracking-widest transition-all active:scale-95"
+            >
+              <FiShoppingBag size={20} />
+              Shop Now
+            </button>
           </motion.div>
         </div>
-      </motion.section>
+      </div>
 
-      {/* Products Grid */}
-      <motion.section 
-        className="py-20 px-4 md:px-8 lg:px-16 bg-background"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={containerVariants}
-      >
-        <div className="max-w-7xl mx-auto">
-          {filteredProducts.length === 0 ? (
-            <motion.p 
-              className="text-center font-montserrat-medium text-xl text-charcoal py-12"
-              variants={itemVariants}
-            >
-              No spices found matching your search. Try broadening your criteria.
-            </motion.p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map((product) => (
-                <motion.article 
+      {/* Bottom Navigation - Progress + Dots (No Arrows) */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6 w-full px-6">
+        <div className="flex gap-4">
+          {featured.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              className={`h-2.5 rounded-full transition-all duration-500 ${i === index ? 'bg-orange-500 w-12' : 'bg-white/40 w-8 hover:bg-white/60'}`}
+            />
+          ))}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full max-w-xs h-px bg-white/20 overflow-hidden">
+          <motion.div
+            className="h-full bg-orange-500"
+            initial={{ width: "0%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: "linear" }}
+          />
+        </div>
+      </div>
+
+      {/* Subtle floating particles */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-orange-400/30 rounded-full"
+          style={{
+            top: `${15 + (i * 9)}%`,
+            left: `${10 + (i * 11)}%`,
+          }}
+          animate={{ 
+            y: [0, -25, 0],
+            opacity: [0.3, 0.7, 0.3]
+          }}
+          transition={{ 
+            duration: 4 + (i % 3), 
+            repeat: Infinity, 
+            delay: i * 0.4 
+          }}
+        />
+      ))}
+    </section>
+  );
+};
+
+/* ─── MAIN PRODUCTS PAGE ─── */
+const Products = () => {
+  const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <ProductSkeleton />;
+
+  return (
+    <div className="bg-[#FDF8F1] min-h-screen pb-20 overflow-x-hidden">
+      {/* New Catchy Carousel */}
+      <HeroCarousel />
+
+      {/* Signature Collection Grid */}
+      <section className="max-w-[1400px] mx-auto px-6 py-32">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-6">
+          <div className="max-w-xl">
+            <div className="flex items-center space-x-3 text-orange-600 mb-4">
+              <FiLayers size={20} />
+              <span className="font-black tracking-widest text-xs uppercase">The Collection</span>
+            </div>
+            <h3 className="text-5xl md:text-7xl font-serif font-black text-[#2D1606] tracking-tighter">
+              Curated <span className="italic text-orange-600">Aromas.</span>
+            </h3>
+          </div>
+          <p className="text-stone-500 font-medium max-w-xs md:text-right italic leading-relaxed">
+            Every grain is inspected under natural light to ensure 100% purity and color vibrance.
+          </p>
+        </div>
+
+        <div className="pt-24 pb-20 bg-[#FFF8F0]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl md:text-5xl font-black text-[#2D1606] text-center mb-4 tracking-tight">
+              Our Artisan Collection
+            </h1>
+            <p className="text-center text-[#2D1606]/70 max-w-md mx-auto mb-16">
+              Handmade with love in Ghana • Every piece tells a story
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+              {products.map((product) => (
+                <motion.div
                   key={product.id}
-                  className="group bg-card rounded-3xl overflow-hidden shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-700 border border-border hover:border-secondary/50 relative"
-                  variants={itemVariants}
-                  whileHover={{ y: -15, rotateX: 5 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  whileHover={{ y: -20 }}
+                  className="group relative"
                 >
-                  {/* Premium Badge */}
-                  {product.certified && (
-                    <motion.div 
-                      className="absolute top-4 left-4 z-10 bg-success text-text-dark px-2 py-1 rounded-full text-xs font-montserrat-bold uppercase tracking-wide shadow-lg"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      Certified Organic
-                    </motion.div>
-                  )}
-
-                  {/* Image with Gradient Overlay */}
-                  <div className="relative overflow-hidden bg-linear-to-t from-background-dark/50 to-transparent">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+                  <div className="h-[500px] rounded-[5rem] overflow-hidden shadow-2xl shadow-orange-900/5 relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]"
                     />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <motion.div 
-                      className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-2"
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2D1606]/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Floating Add to Cart Button */}
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="absolute bottom-10 right-10 w-20 h-20 bg-orange-600 text-white rounded-full flex items-center justify-center shadow-2xl translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 hover:bg-orange-700 active:scale-95"
                     >
-                      <button className="bg-text-light/10 backdrop-blur-sm p-2 rounded-full hover:bg-info/20 shadow-md">
-                        <Heart className="w-5 h-5 text-secondary" />
-                      </button>
-                      <button className="bg-secondary/90 text-text-light p-2 rounded-full hover:bg-error shadow-md">
-                        <ShoppingCart className="w-5 h-5" />
-                      </button>
-                    </motion.div>
+                      <FiShoppingBag size={28} />
+                    </button>
+
+                    {/* Phone & WhatsApp Icons */}
+                    <div className="absolute top-6 right-6 flex flex-col gap-3 z-10">
+                      <a
+                        href="tel:0539526814"
+                        className="w-11 h-11 bg-white/95 backdrop-blur shadow-lg hover:bg-white text-[#2D1606] rounded-2xl flex items-center justify-center transition-all hover:scale-110"
+                        title="Call us: 0539526814"
+                      >
+                        <FiPhone size={24} />
+                      </a>
+                      <a
+                        href="https://wa.me/233244597912?text=Hi%2C%20I'm%20interested%20in%20this%20product%20from%20MELO'S%20Artisan!"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-11 h-11 bg-white/95 backdrop-blur shadow-lg hover:bg-white text-[#2D1606] rounded-2xl flex items-center justify-center transition-all hover:scale-110"
+                        title="Chat on WhatsApp: 0244597912"
+                      >
+                        <FaWhatsapp size={24} />
+                      </a>
+                    </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-6 relative z-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-montserrat-light text-xs text-charcoal">{product.origin}</span>
-                      <div className="flex text-success">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
-                        ))}
-                        <span className="ml-1 text-xs font-montserrat-medium">({product.rating})</span>
+                  <div className="mt-10 px-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center space-x-2">
+                        <FiStar className="text-orange-500 fill-orange-500" size={16} />
+                        <span className="text-xs font-black text-stone-400 tracking-widest">
+                          {product.rating} RATING
+                        </span>
                       </div>
+                      <span className="text-[10px] font-black uppercase text-orange-600 tracking-[0.2em] bg-orange-100 px-4 py-1 rounded-full">
+                        New Batch
+                      </span>
                     </div>
-                    <h3 className="font-playfair-display-semi-bold text-xl text-text-dark mb-2 leading-tight group-hover:text-secondary transition-colors duration-300">
+
+                    <h4 className="text-4xl font-serif font-black text-[#2D1606] mb-3 tracking-tight leading-none">
                       {product.name}
-                    </h3>
-                    <p className="font-montserrat-light text-charcoal mb-4 h-12 overflow-hidden line-clamp-2">
+                    </h4>
+
+                    <div className="flex items-baseline space-x-3">
+                      <span className="text-3xl font-serif font-black text-[#2D1606]">
+                        GHS {product.price}
+                      </span>
+                      {product.oldPrice && (
+                        <span className="text-stone-400 text-sm line-through font-bold">
+                          GHS {product.oldPrice}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-4 text-[#2D1606]/70 text-[15px] leading-relaxed">
                       {product.desc}
                     </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-border">
-                      <span className="font-playfair-display-bold text-2xl text-secondary tracking-tight">
-                        ${product.price}
-                      </span>
-                    <AddToCartButton
-                      isAuthenticated={isAuthenticated}
-                      onLoginRequired={handleLoginRequired}
-                      productName={product.name}
-                      productImage={product.image}
-                    />
-                    </div>
                   </div>
-
-                  {/* Hover Glow Effect */}
-                  <motion.div 
-                    className="absolute inset-0 rounded-3xl bg-linear-to-r from-info/10 to-success/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </motion.article>
+                </motion.div>
               ))}
             </div>
-          )}
+          </div>
         </div>
-      </motion.section>
-
-      <Footer />
+      </section>
     </div>
   );
-}
+};
+
+export default Products;

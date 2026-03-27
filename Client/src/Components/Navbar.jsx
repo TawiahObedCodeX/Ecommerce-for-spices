@@ -1,211 +1,134 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { NavLink, Link } from "react-router-dom";
+import { FiShoppingBag, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../context/CartContext";
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const Navlink = [
-    { label: "Home", link: "/" },
-    { label: "About", link: "/about" },
-    { label: "Products", link: "/product" },
-    { label: "Contact", link: "/contact" },
+const Navbar = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const { cartCount } = useCart();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "Collection", path: "/products" },
+    { name: "Our Story", path: "/services" },
+    { name: "Contact", path: "/contact" },
   ];
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
-    }
-  };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.4, ease: "easeOut", delay: 0.3 }
-    }
-  };
-
-  const mobileMenuVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: -100,
-      scale: 0.95
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      transition: { 
-        duration: 0.4, 
-        ease: "easeOut",
-        staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -50,
-      scale: 0.95,
-      transition: { duration: 0.3, ease: "easeIn" }
-    }
-  };
-
-  const linkVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
-      x: 0,
-      transition: { duration: 0.3, ease: "easeOut" }
-    }
-  };
-
   return (
-    <>
-      <motion.nav 
-        className="fixed top-0 left-0 w-full h-[12vh] min-h-[60px] bg-background/95 backdrop-blur-md border-b border-border shadow-sm flex justify-between items-center px-2 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 z-50"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Logo - Enhanced responsive sizing across all breakpoints */}
-        <motion.div 
-          className="font-playfair-display-italic text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl text-text-dark hover:scale-105 transition-transform duration-300 cursor-pointer "
-          variants={itemVariants}
-          whileHover={{ scale: 1.05 }}
-        >
-          Melos Organic Spices
-        </motion.div>
+    <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
+      scrolled ? "py-4" : "py-6"
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* The White/Glass Container ensures Navbar stays readable regardless of Carousel colors */}
+        <div className={`relative flex justify-between items-center px-6 sm:px-8 py-4 rounded-[2.5rem] transition-all duration-500 border ${
+          scrolled
+            ? "bg-white/90 backdrop-blur-xl shadow-2xl border-stone-100 shadow-orange-900/10"
+            : "bg-white border-white shadow-lg shadow-orange-900/5"
+        }`}>
 
-        {/* Desktop Nav Links - Responsive with flex-wrap and adjusted gaps for smaller widths */}
-        <motion.div 
-          className="hidden md:flex flex-1 justify-center mx-2 md:mx-4 lg:mx-6 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl font-montserrat-medium text-text-dark"
-          variants={containerVariants}
-        >
-          <div className="flex flex-row gap-1 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-6 2xl:gap-8 items-center flex-wrap justify-center">
-            {Navlink.map((item, index) => (
-              <motion.div key={index} variants={linkVariants}>
-                <Link
-                  to={item.link}
-                  className="px-1 py-0.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 2xl:px-6 rounded-lg hover:text-accent underline-offset-8 decoration-2 hover:decoration-accent transition-all duration-300 group whitespace-nowrap text-center font-playfair-display-semi-bold"
-                >
-                  {item.label}
-                </Link>
-              </motion.div>
+          {/* Logo - Always visible and responsive */}
+          <Link to="/" className="group flex items-center space-x-2 flex-shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#2D1606] rounded-xl flex items-center justify-center text-orange-400 font-serif font-bold text-xl transition-transform group-hover:rotate-12">
+              M
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl sm:text-2xl font-serif font-black text-[#2D1606] leading-none">MELO'S</span>
+              <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-orange-600 uppercase">Artisan</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation - Hidden on mobile, shown from lg */}
+          <div className="hidden lg:flex items-center space-x-8 xl:space-x-10">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.name}
+                to={link.path}
+                className={({ isActive }) => `text-xs font-black uppercase tracking-[0.2em] transition-all hover:text-orange-600 ${
+                  isActive ? "text-orange-600" : "text-[#2D1606]/70"
+                }`}
+              >
+                {link.name}
+              </NavLink>
             ))}
           </div>
-        </motion.div>
 
-        {/* Desktop Buttons - Responsive stacking on smaller md screens if needed, but flex-row with smaller gaps */}
-        <motion.div 
-          className="hidden md:flex flex-row items-center gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 "
-          variants={buttonVariants}
-        >
-         <Link  to='/roleselector'>
-             <motion.button
-           className="bg-secondary text-white rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:scale-105 transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
-           whileHover={{ scale: 1.05 }}
-           whileTap={{ scale: 0.95 }}
-         >
-           Sign Up
-         </motion.button>
-         </Link>
-          <Link  to='/roleselector'>
-          <motion.button
-           className="border-2 border-accent text-accent rounded-lg px-2 py-3 sm:px-3 md:px-4 lg:px-5 xl:px-6 2xl:px-7 hover:bg-accent hover:text-white transition-all duration-300 shadow-md btn-glow font-playfair-display-bold-italic text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl whitespace-nowrap"
-           whileHover={{ scale: 1.05 }}
-           whileTap={{ scale: 0.95 }}
-         >
-           Login
-         </motion.button>
-         </Link>
-       </motion.div>
+          {/* Right Side Actions */}
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            {/* User Icon - Hidden on small mobile, shown from md */}
+            <Link 
+              to="/signup" 
+              className="hidden md:flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-stone-100 text-[#2D1606] hover:bg-[#2D1606] hover:text-white transition-all"
+            >
+              <FiUser size={18} />
+            </Link>
 
-        {/* Mobile Hamburger Menu - Enhanced sizing for all small screens */}
-        <div className="md:hidden flex items-center relative">
-          <motion.button
-            onClick={toggleMenu}
-            className={`focus:outline-none transition-all duration-300 ${isOpen ? 'hamburger-open text-secondary' : 'text-text-dark hover:scale-110'}`}
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <motion.path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                initial={false}
-                animate={{ pathLength: isOpen ? [0.7, 1] : [0, 1] }}
-                transition={{ duration: 0.3 }}
-              />
-            </svg>
-          </motion.button>
+            {/* Cart Icon - Always visible with dynamic count */}
+            <Link 
+              to="/cart" 
+              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#2D1606] text-white shadow-lg hover:bg-orange-600 transition-all"
+            >
+              <FiShoppingBag size={18} />
+              <span className="absolute -top-1 -right-1 bg-orange-600 text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">
+                {cartCount}
+              </span>
+            </Link>
+
+            {/* Mobile Menu Button - Only on mobile & tablet */}
+            <button 
+              onClick={() => setMobileMenu(!mobileMenu)} 
+              className="lg:hidden p-2 text-[#2D1606] hover:text-orange-600 transition-colors"
+            >
+              {mobileMenu ? <FiX size={26} /> : <FiMenu size={26} />}
+            </button>
+          </div>
         </div>
-      </motion.nav>
+      </div>
 
-      {/* Mobile Menu - Full-screen overlay, responsive padding and spacing for portrait/landscape */}
-      <motion.div 
-        className="md:hidden fixed inset-0 bg-background/95 backdrop-blur-md flex flex-col justify-center items-center py-2 sm:py-4 md:py-6 space-y-2 sm:space-y-3 lg:space-y-4 z-40 overflow-y-auto"
-        variants={mobileMenuVariants}
-        initial="hidden"
-        animate={isOpen ? "visible" : "exit"}
-      >
-        <div className="flex flex-col items-center space-y-2 sm:space-y-3 w-full max-w-md px-4 sm:px-6 lg:px-8">
-          {Navlink.map((item, index) => (
-            <motion.div key={index} variants={linkVariants}>
-              <Link
-                to={item.link}
-                onClick={() => setIsOpen(false)}
-                className="text-text-dark text-sm sm:text-base md:text-lg font-montserrat-semibold hover:text-secondary hover:scale-110 transition-all duration-300 px-4 py-3 sm:py-3 lg:py-5 rounded-full hover:bg-accent/20 w-full max-w-xs text-center block"
+      {/* Mobile Menu Dropdown - Full responsive with smooth animation */}
+      <AnimatePresence>
+        {mobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-white border-t border-stone-100 shadow-xl"
+          >
+            <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col space-y-6">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.name}
+                  to={link.path}
+                  onClick={() => setMobileMenu(false)}
+                  className={({ isActive }) => `text-lg font-black uppercase tracking-widest transition-all py-2 ${
+                    isActive ? "text-orange-600" : "text-[#2D1606]"
+                  }`}
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+
+              {/* Mobile-only User Link */}
+              <Link 
+                to="/signup" 
+                onClick={() => setMobileMenu(false)}
+                className="flex items-center gap-3 text-lg font-medium text-[#2D1606] pt-4 border-t border-stone-100"
               >
-                {item.label}
+                <FiUser size={22} /> Account
               </Link>
-            </motion.div>
-          ))}
-        </div>
-        <motion.div
-          className="flex flex-col items-center space-y-1 sm:space-y-2 w-full max-w-xs px-4 sm:px-6"
-          variants={buttonVariants}
-        >
-           <Link  to='/roleselector'>
-           <motion.button
-            className="w-full bg-secondary text-white rounded-lg py-2 sm:py-3 lg:py-4 hover:bg-accent hover:scale-105 transition-all duration-300 shadow-md btn-glow  text-sm sm:text-base md:text-lg font-playfair-display-bold-italic"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Sign Up
-          </motion.button>
-          </Link>
-            <Link  to='/roleselector'>
-           <motion.button
-            className="w-full border-2 border-accent text-accent rounded-lg py-2 sm:py-3 lg:py-4 hover:bg-accent hover:text-white transition-all duration-300 shadow-md btn-glow font-montserrat-semibold text-sm sm:text-base md:text-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Login
-          </motion.button>
-          </Link>
-        </motion.div>
-      </motion.div>
-    </>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
   );
-}
+};
+
+export default Navbar;
