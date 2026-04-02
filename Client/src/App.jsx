@@ -7,7 +7,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from "./Pages/Home";
+import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
