@@ -1,0 +1,15 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Optional: VSCode settings
+.vscode/
+
+# Optional: build folders
+dist/

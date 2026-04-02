@@ -78,7 +78,7 @@ const Checkout = () => {
             <div className="space-y-8">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex flex-col md:flex-row gap-6 bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-                  <img src={item.image} alt={item.name} className="w-full md:w-40 h-40 object-cover rounded-2xl flex-shrink-0" />
+                  <img src={item.image} alt={item.name} className="w-full md:w-40 h-40 object-cover rounded-2xl shrink-0" />
                   <div className="flex-1">
                     <h3 className="font-black text-2xl text-[#2D1606] mb-2">{item.name}</h3>
                     <p className="text-orange-600 font-medium text-xl">

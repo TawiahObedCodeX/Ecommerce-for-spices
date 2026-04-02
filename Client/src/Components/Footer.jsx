@@ -24,7 +24,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#2D1606] text-white overflow-hidden relative">
       {/* Subtle top wave / divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-orange-500/30 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
@@ -170,7 +170,7 @@ const Footer = () => {
             <Link to="#" className="hover:text-white transition-colors">Terms of Service</Link>
             <Link to="#" className="hover:text-white transition-colors">Shipping</Link>
           </div>
-          <div className="text-[10px] tracking-[0.1em]">HANDCRAFTED IN GHANA WITH LOVE </div>
+          <div className="text-[10px] tracking-widest">HANDCRAFTED IN GHANA WITH LOVE </div>
         </div>
       </div>
     </footer>

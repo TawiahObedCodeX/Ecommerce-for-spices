@@ -62,7 +62,7 @@ const Signup = () => {
               alt="Artisan Spices"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#2D1606]" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#2D1606]" />
 
           <div className="relative z-10">
             <motion.div 
