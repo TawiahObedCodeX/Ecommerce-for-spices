@@ -99,9 +99,9 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white border-t border-stone-100 shadow-xl"
+            className="lg:hidden bg-white border-t border-stone-100 shadow-xl mt-4"
           >
-            <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col space-y-6">
+            <div className="max-w-7xl mx-auto   flex flex-col justify-center items-center space-y-6">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.name}

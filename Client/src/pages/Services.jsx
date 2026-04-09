@@ -30,7 +30,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="bg-[#FDF8F1] min-h-screen pt-20">
+    <div className="bg-[#FDF8F1] min-h-screen ">
       {/* --- SECTION 1: HERO STORY --- */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <motion.div 
@@ -65,13 +65,13 @@ const Services = () => {
           </motion.h1>
         </div>
 
-        <motion.div 
+        {/* <motion.div 
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-xs font-black uppercase tracking-[0.3em]"
         >
           Scroll to Explore
-        </motion.div>
+        </motion.div> */}
       </section>
 
       {/* --- SECTION 2: THE PHILOSOPHY (BENTO GRID) --- */}
