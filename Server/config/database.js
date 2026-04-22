@@ -38,8 +38,24 @@ export async function initDatabase() {
         ip_address INET,
         user_agent TEXT,
         idempotency_key VARCHAR(100) UNIQUE,
+        fingerprint VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Request logs table (MISSING - ADD THIS)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS request_logs (
+        id SERIAL PRIMARY KEY,
+        ip_address INET,
+        method VARCHAR(10),
+        path VARCHAR(255),
+        status_code INTEGER,
+        duration INTEGER,
+        user_agent TEXT,
+        request_body TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -51,6 +67,7 @@ export async function initDatabase() {
         email VARCHAR(200),
         reason TEXT,
         attempted_amount INTEGER,
+        fingerprint VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -65,6 +82,17 @@ export async function initDatabase() {
       );
     `);
 
+    // Blocked IPs table (ADD THIS FOR SECURITY)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS blocked_ips (
+        id SERIAL PRIMARY KEY,
+        ip_address INET UNIQUE NOT NULL,
+        reason TEXT,
+        blocked_until TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Create indexes for performance
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_transactions_reference ON transactions(reference);
@@ -72,6 +100,8 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
       CREATE INDEX IF NOT EXISTS idx_failed_payments_ip ON failed_payments(ip_address);
       CREATE INDEX IF NOT EXISTS idx_failed_payments_created ON failed_payments(created_at);
+      CREATE INDEX IF NOT EXISTS idx_request_logs_ip ON request_logs(ip_address);
+      CREATE INDEX IF NOT EXISTS idx_blocked_ips_ip ON blocked_ips(ip_address);
     `);
 
     console.log("✅ Database initialized successfully");

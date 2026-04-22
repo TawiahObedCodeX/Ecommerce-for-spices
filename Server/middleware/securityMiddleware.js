@@ -1,7 +1,28 @@
 import crypto from "crypto";
+import { pool } from "../config/database.js";
+
+// Check if IP is blocked
+async function isIpBlocked(ip) {
+  const result = await pool.query(
+    `SELECT blocked_until FROM blocked_ips 
+     WHERE ip_address = $1 AND (blocked_until IS NULL OR blocked_until > NOW())`,
+    [ip]
+  );
+  return result.rows.length > 0;
+}
 
 // Validate request origin and headers
-export const securityMiddleware = (req, res, next) => {
+export const securityMiddleware = async (req, res, next) => {
+  // Get real IP
+  const realIp = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || req.ip;
+  req.realIp = realIp;
+
+  // Check if IP is blocked
+  if (await isIpBlocked(realIp)) {
+    console.warn(`Blocked IP attempted access: ${realIp}`);
+    return res.status(403).json({ error: "Access denied" });
+  }
+
   // Check for suspicious headers
   const suspiciousHeaders = ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"];
   const hasSuspiciousHeaders = suspiciousHeaders.some(header => req.headers[header]);
@@ -18,11 +39,14 @@ export const securityMiddleware = (req, res, next) => {
 
   // Check for SQL injection patterns in query/body
   const sqlPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE)\b|\-\-|;|\|\||&&)/i;
+  const xssPattern = /<script|javascript:|onerror=|onload=|alert\(|document\.|window\./i;
   
   const checkForInjection = (obj) => {
     for (let key in obj) {
-      if (typeof obj[key] === "string" && sqlPattern.test(obj[key])) {
-        return true;
+      if (typeof obj[key] === "string") {
+        if (sqlPattern.test(obj[key]) || xssPattern.test(obj[key])) {
+          return true;
+        }
       }
       if (typeof obj[key] === "object" && obj[key] !== null) {
         if (checkForInjection(obj[key])) return true;

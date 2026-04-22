@@ -13,7 +13,7 @@ import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
 import Checkout from "./pages/Checkout";
-import { CartProvider } from "./context/CartContext";   // <-- Added for dynamic cart
+import { CartProvider } from "./context/CartContext";
 import Footer from "./components/Footer";
 
 // Layout Wrapper to keep Navbar and Footer on all pages
@@ -25,7 +25,6 @@ const Layout = () => {
         <Outlet />
         <Footer/>
       </main>
-    
     </div>
   );
 };
@@ -45,7 +44,7 @@ export default function App() {
   );
 
   return (
-    <CartProvider>   {/* <-- Added: wraps entire app so cart works everywhere */}
+    <CartProvider>
       <RouterProvider router={router} />
     </CartProvider>
   );
