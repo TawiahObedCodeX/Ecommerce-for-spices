@@ -1,8 +1,7 @@
 import { pool } from "../config/database.js";
-import { redisClient } from "../server.js";
+import { redisClient } from "../config/redis.js";
 
 class TransactionService {
-  // Store transaction record
   async createTransaction({
     reference,
     amount,
@@ -43,7 +42,6 @@ class TransactionService {
       
       await client.query("COMMIT");
       
-      // Cache transaction in Redis for 1 hour
       await redisClient.setEx(
         `txn:${reference}`,
         3600,
@@ -54,25 +52,20 @@ class TransactionService {
     } catch (error) {
       await client.query("ROLLBACK");
       console.error("Transaction creation error:", error);
-      
-      if (error.code === "23505") { // Unique violation
+      if (error.code === "23505") {
         return { success: false, error: "Duplicate transaction reference" };
       }
-      
       return { success: false, error: "Failed to create transaction" };
     } finally {
       client.release();
     }
   }
 
-  // Update transaction status
   async updateTransactionStatus(reference, status, paymentData = null) {
     const client = await pool.connect();
     try {
       await client.query(
-        `UPDATE transactions 
-         SET status = $1, updated_at = CURRENT_TIMESTAMP
-         WHERE reference = $2`,
+        `UPDATE transactions SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE reference = $2`,
         [status, reference]
       );
       
@@ -84,7 +77,6 @@ class TransactionService {
         );
       }
       
-      // Update Redis cache
       await redisClient.del(`txn:${reference}`);
       await redisClient.setEx(
         `txn:${reference}`,
@@ -101,7 +93,6 @@ class TransactionService {
     }
   }
 
-  // Log failed payment attempt (fraud detection)
   async logFailedAttempt(ip, email, reason, amount) {
     try {
       await pool.query(
@@ -110,7 +101,6 @@ class TransactionService {
         [ip, email, reason, amount]
       );
       
-      // Check for suspicious patterns
       const recentFails = await pool.query(
         `SELECT COUNT(*) FROM failed_payments 
          WHERE ip_address = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
@@ -119,7 +109,6 @@ class TransactionService {
       
       if (parseInt(recentFails.rows[0].count) > 5) {
         console.warn(`🚨 FRAUD ALERT: IP ${ip} has ${recentFails.rows[0].count} failed attempts in last hour`);
-        // Could trigger blocking or admin alert here
       }
     } catch (error) {
       console.error("Failed to log attempt:", error);

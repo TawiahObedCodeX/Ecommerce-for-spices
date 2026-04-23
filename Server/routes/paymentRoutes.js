@@ -1,9 +1,10 @@
 import express from "express";
-import { verifyPayment } from "../controllers/paymentController.js";
+import { initializePayment, verifyPayment } from "../controllers/paymentController.js";   // fixed
+import { validatePaymentInit, validatePaymentVerification } from "../middleware/validationMiddleware.js";
 
 const router = express.Router();
 
-// POST /api/payment/verify
-router.post("/verify", verifyPayment);
+router.post("/initialize", validatePaymentInit, initializePayment);
+router.post("/verify", validatePaymentVerification, verifyPayment);
 
 export default router;

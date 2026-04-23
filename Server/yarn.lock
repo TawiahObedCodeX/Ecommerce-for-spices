@@ -36,6 +36,11 @@
   dependencies:
     "@hapi/hoek" "^11.0.2"
 
+"@paystack/paystack-sdk@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@paystack/paystack-sdk/-/paystack-sdk-1.0.1.tgz#a1b5b11e55bbf4064b24ed556dd29830d787b473"
+  integrity sha512-IZT3KI8O6yX+ZFLK2WYq/IjhYduxCWkqh0HesJcSD1TUcHYyoi8iREiM02Qg+nnVCiPaTKdAw7Ogfeg9eVp9wA==
+
 "@redis/bloom@5.12.1":
   version "5.12.1"
   resolved "https://registry.npmjs.org/@redis/bloom/-/bloom-5.12.1.tgz#047dbfce93cfa7e5879fb58ad1b2afe87ebb2dc4"

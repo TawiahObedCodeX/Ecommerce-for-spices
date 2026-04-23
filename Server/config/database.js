@@ -5,20 +5,70 @@ dotenv.config();
 
 const { Pool } = pg;
 
-export const pool = new Pool({
+// Connection config without database name (used to check/create DB)
+const adminConfig = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  max: 20,
-  idleTimeoutMillis: 30000,
+  database: "postgres",        // connect to default maintenance DB
+  max: 1,
+  idleTimeoutMillis: 0,
   connectionTimeoutMillis: 2000,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
-});
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+};
 
-// Initialize database tables
+// Main pool that will use the actual DB name
+export let pool = null;
+
+// Function to ensure the target database exists
+async function ensureDatabaseExists() {
+  const adminClient = new pg.Client(adminConfig);
+  try {
+    await adminClient.connect();
+    const dbName = process.env.DB_NAME;
+    const res = await adminClient.query(
+      "SELECT 1 FROM pg_database WHERE dataname = $1",
+      [dbName]
+    );
+    if (res.rowCount === 0) {
+      console.log(`📦 Creating database "${dbName}"...`);
+      // Use template0 to avoid encoding issues, and quote identifier to preserve case
+      await adminClient.query(`CREATE DATABASE "${dbName}" TEMPLATE template0;`);
+      console.log(`✅ Database "${dbName}" created.`);
+    } else {
+      console.log(`✅ Database "${dbName}" already exists.`);
+    }
+  } catch (err) {
+    console.error("❌ Failed to ensure database exists:", err);
+    throw err;
+  } finally {
+    await adminClient.end();
+  }
+}
+
+// Initialize main pool after ensuring DB exists
+export async function initDatabasePool() {
+  await ensureDatabaseExists();
+  pool = new Pool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+  });
+  return pool;
+}
+
+// Initialize database tables (same as your original, but uses `pool`)
 export async function initDatabase() {
+  if (!pool) {
+    await initDatabasePool();
+  }
   const client = await pool.connect();
   try {
     // Transactions table
@@ -44,7 +94,7 @@ export async function initDatabase() {
       );
     `);
 
-    // Request logs table (MISSING - ADD THIS)
+    // Request logs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS request_logs (
         id SERIAL PRIMARY KEY,
@@ -82,7 +132,7 @@ export async function initDatabase() {
       );
     `);
 
-    // Blocked IPs table (ADD THIS FOR SECURITY)
+    // Blocked IPs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS blocked_ips (
         id SERIAL PRIMARY KEY,
@@ -104,7 +154,7 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_blocked_ips_ip ON blocked_ips(ip_address);
     `);
 
-    console.log("✅ Database initialized successfully");
+    console.log("✅ Database tables initialized successfully");
   } catch (error) {
     console.error("Database initialization error:", error);
     throw error;
