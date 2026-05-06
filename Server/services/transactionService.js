@@ -1,4 +1,3 @@
-// services/transactionService.js
 import { pool } from "../config/database.js";
 import { redisClient } from "../config/redis.js";
 
@@ -19,7 +18,7 @@ class TransactionService {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-
+      
       const result = await client.query(
         `INSERT INTO transactions 
          (reference, amount, currency, customer_name, customer_email, customer_whatsapp, 
@@ -42,15 +41,15 @@ class TransactionService {
           "pending"
         ]
       );
-
+      
       await client.query("COMMIT");
-
-      await redisClient.setEx(
-        `txn:${reference}`,
-        3600,
-        JSON.stringify({ reference, amount, email, status: "pending" })
-      );
-
+      
+      await redisClient.setEx(`txn:${reference}`, 3600, JSON.stringify({ 
+        reference, 
+        status: "pending",
+        total_amount: totalAmount 
+      }));
+      
       return { success: true, id: result.rows[0].id };
     } catch (error) {
       await client.query("ROLLBACK");
@@ -68,58 +67,26 @@ class TransactionService {
     const client = await pool.connect();
     try {
       await client.query(
-        `UPDATE transactions 
-         SET status = $1, updated_at = CURRENT_TIMESTAMP 
-         WHERE reference = $2`,
+        `UPDATE transactions SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE reference = $2`,
         [status, reference]
       );
-
+      
       if (paymentData && status === "success") {
         await client.query(
           `INSERT INTO verified_payments (transaction_reference, paystack_data)
            VALUES ($1, $2)
-           ON CONFLICT (transaction_reference) 
-           DO UPDATE SET paystack_data = EXCLUDED.paystack_data`,
+           ON CONFLICT (transaction_reference) DO UPDATE SET paystack_data = EXCLUDED.paystack_data`,
           [reference, JSON.stringify(paymentData)]
         );
       }
-
+      
       await redisClient.del(`txn:${reference}`);
-      await redisClient.setEx(
-        `txn:${reference}`,
-        86400,
-        JSON.stringify({ reference, status, verifiedAt: new Date().toISOString() })
-      );
-
       return { success: true };
     } catch (error) {
       console.error("Update error:", error);
-      return { success: false, error: "Failed to update transaction" };
+      return { success: false };
     } finally {
       client.release();
-    }
-  }
-
-  async getTransactionByReference(reference) {
-    try {
-      const cached = await redisClient.get(`txn:${reference}`);
-      if (cached) return JSON.parse(cached);
-
-      const result = await pool.query(
-        `SELECT reference, status, total_amount, customer_name, customer_email, 
-                created_at, cart_items 
-         FROM transactions WHERE reference = $1`,
-        [reference]
-      );
-
-      if (result.rows.length === 0) return null;
-
-      const txn = result.rows[0];
-      await redisClient.setEx(`txn:${reference}`, 3600, JSON.stringify(txn));
-      return txn;
-    } catch (error) {
-      console.error("Get transaction error:", error);
-      return null;
     }
   }
 
@@ -131,7 +98,7 @@ class TransactionService {
         [ip, email, reason, amount, fingerprint]
       );
     } catch (e) {
-      console.error("Failed to log attempt:", e);
+      console.error("Log failed attempt error:", e);
     }
   }
 }

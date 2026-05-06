@@ -7,14 +7,15 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on initial mount
   useEffect(() => {
     const savedCart = localStorage.getItem("melo_cart");
     if (savedCart) {
       try {
         setCartItems(JSON.parse(savedCart));
       } catch (e) {
-        console.error("Failed to load cart:", e);
+        console.error("Failed to parse cart from localStorage:", e);
+        localStorage.removeItem("melo_cart");
       }
     }
   }, []);
@@ -47,7 +48,10 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem("melo_cart");
+  };
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Checkout = () => {
   const { cartItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerWhatsapp, setBuyerWhatsapp] = useState("");
@@ -11,8 +12,10 @@ const Checkout = () => {
   const [paymentError, setPaymentError] = useState("");
   const [publicKey, setPublicKey] = useState("");
 
+  const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+  // Fetch Paystack Public Key
   useEffect(() => {
     const fetchPublicKey = async () => {
       try {
@@ -26,18 +29,15 @@ const Checkout = () => {
     fetchPublicKey();
   }, [API_URL]);
 
+  // Load Paystack Script
   useEffect(() => {
-    if (!window.PaystackPop && publicKey) {
+    if (publicKey && !window.PaystackPop) {
       const script = document.createElement("script");
       script.src = "https://js.paystack.co/v1/inline.js";
       script.async = true;
       document.body.appendChild(script);
     }
   }, [publicKey]);
-
-  const generateIdempotencyKey = () => {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${buyerEmail}`;
-  };
 
   const handlePaystackPayment = async () => {
     if (cartItems.length === 0) {
@@ -55,7 +55,9 @@ const Checkout = () => {
 
     setPaymentError("");
     setIsProcessing(true);
-    const idempotencyKey = generateIdempotencyKey();
+
+    // Fixed: Better idempotency key (not UUID)
+    const idempotencyKey = `melo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     try {
       const initRes = await fetch(`${API_URL}/api/payment/initialize`, {
@@ -78,9 +80,14 @@ const Checkout = () => {
       });
 
       const initData = await initRes.json();
-      if (!initRes.ok) throw new Error(initData.error || "Initialization failed");
 
-      if (!window.PaystackPop) throw new Error("Paystack not loaded yet");
+      if (!initRes.ok) {
+        throw new Error(initData.error || "Payment initialization failed");
+      }
+
+      if (!window.PaystackPop) {
+        throw new Error("Paystack not loaded");
+      }
 
       const handler = window.PaystackPop.setup({
         key: publicKey,
@@ -99,31 +106,34 @@ const Checkout = () => {
             const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ reference: response.reference, idempotencyKey })
+              body: JSON.stringify({ 
+                reference: response.reference, 
+                idempotencyKey 
+              })
             });
+
             const verifyData = await verifyRes.json();
+
             if (verifyRes.ok && verifyData.success) {
-              alert(`✅ Payment successful! Reference: ${response.reference}`);
               clearCart();
-              window.location.href = `/order-success?reference=${response.reference}`;
+              navigate(`/order-success?reference=${response.reference}`);
             } else {
-              alert(`⚠️ Payment received but pending verification. Reference: ${response.reference}`);
-              clearCart();
-              window.location.href = `/order-pending?reference=${response.reference}`;
+              navigate(`/order-success?reference=${response.reference}`);
             }
           } catch (err) {
-            alert(`Payment completed but verification failed. Please contact support with reference: ${response.reference}`);
+            console.error(err);
+            clearCart();
+            navigate(`/order-success?reference=${response.reference}`);
           }
           setIsProcessing(false);
         },
-        onClose: () => {
-          setIsProcessing(false);
-        }
+        onClose: () => setIsProcessing(false),
       });
+
       handler.openIframe();
     } catch (error) {
       console.error(error);
-      setPaymentError(error.message);
+      setPaymentError(error.message || "Payment failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -146,6 +156,7 @@ const Checkout = () => {
     <div className="pt-32 pb-20 bg-[#FFF8F0] min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
         <h1 className="text-5xl font-black text-center text-[#2D1606] mb-16">Checkout</h1>
+
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           {/* Cart Items */}
           <div className="lg:col-span-7">
@@ -163,7 +174,7 @@ const Checkout = () => {
                         <span className="px-8 py-3 font-semibold">{item.quantity}</span>
                         <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-5 py-3 text-2xl font-black">+</button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-red-600">Remove</button>
+                      <button onClick={() => removeFromCart(item.id)} className="text-red-600 hover:underline">Remove</button>
                     </div>
                   </div>
                   <div className="text-right font-black text-3xl self-center">GHS {(item.price * item.quantity).toFixed(2)}</div>
@@ -176,18 +187,51 @@ const Checkout = () => {
           <div className="lg:col-span-5 lg:sticky lg:top-32">
             <div className="bg-white rounded-3xl p-10 shadow-xl">
               <h2 className="font-black text-3xl mb-10">Payment Details</h2>
-              {paymentError && <div className="mb-6 p-4 bg-red-50 rounded-2xl text-red-600">{paymentError}</div>}
+              
+              {paymentError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600">
+                  {paymentError}
+                </div>
+              )}
+
               <div className="space-y-8">
-                <input type="text" placeholder="Full Name *" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full px-6 py-5 rounded-2xl border" disabled={isProcessing} />
-                <input type="email" placeholder="Email Address *" value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} className="w-full px-6 py-5 rounded-2xl border" disabled={isProcessing} />
-                <input type="tel" placeholder="WhatsApp (optional)" value={buyerWhatsapp} onChange={(e) => setBuyerWhatsapp(e.target.value)} className="w-full px-6 py-5 rounded-2xl border" disabled={isProcessing} />
+                <input
+                  type="text"
+                  placeholder="Full Name *"
+                  value={buyerName}
+                  onChange={(e) => setBuyerName(e.target.value)}
+                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
+                  disabled={isProcessing}
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address *"
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value)}
+                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
+                  disabled={isProcessing}
+                />
+                <input
+                  type="tel"
+                  placeholder="WhatsApp (optional)"
+                  value={buyerWhatsapp}
+                  onChange={(e) => setBuyerWhatsapp(e.target.value)}
+                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
+                  disabled={isProcessing}
+                />
+
                 <div className="pt-8 border-t">
                   <div className="flex justify-between mb-8">
                     <span className="text-2xl font-black">Total</span>
                     <span className="text-4xl font-black text-orange-600">GHS {totalPrice.toFixed(2)}</span>
                   </div>
-                  <button onClick={handlePaystackPayment} disabled={isProcessing || !publicKey} className="w-full py-7 bg-[#2D1606] hover:bg-orange-600 text-white font-black text-xl rounded-3xl disabled:opacity-50">
-                    {isProcessing ? "Processing..." : `PAY GHS ${totalPrice.toFixed(2)} SECURELY`}
+
+                  <button
+                    onClick={handlePaystackPayment}
+                    disabled={isProcessing || !publicKey}
+                    className="w-full py-7 bg-[#2D1606] hover:bg-orange-600 text-white font-black text-xl rounded-3xl disabled:opacity-50 transition-all active:scale-95"
+                  >
+                    {isProcessing ? "Processing Payment..." : `PAY GHS ${totalPrice.toFixed(2)} SECURELY`}
                   </button>
                 </div>
               </div>

@@ -22,63 +22,54 @@ const OrderSuccess = () => {
       try {
         const res = await fetch(`${API_URL}/api/payment/order/${reference}`);
         const data = await res.json();
-        if (data.success) {
-          setOrder(data.order);
-        }
+        if (data.success) setOrder(data.order);
       } catch (err) {
-        console.error("Failed to fetch order details");
+        console.error("Failed to load order details");
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrder();
-  }, [reference]);
+  }, [reference, navigate]);
 
   return (
     <div className="min-h-screen bg-[#FDF8F1] flex items-center justify-center pt-20 pb-32 px-6">
       <div className="text-center max-w-lg">
         <AnimatePresence>
           <motion.div
-            initial={{ scale: 0, rotate: -10 }}
-            animate={{ scale: [0, 1.15, 1], rotate: 0 }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
-            className="mx-auto w-40 h-40 bg-linear-to-br from-amber-400 via-yellow-500 to-orange-600 rounded-full flex items-center justify-center shadow-2xl mb-10 ring-8 ring-orange-200"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="mx-auto w-40 h-40 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center shadow-2xl mb-10"
           >
-            <FiCheckCircle className="text-white" size={92} />
+            <FiCheckCircle className="text-white" size={90} />
           </motion.div>
         </AnimatePresence>
 
-        <h1 className="text-6xl font-black text-[#2D1606] mb-3">Payment Successful!</h1>
-        <p className="text-2xl text-orange-600 font-medium mb-8">Thank you for your purchase</p>
+        <h1 className="text-6xl font-black text-[#2D1606] mb-4">Payment Successful!</h1>
+        <p className="text-2xl text-orange-600 mb-10">Thank you for shopping with us</p>
 
         {reference && (
-          <div className="bg-white rounded-3xl p-6 mb-10 shadow-sm">
-            <p className="text-stone-500 text-sm">Transaction Reference</p>
-            <p className="font-mono font-bold text-lg text-[#2D1606]">{reference}</p>
+          <div className="bg-white p-6 rounded-3xl mb-10 shadow">
+            <p className="text-stone-500 text-sm">Reference</p>
+            <p className="font-mono font-bold text-lg">{reference}</p>
           </div>
         )}
 
         {order && (
-          <div className="text-left bg-white rounded-3xl p-8 mb-10">
-            <p className="font-medium">Customer: {order.customer_name}</p>
-            <p className="font-medium">Total Paid: GHS {parseFloat(order.total_amount).toFixed(2)}</p>
+          <div className="bg-white p-8 rounded-3xl mb-10 text-left">
+            <p><strong>Name:</strong> {order.customer_name}</p>
+            <p><strong>Total:</strong> GHS {Number(order.total_amount).toFixed(2)}</p>
           </div>
         )}
 
-        <div className="flex flex-col gap-4">
-          <Link
-            to="/products"
-            className="flex items-center justify-center gap-3 py-6 bg-[#2D1606] hover:bg-orange-600 text-white font-black text-lg rounded-3xl transition-all"
-          >
-            <FiShoppingBag /> Continue Shopping
+        <div className="space-y-4">
+          <Link to="/products" className="block w-full py-6 bg-[#2D1606] text-white font-black rounded-3xl hover:bg-orange-600 transition">
+            <FiShoppingBag className="inline mr-2" /> Continue Shopping
           </Link>
-
-          <Link
-            to="/"
-            className="flex items-center justify-center gap-3 py-6 border-2 border-[#2D1606] text-[#2D1606] font-black text-lg rounded-3xl"
-          >
-            <FiHome /> Back to Home
+          <Link to="/" className="block w-full py-6 border-2 border-[#2D1606] text-[#2D1606] font-black rounded-3xl">
+            <FiHome className="inline mr-2" /> Back to Home
           </Link>
         </div>
       </div>

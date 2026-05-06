@@ -5,30 +5,26 @@ dotenv.config();
 
 const { Pool } = pg;
 
-// Connection config without database name (used to check/create DB)
 const adminConfig = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: "postgres",        // connect to default maintenance DB
+  database: "postgres",
   max: 1,
   idleTimeoutMillis: 0,
   connectionTimeoutMillis: 2000,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 };
 
-// Main pool that will use the actual DB name
 export let pool = null;
 
-// Function to ensure the target database exists
 async function ensureDatabaseExists() {
   const adminClient = new pg.Client(adminConfig);
   try {
     await adminClient.connect();
     const dbName = process.env.DB_NAME;
     
-    // ✅ FIXED: Changed "dataname" to "datname"
     const res = await adminClient.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
       [dbName]
@@ -49,7 +45,6 @@ async function ensureDatabaseExists() {
   }
 }
 
-// Initialize main pool after ensuring DB exists
 export async function initDatabasePool() {
   await ensureDatabaseExists();
   pool = new Pool({
@@ -66,14 +61,12 @@ export async function initDatabasePool() {
   return pool;
 }
 
-// Initialize database tables
 export async function initDatabase() {
   if (!pool) {
     await initDatabasePool();
   }
   const client = await pool.connect();
   try {
-    // Transactions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
@@ -96,7 +89,6 @@ export async function initDatabase() {
       );
     `);
 
-    // Request logs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS request_logs (
         id SERIAL PRIMARY KEY,
@@ -111,7 +103,6 @@ export async function initDatabase() {
       );
     `);
 
-    // Failed attempts log for fraud detection
     await client.query(`
       CREATE TABLE IF NOT EXISTS failed_payments (
         id SERIAL PRIMARY KEY,
@@ -124,7 +115,6 @@ export async function initDatabase() {
       );
     `);
 
-    // Verified transactions log
     await client.query(`
       CREATE TABLE IF NOT EXISTS verified_payments (
         id SERIAL PRIMARY KEY,
@@ -134,7 +124,6 @@ export async function initDatabase() {
       );
     `);
 
-    // Blocked IPs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS blocked_ips (
         id SERIAL PRIMARY KEY,
@@ -145,7 +134,6 @@ export async function initDatabase() {
       );
     `);
 
-    // Create indexes for performance
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_transactions_reference ON transactions(reference);
       CREATE INDEX IF NOT EXISTS idx_transactions_email ON transactions(customer_email);
