@@ -27,13 +27,15 @@ async function ensureDatabaseExists() {
   try {
     await adminClient.connect();
     const dbName = process.env.DB_NAME;
+    
+    // ✅ FIXED: Changed "dataname" to "datname"
     const res = await adminClient.query(
-      "SELECT 1 FROM pg_database WHERE dataname = $1",
+      "SELECT 1 FROM pg_database WHERE datname = $1",
       [dbName]
     );
+    
     if (res.rowCount === 0) {
       console.log(`📦 Creating database "${dbName}"...`);
-      // Use template0 to avoid encoding issues, and quote identifier to preserve case
       await adminClient.query(`CREATE DATABASE "${dbName}" TEMPLATE template0;`);
       console.log(`✅ Database "${dbName}" created.`);
     } else {
@@ -64,7 +66,7 @@ export async function initDatabasePool() {
   return pool;
 }
 
-// Initialize database tables (same as your original, but uses `pool`)
+// Initialize database tables
 export async function initDatabase() {
   if (!pool) {
     await initDatabasePool();
