@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post("/initialize", validatePaymentInit, initializePayment);
 router.post("/verify", validatePaymentVerification, verifyPayment);
-router.get("/order/:reference", getOrderDetails);   // ← Added
+router.get("/order/:reference", getOrderDetails);
 
 export default router;

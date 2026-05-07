@@ -15,6 +15,7 @@ import Signup from "./pages/Signup";
 import Checkout from "./pages/Checkout";
 import { CartProvider } from "./context/CartContext";
 import Footer from "./components/Footer";
+import OrderSuccess from "./components/OrderSuccess";
 
 // Layout Wrapper to keep Navbar and Footer on all pages
 const Layout = () => {
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="cart" element={<Checkout />} />
         <Route path="signup" element={<Signup />} />
+        <Route path="order-success" element={<OrderSuccess />} />
       </Route>
     )
   );

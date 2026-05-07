@@ -7,7 +7,7 @@ export const validatePaymentInit = (req, res, next) => {
     whatsapp: Joi.string().pattern(/^[0-9+\-\s()]+$/).max(20).allow(""),
     amount: Joi.number().positive().min(1).max(100000).required(),
     cartItems: Joi.array().min(1).required(),
-    idempotencyKey: Joi.string().min(8).max(100).required()   // ← FIXED: Not UUID
+    idempotencyKey: Joi.string().min(8).max(100).required()
   });
 
   const { error } = schema.validate(req.body);

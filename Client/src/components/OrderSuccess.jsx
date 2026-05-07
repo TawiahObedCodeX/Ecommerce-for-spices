@@ -41,7 +41,7 @@ const OrderSuccess = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="mx-auto w-40 h-40 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center shadow-2xl mb-10"
+            className="mx-auto w-40 h-40 bg-linear-to-br from-yellow-400 to-orange-600 rounded-full flex items-center justify-center shadow-2xl mb-10"
           >
             <FiCheckCircle className="text-white" size={90} />
           </motion.div>
@@ -53,23 +53,24 @@ const OrderSuccess = () => {
         {reference && (
           <div className="bg-white p-6 rounded-3xl mb-10 shadow">
             <p className="text-stone-500 text-sm">Reference</p>
-            <p className="font-mono font-bold text-lg">{reference}</p>
+            <p className="font-mono font-bold text-lg break-all">{reference}</p>
           </div>
         )}
 
         {order && (
-          <div className="bg-white p-8 rounded-3xl mb-10 text-left">
+          <div className="bg-white p-8 rounded-3xl mb-10 text-left space-y-2">
             <p><strong>Name:</strong> {order.customer_name}</p>
             <p><strong>Total:</strong> GHS {Number(order.total_amount).toFixed(2)}</p>
+            <p><strong>Status:</strong> <span className="text-green-600 font-semibold">{order.status}</span></p>
           </div>
         )}
 
         <div className="space-y-4">
-          <Link to="/products" className="block w-full py-6 bg-[#2D1606] text-white font-black rounded-3xl hover:bg-orange-600 transition">
-            <FiShoppingBag className="inline mr-2" /> Continue Shopping
+          <Link to="/products" className="block w-full py-6 bg-[#2D1606] text-white font-black rounded-3xl hover:bg-orange-600 transition items-center justify-center gap-2">
+            <FiShoppingBag /> Continue Shopping
           </Link>
-          <Link to="/" className="block w-full py-6 border-2 border-[#2D1606] text-[#2D1606] font-black rounded-3xl">
-            <FiHome className="inline mr-2" /> Back to Home
+          <Link to="/" className="block w-full py-6 border-2 border-[#2D1606] text-[#2D1606] font-black rounded-3xl items-center justify-center gap-2">
+            <FiHome /> Back to Home
           </Link>
         </div>
       </div>

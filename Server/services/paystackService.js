@@ -1,5 +1,8 @@
 import axios from "axios";
 import crypto from "crypto";
+import dotenv from "dotenv";
+
+dotenv.config(); // ✅ ensure env is loaded
 
 const PAYSTACK_API = "https://api.paystack.co";
 
@@ -7,6 +10,13 @@ class PaystackService {
   constructor() {
     this.secretKey = process.env.PAYSTACK_SECRET_KEY;
     this.webhookSecret = process.env.WEBHOOK_SECRET;
+    
+    if (!this.secretKey) {
+      console.error("❌ PAYSTACK_SECRET_KEY is not set in .env");
+    } else {
+      // Log first 6 characters for debugging (safe)
+      console.log(`🔑 Paystack secret key loaded (starts with: ${this.secretKey.substring(0, 6)}...)`);
+    }
   }
 
   getAuthHeaders() {
@@ -16,14 +26,13 @@ class PaystackService {
     };
   }
 
-  // Initialize payment
   async initializePayment({ email, amount, reference, metadata, idempotencyKey }) {
     try {
       const response = await axios.post(
         `${PAYSTACK_API}/transaction/initialize`,
         {
           email,
-          amount: Math.round(amount * 100), // Convert to pesewas
+          amount: Math.round(amount * 100),
           currency: "GHS",
           reference,
           metadata,
@@ -34,7 +43,7 @@ class PaystackService {
             ...this.getAuthHeaders(),
             "Idempotency-Key": idempotencyKey
           },
-          timeout: 10000
+          timeout: 15000
         }
       );
 
@@ -43,15 +52,15 @@ class PaystackService {
         data: response.data.data
       };
     } catch (error) {
-      console.error("Paystack init error:", error.response?.data || error.message);
+      const paystackError = error.response?.data;
+      console.error("Paystack init error:", paystackError || error.message);
       return {
         success: false,
-        error: error.response?.data?.message || "Payment initialization failed"
+        error: paystackError?.message || "Payment initialization failed"
       };
     }
   }
 
-  // Verify payment with additional security checks
   async verifyPayment(reference, expectedAmount = null) {
     try {
       const response = await axios.get(
@@ -64,22 +73,8 @@ class PaystackService {
 
       const transaction = response.data.data;
 
-      // CRITICAL: Verify amount hasn't been tampered
       if (expectedAmount && transaction.amount !== Math.round(expectedAmount * 100)) {
-        console.error(`Amount mismatch for ${reference}: Expected ${expectedAmount}, Got ${transaction.amount / 100}`);
-        return {
-          success: false,
-          error: "Amount verification failed",
-          tampered: true
-        };
-      }
-
-      // Verify currency
-      if (transaction.currency !== "GHS") {
-        return {
-          success: false,
-          error: "Invalid currency"
-        };
+        return { success: false, error: "Amount verification failed", tampered: true };
       }
 
       return {
@@ -91,18 +86,12 @@ class PaystackService {
       };
     } catch (error) {
       console.error("Paystack verify error:", error.response?.data || error.message);
-      return {
-        success: false,
-        error: "Verification failed"
-      };
+      return { success: false, error: "Verification failed" };
     }
   }
 
-  // Verify webhook signature
   verifyWebhookSignature(payload, signature) {
-    if (!this.webhookSecret || !signature) {
-      return false;
-    }
+    if (!this.webhookSecret || !signature) return false;
 
     const expectedSignature = crypto
       .createHmac("sha512", this.webhookSecret)

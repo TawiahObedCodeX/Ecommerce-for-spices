@@ -16,6 +16,15 @@ import { redisClient } from "./config/redis.js";
 
 dotenv.config();
 
+// ========== VALIDATE REQUIRED ENV VARS ==========
+const requiredEnv = ["PAYSTACK_SECRET_KEY", "PAYSTACK_PUBLIC_KEY", "DB_HOST", "REDIS_URL"];
+const missing = requiredEnv.filter(key => !process.env[key]);
+if (missing.length) {
+  console.error(`❌ Missing required environment variables: ${missing.join(", ")}`);
+  process.exit(1);
+}
+console.log("✅ Environment variables validated");
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -60,7 +69,7 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // Connect to Redis first
-await redisClient.connect();   // ← IMPORTANT: add this line
+await redisClient.connect();
 
 // Initialize database
 await initDatabase();
@@ -83,7 +92,8 @@ app.get("/health", (req, res) => {
   res.status(200).json({ 
     status: "ok", 
     timestamp: new Date().toISOString(),
-    redis: redisClient.isOpen ? "connected" : "disconnected"
+    redis: redisClient.isOpen ? "connected" : "disconnected",
+    paystackConfigured: !!process.env.PAYSTACK_SECRET_KEY
   });
 });
 

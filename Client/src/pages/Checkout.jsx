@@ -11,35 +11,51 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [publicKey, setPublicKey] = useState("");
+  const [paystackReady, setPaystackReady] = useState(false);
 
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch Paystack Public Key
+  // Fetch Public Key
   useEffect(() => {
     const fetchPublicKey = async () => {
       try {
         const res = await fetch(`${API_URL}/api/config/paystack-key`);
         const data = await res.json();
-        if (data.publicKey) setPublicKey(data.publicKey);
+        if (data.publicKey) {
+          setPublicKey(data.publicKey);
+        } else {
+          setPaymentError("Payment gateway not configured properly.");
+        }
       } catch (err) {
         console.error("Failed to fetch Paystack key:", err);
+        setPaymentError("Cannot connect to payment server.");
       }
     };
     fetchPublicKey();
   }, [API_URL]);
 
-  // Load Paystack Script
+  // Load Paystack Script and wait for it to be ready
   useEffect(() => {
     if (publicKey && !window.PaystackPop) {
       const script = document.createElement("script");
       script.src = "https://js.paystack.co/v1/inline.js";
       script.async = true;
+      script.onload = () => {
+        // Small delay to ensure internal objects are fully initialized
+        setTimeout(() => setPaystackReady(true), 100);
+      };
+      script.onerror = () => {
+        setPaymentError("Failed to load payment gateway. Please refresh the page.");
+      };
       document.body.appendChild(script);
+    } else if (window.PaystackPop) {
+      setPaystackReady(true);
     }
   }, [publicKey]);
 
   const handlePaystackPayment = async () => {
+    // Validation
     if (cartItems.length === 0) {
       setPaymentError("Your cart is empty");
       return;
@@ -52,11 +68,14 @@ const Checkout = () => {
       setPaymentError("Please enter a valid email address");
       return;
     }
+    if (!paystackReady || !window.PaystackPop) {
+      setPaymentError("Payment system is still loading. Please wait and try again.");
+      return;
+    }
 
     setPaymentError("");
     setIsProcessing(true);
 
-    // Fixed: Better idempotency key (not UUID)
     const idempotencyKey = `melo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     try {
@@ -85,10 +104,30 @@ const Checkout = () => {
         throw new Error(initData.error || "Payment initialization failed");
       }
 
-      if (!window.PaystackPop) {
-        throw new Error("Paystack not loaded");
-      }
+      // Define the payment handler
+      const handleSuccess = async (response) => {
+        try {
+          await fetch(`${API_URL}/api/payment/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              reference: response.reference, 
+              idempotencyKey 
+            })
+          });
+        } catch (err) {
+          console.error("Verification error:", err);
+        }
+        clearCart();
+        navigate(`/order-success?reference=${response.reference}`);
+        setIsProcessing(false);
+      };
 
+      const handleClose = () => {
+        setIsProcessing(false);
+      };
+
+      // Create Paystack transaction
       const handler = window.PaystackPop.setup({
         key: publicKey,
         email: buyerEmail.trim().toLowerCase(),
@@ -101,38 +140,17 @@ const Checkout = () => {
             { display_name: "WhatsApp", variable_name: "whatsapp", value: buyerWhatsapp.trim() || "Not provided" }
           ]
         },
-        callback: async (response) => {
-          try {
-            const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                reference: response.reference, 
-                idempotencyKey 
-              })
-            });
-
-            const verifyData = await verifyRes.json();
-
-            if (verifyRes.ok && verifyData.success) {
-              clearCart();
-              navigate(`/order-success?reference=${response.reference}`);
-            } else {
-              navigate(`/order-success?reference=${response.reference}`);
-            }
-          } catch (err) {
-            console.error(err);
-            clearCart();
-            navigate(`/order-success?reference=${response.reference}`);
-          }
-          setIsProcessing(false);
+        // IMPORTANT: Use a synchronous function that calls the async handler
+        callback: (response) => {
+          // Call the async function but don't return a promise to Paystack
+          handleSuccess(response).catch(err => console.error("Callback error:", err));
         },
-        onClose: () => setIsProcessing(false),
+        onClose: handleClose
       });
 
       handler.openIframe();
     } catch (error) {
-      console.error(error);
+      console.error("Payment Error:", error);
       setPaymentError(error.message || "Payment failed. Please try again.");
       setIsProcessing(false);
     }
@@ -158,7 +176,6 @@ const Checkout = () => {
         <h1 className="text-5xl font-black text-center text-[#2D1606] mb-16">Checkout</h1>
 
         <div className="grid lg:grid-cols-12 gap-12 items-start">
-          {/* Cart Items */}
           <div className="lg:col-span-7">
             <h2 className="font-black text-3xl mb-8">Your Selected Items</h2>
             <div className="space-y-8">
@@ -183,7 +200,6 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Payment Form */}
           <div className="lg:col-span-5 lg:sticky lg:top-32">
             <div className="bg-white rounded-3xl p-10 shadow-xl">
               <h2 className="font-black text-3xl mb-10">Payment Details</h2>
@@ -195,30 +211,9 @@ const Checkout = () => {
               )}
 
               <div className="space-y-8">
-                <input
-                  type="text"
-                  placeholder="Full Name *"
-                  value={buyerName}
-                  onChange={(e) => setBuyerName(e.target.value)}
-                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
-                  disabled={isProcessing}
-                />
-                <input
-                  type="email"
-                  placeholder="Email Address *"
-                  value={buyerEmail}
-                  onChange={(e) => setBuyerEmail(e.target.value)}
-                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
-                  disabled={isProcessing}
-                />
-                <input
-                  type="tel"
-                  placeholder="WhatsApp (optional)"
-                  value={buyerWhatsapp}
-                  onChange={(e) => setBuyerWhatsapp(e.target.value)}
-                  className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500"
-                  disabled={isProcessing}
-                />
+                <input type="text" placeholder="Full Name *" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500" disabled={isProcessing} />
+                <input type="email" placeholder="Email Address *" value={buyerEmail} onChange={(e) => setBuyerEmail(e.target.value)} className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500" disabled={isProcessing} />
+                <input type="tel" placeholder="WhatsApp (optional)" value={buyerWhatsapp} onChange={(e) => setBuyerWhatsapp(e.target.value)} className="w-full px-6 py-5 rounded-2xl border focus:outline-none focus:border-orange-500" disabled={isProcessing} />
 
                 <div className="pt-8 border-t">
                   <div className="flex justify-between mb-8">
@@ -228,7 +223,7 @@ const Checkout = () => {
 
                   <button
                     onClick={handlePaystackPayment}
-                    disabled={isProcessing || !publicKey}
+                    disabled={isProcessing || !publicKey || !paystackReady}
                     className="w-full py-7 bg-[#2D1606] hover:bg-orange-600 text-white font-black text-xl rounded-3xl disabled:opacity-50 transition-all active:scale-95"
                   >
                     {isProcessing ? "Processing Payment..." : `PAY GHS ${totalPrice.toFixed(2)} SECURELY`}

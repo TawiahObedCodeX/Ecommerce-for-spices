@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import paystackService from "../services/paystackService.js";
 import transactionService from "../services/transactionService.js";
 import { redisClient } from "../config/redis.js";
+import { pool } from "../config/database.js";
 
 export const initializePayment = async (req, res) => {
   const { email, name, whatsapp, amount, cartItems, idempotencyKey } = req.body;
@@ -47,6 +48,7 @@ export const initializePayment = async (req, res) => {
     });
     
     if (!payment.success) {
+      console.error("Paystack init error:", payment.error);
       return res.status(400).json({ error: payment.error });
     }
     
@@ -126,7 +128,6 @@ export const verifyPayment = async (req, res) => {
   }
 };
 
-// NEW: For Order Success Page
 export const getOrderDetails = async (req, res) => {
   const { reference } = req.params;
   try {
