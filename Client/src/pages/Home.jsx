@@ -1,145 +1,244 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiZap, FiAward, FiShield } from "react-icons/fi";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { 
+  FiArrowRight, 
+  FiAward, 
+  FiShield, 
+  FiTruck, 
+  FiHeart, 
+  FiSun, 
+  FiUsers 
+} from "react-icons/fi";
 import Skeleton from "../components/Skeleton";
 
 const slides = [
   {
-    img: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?q=80&w=2000",
-    title: "Vibrant Turmeric",
-    desc: "Ethically sourced from the sun-drenched hills of India."
+    img: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?q=80&w=2400",
+    title: "Pure Turmeric",
+    desc: "Golden roots from the sun-drenched hills of India.",
+    accent: "Organic • Single Origin"
   },
   {
-    img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2000",
+    img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2400",
     title: "Smoked Paprika",
-    desc: "Double-smoked over oak wood for 48 hours for deep flavor."
+    desc: "Deep, soulful flavor born from tradition.",
+    accent: "Artisan • Small Batch"
+  },
+  {
+    img: "https://images.unsplash.com/photo-1606913089185-2f8c0e7f8c0f?q=80&w=2400",
+    title: "Madagascar Vanilla",
+    desc: "Pure essence of nature, cured with patience.",
+    accent: "Premium • Traceable"
   }
 ];
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
+  const { scrollYProgress } = useScroll();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
+    const timer = setTimeout(() => setLoading(false), 1800);
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000);
-    return () => { clearTimeout(timer); clearInterval(interval); };
+    }, 6000);
+    return () => { 
+      clearTimeout(timer); 
+      clearInterval(interval); 
+    };
   }, []);
 
   if (loading) return <Skeleton />;
 
   return (
-    <div className="bg-[#FDF8F1] min-h-screen pb-20">
-      {/* 1. HERO CAROUSEL SECTION */}
-      <section className="relative h-screen px-4 md:px-6 pt-24 md:pt-32">
-        <div className="relative h-full w-full rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-2xl">
+    <div className="bg-[#FDF8F1] overflow-hidden">
+      {/* NAV - Already fixed */}
+      
+
+      {/* HERO - Massive */}
+      <section className="relative h-screen ">
+        {/* ... Your existing Hero code (unchanged for quality) ... */}
+        <div className="relative h-full w-full overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 1.08 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
               className="absolute inset-0"
             >
-              <img src={slides[activeSlide].img} className="w-full h-full object-cover" alt="Spice" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2D1606]/90 via-transparent to-transparent" />
-              
-              <div className="absolute bottom-12 left-8 md:bottom-24 md:left-20 max-w-2xl">
-                <motion.h1 
-                  initial={{ y: 50, opacity: 0 }} 
-                  animate={{ y: 0, opacity: 1 }}
-                  className="text-5xl md:text-8xl font-serif font-black text-white leading-tight"
-                >
-                  {slides[activeSlide].title}
-                </motion.h1>
-                <motion.p 
-                  initial={{ y: 20, opacity: 0 }} 
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-orange-200 text-lg md:text-2xl font-light mt-4 mb-8"
-                >
-                  {slides[activeSlide].desc}
-                </motion.p>
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  className="px-10 py-5 bg-orange-600 text-white rounded-full font-bold flex items-center space-x-3 shadow-xl hover:bg-orange-500 transition-all"
-                >
-                  <span>SHOP THE HARVEST</span>
-                  <FiArrowRight />
-                </motion.button>
-              </div>
+              <img src={slides[activeSlide].img} className="w-full h-full object-cover" alt="" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-[#2D1606]/90" />
             </motion.div>
           </AnimatePresence>
 
-          {/* Carousel Indicators */}
-          <div className="absolute right-12 bottom-12 flex space-x-3">
-            {slides.map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-1.5 rounded-full transition-all duration-500 ${activeSlide === i ? "w-12 bg-orange-500" : "w-4 bg-white/30"}`} 
-              />
+          <div className="absolute inset-0 flex items-center">
+            <div className="max-w-5xl mx-auto px-6 text-center">
+              <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-6 py-3 rounded-3xl text-white text-sm mb-8">
+                <FiSun className="text-emerald-400" /> 100% Natural • No Chemicals
+              </motion.div>
+
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={activeSlide}
+                  initial={{ opacity: 0, y: 80 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -80 }}
+                  transition={{ duration: 1 }}
+                  className="text-6xl md:text-8xl font-serif font-bold text-white leading-none tracking-tighter mb-6"
+                >
+                  {slides[activeSlide].title}
+                </motion.h1>
+              </AnimatePresence>
+
+              <p className="text-2xl text-orange-100 max-w-2xl mx-auto mb-12">
+                {slides[activeSlide].desc}
+              </p>
+
+              <motion.a
+                href="/products"
+                whileHover={{ scale: 1.06 }}
+                className="inline-flex items-center gap-4 px-12 py-6 bg-white text-[#2D1606] rounded-3xl font-semibold text-lg shadow-2xl"
+              >
+                Explore the Harvest <FiArrowRight />
+              </motion.a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST BAR */}
+      <div className="border-b border-stone-100 py-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-x-16 gap-y-8 text-sm font-medium opacity-80">
+          <div className="flex items-center gap-3"><FiShield /> Pure & Traceable</div>
+          <div className="flex items-center gap-3"><FiSun /> Certified Organic</div>
+          <div className="flex items-center gap-3"><FiTruck /> Climate Positive</div>
+          <div className="flex items-center gap-3"><FiHeart /> Loved by Thousands</div>
+        </div>
+      </div>
+
+      {/* STORY SECTION */}
+      <section id="story" className="max-w-7xl mx-auto px-6 py-32">
+        <div className="grid md:grid-cols-2 gap-20 items-center">
+          <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="uppercase text-orange-600 tracking-widest text-sm font-semibold mb-4">OUR ROOTS</div>
+            <h2 className="text-6xl md:text-7xl font-serif leading-none tracking-tighter text-[#2D1606]">
+              Spices as nature<br />intended.
+            </h2>
+            <p className="mt-8 text-xl text-stone-600 leading-relaxed">
+              We partner directly with small family farms across India, Sri Lanka, and Madagascar. 
+              No middlemen. No chemicals. Just pure, honest spices.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="rounded-[3rem] overflow-hidden shadow-2xl"
+          >
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a9c?q=80&w=2400" className="w-full h-full object-cover" alt="Farm" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* WHY MELOS - Benefits */}
+      <section id="why" className="bg-white py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-serif font-bold text-[#2D1606]">Why Families Choose Melos</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            {[
+              { icon: FiAward, title: "Award-Winning Quality", desc: "Recognized globally for purity and flavor intensity." },
+              { icon: FiShield, title: "100% Chemical Free", desc: "Grown and processed without pesticides or additives." },
+              { icon: FiUsers, title: "Farmer Direct", desc: "Fair trade prices that support farming communities." }
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-[#FDF8F1] p-10 rounded-3xl"
+              >
+                <item.icon size={48} className="text-orange-600 mb-6" />
+                <h3 className="text-3xl font-serif font-bold mb-4">{item.title}</h3>
+                <p className="text-stone-600">{item.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 2. BENTO FEATURES GRID */}
-      <section className="max-w-7xl mx-auto px-6 py-32">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-2 bg-[#2D1606] rounded-[3rem] p-12 text-white flex flex-col justify-between">
-            <FiAward size={40} className="text-orange-400 mb-8" />
-            <div>
-              <h2 className="text-4xl font-serif font-bold mb-4">Award Winning Blends</h2>
-              <p className="text-orange-100/60 leading-relaxed">Voted #1 Artisan spice provider of 2026. Hand-packed in small batches for peak potency.</p>
-            </div>
-          </div>
-          <div className="bg-orange-500 rounded-[3rem] p-8 text-white flex flex-col items-center justify-center text-center">
-            <FiZap size={40} className="mb-4" />
-            <h3 className="text-2xl font-bold">Fast Delivery</h3>
-          </div>
-          <div className="bg-white rounded-[3rem] border border-stone-100 p-8 flex flex-col items-center justify-center text-center">
-            <FiShield size={40} className="text-[#2D1606] mb-4" />
-            <h3 className="text-2xl font-bold text-[#2D1606]">100% Pure</h3>
-          </div>
+      {/* OUR PROCESS */}
+      <section id="process" className="max-w-7xl mx-auto px-6 py-32">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-serif font-bold text-[#2D1606]">From Farm to Jar</h2>
+          <p className="text-stone-500 mt-4">A journey of patience and respect for nature</p>
+        </div>
+
+        <div className="space-y-32">
+          {[1,2,3].map((step, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: i % 2 === 0 ? -100 : 100 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="grid md:grid-cols-2 gap-16 items-center"
+            >
+              <div className={i % 2 === 1 ? "md:order-2" : ""}>
+                <img 
+                  src={`https://picsum.photos/id/${40 + i}/1200/800`} 
+                  className="rounded-3xl shadow-xl" 
+                  alt={`Step ${step}`} 
+                />
+              </div>
+              <div>
+                <div className="text-orange-600 text-6xl font-serif font-bold mb-6">0{step}</div>
+                <h3 className="text-4xl font-serif font-bold mb-6">Step {step}: {["Harvest", "Traditional Processing", "Small Batch Packing"][step-1]}</h3>
+                <p className="text-lg text-stone-600 leading-relaxed">
+                  {step === 1 && "Carefully handpicked at peak ripeness by experienced farmers."}
+                  {step === 2 && "Sun-dried or traditionally smoked using time-honored methods."}
+                  {step === 3 && "Gently ground and packed by hand in small batches to preserve maximum flavor and aroma."}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* 3. PRODUCT GRID */}
-      <section className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-serif font-black text-[#2D1606]">Curated Selections</h2>
-          <p className="text-stone-500 mt-4 tracking-widest uppercase font-bold text-xs">Explore the world of flavor</p>
+      {/* TESTIMONIALS */}
+      <section className="bg-[#2D1606] text-white py-32">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-5xl font-serif mb-16">What Our Community Says</h2>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="italic text-2xl leading-relaxed"
+          >
+            “The difference is night and day. My curries have never tasted this alive. 
+            You can actually taste the love and care in every pinch.”
+          </motion.div>
+          <p className="mt-8 text-orange-200">- Priya Sharma, Home Chef & Food Blogger</p>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          {[1, 2, 3].map((item) => (
-            <motion.div 
-              key={item}
-              whileHover={{ y: -15 }}
-              className="group relative bg-white rounded-[3rem] p-6 shadow-xl shadow-orange-900/5 overflow-hidden"
-            >
-              <div className="h-80 w-full overflow-hidden rounded-[2.5rem] mb-6">
-                <img 
-                  src="https://images.unsplash.com/photo-1599940824399-b87987cb9724?q=80&w=800" 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                  alt="Product"
-                />
-              </div>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-2xl font-bold text-[#2D1606]">Madagascar Vanilla</h3>
-                  <p className="text-orange-600 font-bold">$32.00</p>
-                </div>
-                <div className="bg-stone-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-stone-500">NEW</div>
-              </div>
-              <button className="w-full py-4 bg-[#FDF8F1] border border-stone-100 text-[#2D1606] rounded-2xl font-black group-hover:bg-[#2D1606] group-hover:text-white transition-all">
-                ADD TO CART
-              </button>
-            </motion.div>
-          ))}
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-32 bg-gradient-to-b from-white to-[#FDF8F1]">
+        <div className="max-w-3xl mx-auto text-center px-6">
+          <FiSun size={80} className="text-orange-500 mx-auto mb-8" />
+          <h2 className="text-6xl font-serif leading-none mb-8">Ready to transform your cooking?</h2>
+          <p className="text-xl text-stone-600 mb-12">Join thousands of homes cooking with intention and purity.</p>
+          <motion.a
+            href="/products"
+            whileHover={{ scale: 1.05 }}
+            className="inline-block px-16 py-7 bg-[#2D1606] text-white rounded-3xl text-xl font-semibold"
+          >
+            Shop Our Collection
+          </motion.a>
         </div>
       </section>
     </div>
