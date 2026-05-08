@@ -152,7 +152,7 @@ const OrderSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F1] pt-24 pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDF8F1] pt-32 pb-20 relative overflow-hidden">
       {/* Confetti Canvas */}
       <canvas
         ref={canvasRef}
@@ -175,10 +175,10 @@ const OrderSuccess = () => {
                 <motion.div
                   animate={{ scale: [1, 1.35, 1] }}
                   transition={{ duration: 2.4, repeat: 1 }}
-                  className="absolute inset-0 bg-gradient-to-br from-[#F5A623] to-[#FF8C00] rounded-full opacity-25 blur-2xl"
+                  className="absolute inset-0 bg-linear-to-br from-[#F5A623] to-[#FF8C00] rounded-full opacity-25 blur-2xl"
                 />
 
-                <div className="w-full h-full bg-gradient-to-br from-[#2D1606] to-[#3F2210] rounded-full flex items-center justify-center shadow-2xl relative z-10">
+                <div className="w-full h-full bg-linear-to-br from-[#2D1606] to-[#3F2210] rounded-full flex items-center justify-center shadow-2xl relative z-10">
                   <FiCheckCircle className="text-[#F5A623]" size={108} />
                 </div>
               </motion.div>
@@ -193,9 +193,6 @@ const OrderSuccess = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h1 className="text-6xl md:text-7xl font-black text-[#2D1606] tracking-tighter mb-4">
-                  GOLD BUZZER!
-                </h1>
                 <p className="text-[#F5A623] text-2xl font-medium">
                   Payment Confirmed Successfully
                 </p>
@@ -245,7 +242,7 @@ const OrderSuccess = () => {
           </motion.p>
 
           {/* Action Buttons */}
-          <div className="space-y-4 w-full max-w-sm mx-auto">
+          <div className="flex flex-col gap-4 w-full max-w-sm mx-auto mb-10">
             <Link to="/products">
               <motion.div
                 whileHover={{ scale: 1.04 }}
