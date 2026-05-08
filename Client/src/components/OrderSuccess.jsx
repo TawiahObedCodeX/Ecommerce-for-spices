@@ -263,15 +263,6 @@ const OrderSuccess = () => {
               </motion.div>
             </Link>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.1 }}
-            className="mt-12 flex items-center justify-center gap-2 text-[#F5A623]"
-          >
-            <FiHeart /> Made with passion for your kitchen
-          </motion.div>
         </div>
       </div>
     </div>
