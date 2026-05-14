@@ -2,7 +2,7 @@ import axios from "axios";
 import crypto from "crypto";
 import dotenv from "dotenv";
 
-dotenv.config(); // ✅ ensure env is loaded
+dotenv.config();
 
 const PAYSTACK_API = "https://api.paystack.co";
 
@@ -14,7 +14,6 @@ class PaystackService {
     if (!this.secretKey) {
       console.error("❌ PAYSTACK_SECRET_KEY is not set in .env");
     } else {
-      // Log first 6 characters for debugging (safe)
       console.log(`🔑 Paystack secret key loaded (starts with: ${this.secretKey.substring(0, 6)}...)`);
     }
   }
@@ -28,6 +27,10 @@ class PaystackService {
 
   async initializePayment({ email, amount, reference, metadata, idempotencyKey }) {
     try {
+      const callbackUrl = process.env.FRONTEND_URL 
+        ? `${process.env.FRONTEND_URL}/payment/callback` 
+        : "http://localhost:5173/payment/callback";
+
       const response = await axios.post(
         `${PAYSTACK_API}/transaction/initialize`,
         {
@@ -36,7 +39,7 @@ class PaystackService {
           currency: "GHS",
           reference,
           metadata,
-          callback_url: `${process.env.FRONTEND_URL}/payment/callback`
+          callback_url: callbackUrl
         },
         {
           headers: {
@@ -74,7 +77,7 @@ class PaystackService {
       const transaction = response.data.data;
 
       if (expectedAmount && transaction.amount !== Math.round(expectedAmount * 100)) {
-        return { success: false, error: "Amount verification failed", tampered: true };
+        return { success: false, error: "Amount mismatch detected", tampered: true };
       }
 
       return {
