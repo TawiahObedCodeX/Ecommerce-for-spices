@@ -108,7 +108,7 @@ const Products = () => {
               className="w-full h-full object-cover" 
               alt={heroSlides[activeSlide].title} 
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-[#2D1606]/90" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/60 to-[#2D1606]/90" />
           </motion.div>
         </AnimatePresence>
 
