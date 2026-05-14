@@ -6,6 +6,7 @@ import {
   RouterProvider,
   Outlet,
 } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -13,19 +14,19 @@ import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
 import Checkout from "./pages/Checkout";
-import { CartProvider } from "./context/CartContext";
-import Footer from "./components/Footer";
 import OrderSuccess from "./components/OrderSuccess";
 
-// Layout Wrapper to keep Navbar and Footer on all pages
+import { CartProvider } from "./context/CartContext";
+import Footer from "./components/Footer";
+
 const Layout = () => {
   return (
     <div className="bg-[#FFF8F0] min-h-screen font-inter selection:bg-orange-200">
       <Navbar />
       <main>
         <Outlet />
-        <Footer/>
       </main>
+      <Footer />
     </div>
   );
 };
@@ -34,12 +35,12 @@ export default function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<Layout />}>
-        <Route index element={<Home/>} />
+        <Route index element={<Home />} />
         <Route path="products" element={<Products />} />
         <Route path="services" element={<Services />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="cart" element={<Checkout />} />
         <Route path="signup" element={<Signup />} />
+        <Route path="cart" element={<Checkout />} />
         <Route path="order-success" element={<OrderSuccess />} />
       </Route>
     )

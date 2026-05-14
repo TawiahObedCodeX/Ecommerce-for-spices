@@ -18,7 +18,7 @@ class TransactionService {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      
+
       const result = await client.query(
         `INSERT INTO transactions 
          (reference, amount, currency, customer_name, customer_email, customer_whatsapp, 
@@ -27,13 +27,13 @@ class TransactionService {
          RETURNING id`,
         [
           reference,
-          Math.round(amount * 100),
+          Math.round(Number(amount) * 100),
           "GHS",
-          name,
-          email,
-          whatsapp || null,
-          JSON.stringify(cartItems),
-          totalAmount,
+          name?.trim() || "Customer",
+          email?.trim(),
+          whatsapp?.trim() || null,
+          JSON.stringify(cartItems || []),
+          Number(totalAmount || amount),
           idempotencyKey,
           ip,
           userAgent,
@@ -41,22 +41,28 @@ class TransactionService {
           "pending"
         ]
       );
-      
+
       await client.query("COMMIT");
-      
-      await redisClient.setEx(`txn:${reference}`, 3600, JSON.stringify({ 
-        reference, 
+
+      // Cache in Redis
+      await redisClient.setEx(`txn:${reference}`, 3600, JSON.stringify({
+        reference,
         status: "pending",
-        total_amount: totalAmount 
+        total_amount: Number(totalAmount || amount)
       }));
-      
+
       return { success: true, id: result.rows[0].id };
     } catch (error) {
       await client.query("ROLLBACK");
       console.error("Transaction creation error:", error);
-      if (error.code === "23505") {
-        return { success: false, error: "Duplicate transaction reference" };
+
+      if (error.code === "42P01") {
+        return { success: false, error: "Database tables not ready. Please run SQL script." };
       }
+      if (error.code === "23505") {
+        return { success: false, error: "Duplicate transaction" };
+      }
+
       return { success: false, error: "Failed to create transaction" };
     } finally {
       client.release();
@@ -70,7 +76,7 @@ class TransactionService {
         `UPDATE transactions SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE reference = $2`,
         [status, reference]
       );
-      
+
       if (paymentData && status === "success") {
         await client.query(
           `INSERT INTO verified_payments (transaction_reference, paystack_data)
@@ -79,7 +85,7 @@ class TransactionService {
           [reference, JSON.stringify(paymentData)]
         );
       }
-      
+
       await redisClient.del(`txn:${reference}`);
       return { success: true };
     } catch (error) {

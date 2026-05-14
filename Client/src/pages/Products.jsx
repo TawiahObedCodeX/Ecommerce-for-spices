@@ -25,35 +25,17 @@ const ProductSkeleton = () => (
 
 // Hero Carousel Slides
 const heroSlides = [
-  {
-    img: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?q=80&w=2400",
-    title: "Pure Turmeric",
-    subtitle: "Golden & Powerful"
-  },
-  {
-    img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2400",
-    title: "Smoked Paprika",
-    subtitle: "Deep & Smoky Flavor"
-  },
-  {
-    img: "https://i.pinimg.com/1200x/8c/e7/0d/8ce70d367260bf668dafa8dba7c3b007.jpg",
-    title: "Madagascar Vanilla",
-    subtitle: "Rich & Aromatic"
-  },
-  {
-    img: "https://i.pinimg.com/1200x/42/ed/82/42ed82790a1c3ea3ac819d5242cbcd4d.jpg",
-    title: "Ceylon Cinnamon",
-    subtitle: "Sweet & Warm"
-  }
+  { img: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?q=80&w=2400", title: "Pure Turmeric", subtitle: "Golden & Powerful" },
+  { img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2400", title: "Smoked Paprika", subtitle: "Deep & Smoky Flavor" },
+  { img: "https://i.pinimg.com/1200x/8c/e7/0d/8ce70d367260bf668dafa8dba7c3b007.jpg", title: "Madagascar Vanilla", subtitle: "Rich & Aromatic" },
+  { img: "https://i.pinimg.com/1200x/42/ed/82/42ed82790a1c3ea3ac819d5242cbcd4d.jpg", title: "Ceylon Cinnamon", subtitle: "Sweet & Warm" }
 ];
 
-// Categories
 const categories = [
   "All Spices", "Turmeric", "Paprika", "Cinnamon", "Vanilla", 
   "Cardamom", "Saffron", "Ginger", "Cloves", "Organic Blends"
 ];
 
-// Products Data
 const products = [
   { id: 1, name: "Pure Turmeric Powder", price: 45, oldPrice: 55, image: "/images/product1.jpeg", rating: "4.9", desc: "Premium single-origin turmeric from India.", category: "Turmeric" },
   { id: 2, name: "Smoked Paprika", price: 65, oldPrice: 75, image: "/images/product1.jpeg", rating: "4.8", desc: "Oak-smoked Spanish paprika with deep flavor.", category: "Paprika" },
@@ -69,7 +51,6 @@ const Products = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const { addToCart } = useCart();
 
-  // Filter products based on selected category
   const filteredProducts = selectedCategory === "All Spices" 
     ? products 
     : products.filter(product => product.category === selectedCategory);
@@ -91,7 +72,6 @@ const Products = () => {
 
   return (
     <div className="bg-[#FDF8F1] min-h-screen overflow-x-hidden">
-      
       {/* HERO CAROUSEL */}
       <section className="relative h-screen pt-20 overflow-hidden">
         <AnimatePresence mode="wait">
@@ -145,7 +125,6 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Indicators */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
           {heroSlides.map((_, i) => (
             <button
@@ -174,7 +153,7 @@ const Products = () => {
         </motion.div>
       </div>
 
-      {/* CATEGORIES - NOW FULLY ACTIVE */}
+      {/* CATEGORIES */}
       <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-wrap gap-3 justify-center">
           {categories.map((cat) => (
@@ -198,7 +177,7 @@ const Products = () => {
         </div>
       </section>
 
-      {/* PRODUCTS GRID */}
+      {/* PRODUCTS GRID - FIXED */}
       <section id="products-section" className="max-w-7xl mx-auto px-6 pb-32">
         <div className="flex justify-between items-end mb-16">
           <div>
@@ -212,7 +191,7 @@ const Products = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync">   {/* ← CHANGED FROM "wait" to "sync" */}
             {filteredProducts.map((product) => (
               <motion.div
                 key={product.id}

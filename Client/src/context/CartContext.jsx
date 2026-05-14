@@ -12,7 +12,8 @@ export const CartProvider = ({ children }) => {
     const savedCart = localStorage.getItem("melo_cart");
     if (savedCart) {
       try {
-        setCartItems(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        setCartItems(parsed);
       } catch (e) {
         console.error("Failed to parse cart from localStorage:", e);
         localStorage.removeItem("melo_cart");
@@ -56,7 +57,7 @@ export const CartProvider = ({ children }) => {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + (item.price || 0) * item.quantity,
     0
   );
 
