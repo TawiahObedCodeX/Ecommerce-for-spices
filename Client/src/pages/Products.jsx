@@ -37,7 +37,7 @@ const categories = [
 ];
 
 const products = [
-  { id: 1, name: "Pure Turmeric Powder", price: 45, oldPrice: 55, image: "/images/product1.jpeg", rating: "4.9", desc: "Premium single-origin turmeric from India.", category: "Turmeric" },
+  { id: 1, name: "Pure Turmeric Powder", price: 5, oldPrice: 55, image: "/images/product1.jpeg", rating: "4.9", desc: "Premium single-origin turmeric from India.", category: "Turmeric" },
   { id: 2, name: "Smoked Paprika", price: 65, oldPrice: 75, image: "/images/product1.jpeg", rating: "4.8", desc: "Oak-smoked Spanish paprika with deep flavor.", category: "Paprika" },
   { id: 3, name: "Ceylon Cinnamon Sticks", price: 85, oldPrice: 95, image: "/images/product1.jpeg", rating: "5.0", desc: "True Ceylon cinnamon - sweet and delicate.", category: "Cinnamon" },
   { id: 4, name: "Madagascar Vanilla Beans", price: 120, oldPrice: 140, image: "/images/product1.jpeg", rating: "4.9", desc: "Grade A vanilla beans from Madagascar.", category: "Vanilla" },
